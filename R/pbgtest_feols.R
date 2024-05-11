@@ -27,14 +27,14 @@ pbgtest_feols <- function(model) {
   X <- cbind(1, lag_resid)
 
   # Fit a Prais-Winsten regression model of residuals on lagged residuals
-  reg <- lm(resid ~ X - 1)
+  reg <- stats::lm(resid ~ X - 1)
 
   # Extract test statistic and degrees of freedom
   chisq <- summary(reg)$fstatistic[1] * reg$df.residual
   df <- length(lag_resid) - 1
 
   # Calculate p-value
-  p_value <- pchisq(chisq, df, lower.tail = FALSE)
+  p_value <- stats::pchisq(chisq, df, lower.tail = FALSE)
 
   # Return results
   cat("Breusch-Godfrey/Wooldridge test for serial correlation\n")
