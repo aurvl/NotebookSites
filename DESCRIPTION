@@ -4,7 +4,7 @@ Title: Functions for Testing Fixed Effect Models
 Version: 0.1.0.9000
 Author: DV
 Maintainer: The package maintainer <yourself@somewhere.net>
-Description: This package contains functions to perform various tests on fixed effect models estimated using the `feols()` function from the fixest package.
+Description: This package contains functions to perform various tests on fixed effect models estimated using the feols() function from the fixest package.
       The tests included in this package assess different aspects of the model, such as serial correlation, heteroskedasticity, and multicollinearity.
       These functions provide convenient tools for diagnosing and evaluating the performance of fixed effect models in econometric analysis.
 License: MIT + file LICENSE
