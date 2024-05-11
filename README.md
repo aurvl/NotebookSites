@@ -1,22 +1,21 @@
 # Testonfeols
-This R package contains functions to perform tests on fixed effect models (feols()) estimated using the fixest package.
-This package contains functions to perform various tests on fixed effect models estimated using the feols() function from the fixest package.
+This R package contains functions to perform tests on fixed effect models (`feols()`) estimated using the fixest package.
 The tests included in this package assess different aspects of the model, such as serial correlation, heteroskedasticity, and multicollinearity.
 These functions provide convenient tools for diagnosing and evaluating the performance of fixed effect models in econometric analysis.
 
 ## Installation
-You can install this package directly from GitHub using the install_github() function from the devtools package. Make sure you have installed the devtools package first by running :
+You can install this package directly from GitHub using the `install_github()` function from the devtools package. Make sure you have installed the devtools package first by running :
 ```R
 install.packages("devtools").
 ```
 
-## Install Testonfeols package from GitHub
+## Install testonfeols package from GitHub
 ```R
 devtools::install_github("aurvl/testonfeols")
 ```
 
 ## Usage
-Once installed, you can load the Testonfeols package with the library() function and access all available functions.
+Once installed, you can load the Testonfeols package with the `library()` function and access all available functions.
 ```R
 library(testonfeols)
 ```
