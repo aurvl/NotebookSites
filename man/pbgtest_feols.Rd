@@ -2,29 +2,20 @@
 % Please edit documentation in R/pbgtest_feols.R
 \name{pbgtest_feols}
 \alias{pbgtest_feols}
-\title{Pbgtest_feols: Performs Breusch-Godfrey/Wooldridge test for serial
-correlation in panel data using Fixed Effects Ordinary Least Squares (FEOLS)
-estimation.
-Args:
-This function calculates the Breusch-Godfrey/Wooldridge test statistic to
-assess serial correlation in panel data models. It computes the test statistic
-and corresponding p-value, indicating whether there is evidence of serial
-correlation in the idiosyncratic errors. The test is conducted under the
-assumption of Fixed Effects Ordinary Least Squares (FEOLS) estimation.}
+\title{Breusch-Godfrey/Wooldridge test for serial correlation in panel data}
 \usage{
 pbgtest_feols(model)
 }
 \arguments{
-\item{model}{}
+\item{model}{a fixed effect model estimated using the fixest package}
 }
 \value{
 the results of the pdg test on fixest objects
 }
 \description{
-Pbgtest_feols: Performs Breusch-Godfrey/Wooldridge test for serial
+pbgtest_feols: Performs Breusch-Godfrey/Wooldridge test for serial
 correlation in panel data using Fixed Effects Ordinary Least Squares (FEOLS)
 estimation.
-Args:
 This function calculates the Breusch-Godfrey/Wooldridge test statistic to
 assess serial correlation in panel data models. It computes the test statistic
 and corresponding p-value, indicating whether there is evidence of serial
@@ -32,5 +23,21 @@ correlation in the idiosyncratic errors. The test is conducted under the
 assumption of Fixed Effects Ordinary Least Squares (FEOLS) estimation.
 }
 \examples{
-pbgtest_feols(feols(y ~ x | i + t, data = pdata, panel.id = c('i', 't')))
+# Generate simulated data for the example
+set.seed(123)
+n <- 100
+i <- rep(1:10, each = 10)
+t <- rep(1:10, times = 10)
+x <- rnorm(n)
+y <- 0.5 * x + rnorm(n)
+df <- data.frame(i, t, x, y)  # Create a data frame
+pdata <- plm::pdata.frame(df, index = c("i", "t"))  # Pass the data frame to pdata.frame
+
+# Fit a Fixed Effects Ordinary Least Squares (FEOLS) model
+model <- fixest::feols(y ~ x | i + t, data = pdata)
+
+# Execute the Breusch-Godfrey/Wooldridge test
+pbgtest_feols(model)
+
+
 }
