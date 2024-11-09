@@ -1,0 +1,1689 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.5.57">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Aurel VEHI">
+
+<title>Overweight Classification - Machine Learning Project</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="Ovwght_files/libs/clipboard/clipboard.min.js"></script>
+<script src="Ovwght_files/libs/quarto-html/quarto.js"></script>
+<script src="Ovwght_files/libs/quarto-html/popper.min.js"></script>
+<script src="Ovwght_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="Ovwght_files/libs/quarto-html/anchor.min.js"></script>
+<link href="Ovwght_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="Ovwght_files/libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="Ovwght_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="Ovwght_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="Ovwght_files/libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+
+
+</head>
+
+<body>
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+<div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
+</div>
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Overweight Classification - Machine Learning Project</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Aurel VEHI </p>
+          </div>
+  </div>
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+<nav id="TOC" role="doc-toc">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#introduction" id="toc-introduction">Introduction</a>
+  <ul>
+  <li><a href="#installing-and-loading-packages" id="toc-installing-and-loading-packages">Installing and loading packages</a></li>
+  </ul></li>
+  <li><a href="#exploratory-data-analysis" id="toc-exploratory-data-analysis">1. Exploratory Data Analysis</a>
+  <ul>
+  <li><a href="#variables-of-the-dataframe" id="toc-variables-of-the-dataframe">1.1. Variables of the dataframe:</a></li>
+  <li><a href="#quality-of-the-data" id="toc-quality-of-the-data">1.2. Quality of the data:</a></li>
+  <li><a href="#distribution-of-variables" id="toc-distribution-of-variables">1.3. Distribution of variables:</a></li>
+  <li><a href="#correlation-of-features" id="toc-correlation-of-features">1.4. Correlation of features:</a></li>
+  </ul></li>
+  <li><a href="#data-preprocessing" id="toc-data-preprocessing">2. Data preprocessing</a></li>
+  <li><a href="#data-splitting" id="toc-data-splitting">3. Data splitting</a>
+  <ul>
+  <li><a href="#oversampled-dataset" id="toc-oversampled-dataset">3.1. Oversampled Dataset</a></li>
+  <li><a href="#splitting-into-two-sets" id="toc-splitting-into-two-sets">3.2. Splitting into two sets</a></li>
+  </ul></li>
+  <li><a href="#implementing-machine-learning-algorithms" id="toc-implementing-machine-learning-algorithms">4. Implementing machine learning algorithms</a>
+  <ul>
+  <li><a href="#logistic-regression" id="toc-logistic-regression">4.1. Logistic regression</a>
+  <ul>
+  <li><a href="#a-training-the-model" id="toc-a-training-the-model">a) Training the model</a></li>
+  <li><a href="#b-predictions" id="toc-b-predictions">b) Predictions</a></li>
+  <li><a href="#c-performance-evaluation" id="toc-c-performance-evaluation">c) Performance Evaluation</a></li>
+  <li><a href="#d-summary" id="toc-d-summary">d) Summary</a></li>
+  </ul></li>
+  <li><a href="#random-forest-classifier" id="toc-random-forest-classifier">4.2. Random Forest classifier</a>
+  <ul>
+  <li><a href="#a-training-the-model-1" id="toc-a-training-the-model-1">a) Training the model</a></li>
+  <li><a href="#b-feaures-importance" id="toc-b-feaures-importance">b) Feaures Importance</a></li>
+  <li><a href="#c-predictions-performance-evaluation" id="toc-c-predictions-performance-evaluation">c) Predictions &amp; Performance evaluation</a></li>
+  </ul></li>
+  <li><a href="#xgboost-classifier" id="toc-xgboost-classifier">4.3. XGBoost Classifier</a>
+  <ul>
+  <li><a href="#a-training-the-xgboost-model" id="toc-a-training-the-xgboost-model">a) Training the XGBoost Model</a></li>
+  <li><a href="#b-predictions-1" id="toc-b-predictions-1">b) Predictions</a></li>
+  <li><a href="#c-accuracy-and-confusion-matrix" id="toc-c-accuracy-and-confusion-matrix">c) Accuracy and Confusion Matrix</a></li>
+  <li><a href="#d-interpratetion" id="toc-d-interpratetion">d) Interpratetion</a></li>
+  </ul></li>
+  </ul></li>
+  <li><a href="#interpretation-of-the-results" id="toc-interpretation-of-the-results">5. Interpretation of the results</a>
+  <ul>
+  <li><a href="#summary-of-results" id="toc-summary-of-results">Summary of Results</a>
+  <ul>
+  <li><a href="#logistic-regression-1" id="toc-logistic-regression-1">Logistic Regression</a></li>
+  <li><a href="#random-forest-classifier-1" id="toc-random-forest-classifier-1">Random Forest Classifier</a></li>
+  <li><a href="#xgboost-classifier-1" id="toc-xgboost-classifier-1">XGBoost Classifier</a></li>
+  </ul></li>
+  <li><a href="#model-choice" id="toc-model-choice">Model choice</a></li>
+  </ul></li>
+  <li><a href="#conclusion" id="toc-conclusion">Conclusion</a></li>
+  </ul>
+</nav>
+<hr>
+<section id="introduction" class="level1">
+<h1>Introduction</h1>
+<p>Overweight and obesity are conditions characterized by an excessive accumulation of body fat, posing health risks according to the World Health Organization (<a href="https://www.who.int/fr/health-topics/obesity#tab=tab_1">WHO</a>). The WHO defines overweight as a body mass index (BMI) above 25 and obesity as a BMI exceeding 30. In 2019, the WHO reported that five million deaths from noncommunicable diseases were related to high BMI.</p>
+<p>Today, obesity prevails more than underweight, highlighting its importance in the context of malnutrition. Research (<a href="https://www.academie-medecine.fr/wp-content/uploads/2018/03/P.1269-1280.pdf">Froguel, 2015</a>) highlights genetic factors predisposing certain individuals to obesity. If a person is obese or overweight, there are chances that this is related to family history. It is therefore logical that we focus our attention on examining the probability that individuals have family history related to obesity.</p>
+<p>Given this information, it is logical to explore the relationship between obesity and family history. Thus, our study aims to develop a machine learning model capable of predicting whether an individual has a family history of obesity based on various individual characteristics. In this Notebook, we are going to present the results of our study.</p>
+<p>The methodology of the study is based on supervised machine learning techniques. We will use several machine learning models, such as logistic regression, random forest classifier and XGBoost.</p>
+<p>The data used comes from the GitHub platform and includes various information about individuals.</p>
+<p>The Notebook is structured as follows:</p>
+<ol type="1">
+<li><p><strong>Exploratory Data Analysis</strong>: Data analysis to understand its structure and characteristics.</p></li>
+<li><p><strong>Data preprocessing</strong>: Data preprocessing to prepare it for analysis.</p></li>
+<li><p><strong>Data splitting</strong>: Division of the dataset into training and testing sets to evaluate model performance.</p></li>
+<li><p><strong>Implementing machine learning algorithms</strong>: Implementation of machine learning algorithms to build predictive models from training data.</p></li>
+<li><p><strong>Interpretation of results</strong>: Where we will summarize the work done.</p></li>
+</ol>
+<p>The study was carried out using the RStudio programming software, which provides a good working environment.</p>
+<section id="installing-and-loading-packages" class="level2">
+<h2 class="anchored" data-anchor-id="installing-and-loading-packages">Installing and loading packages</h2>
+<p>To carry out this study, we need R resources that we select and install. These are the resources (packages) that we will need for our analysis.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># install.packages("dplyr")</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="co"># install.packages("ggplot2")</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="co"># install.packages("tidyr")</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="co"># install.packages("readr")</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="co"># install.packages("data.table")</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="co"># install.packages("stringr")</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="co"># install.packages("gridExtra")</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="co"># install.packages("corrplot")</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="co"># install.packages("caret")</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="co"># install.packages("xgboost")</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="co"># install.packages("randomForest")</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="co"># install.packages("xgboost")</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(gridExtra)</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyr)</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(readr)</span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(data.table)</span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(stringr)</span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(corrplot)</span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(caret)</span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(xgboost)</span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(randomForest)</span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(pROC)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Now that the packages are installed, we can start the work.</p>
+<hr>
+</section>
+</section>
+<section id="exploratory-data-analysis" class="level1">
+<h1>1. Exploratory Data Analysis</h1>
+<p>We load the dataset via the GitHub link into a dataframe named “data” and we take a quick look at its first few rows.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>data <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="st">"https://github.com/Eben2020-hp/Obesity/raw/main/Obesity.csv"</span>)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(data[, <span class="dv">1</span><span class="sc">:</span><span class="dv">8</span>]) <span class="co"># Preview of the 8 first variables of the dataset</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  Gender Age Height Weight family_history_with_overweight FAVC FCVC NCP
+1 Female  21   1.62   64.0                            yes   no    2   3
+2 Female  21   1.52   56.0                            yes   no    3   3
+3   Male  23   1.80   77.0                            yes   no    2   3
+4   Male  27   1.80   87.0                             no   no    3   3
+5   Male  22   1.78   89.8                             no   no    2   1
+6   Male  29   1.62   53.0                             no  yes    2   3</code></pre>
+</div>
+</div>
+<p><strong>Observation of the dataframe</strong></p>
+<p>We notice that we have a mixture of numeric and categorical data types. This section will be devoted to exploring the data, and initially, let’s quickly perform some simple checks of data completeness to see if there are any null or outlier values.</p>
+<section id="variables-of-the-dataframe" class="level2">
+<h2 class="anchored" data-anchor-id="variables-of-the-dataframe">1.1. Variables of the dataframe:</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">glimpse</span>(data)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Rows: 2,111
+Columns: 17
+$ Gender                         &lt;chr&gt; "Female", "Female", "Male", "Male", "Ma…
+$ Age                            &lt;dbl&gt; 21, 21, 23, 27, 22, 29, 23, 22, 24, 22,…
+$ Height                         &lt;dbl&gt; 1.62, 1.52, 1.80, 1.80, 1.78, 1.62, 1.5…
+$ Weight                         &lt;dbl&gt; 64.0, 56.0, 77.0, 87.0, 89.8, 53.0, 55.…
+$ family_history_with_overweight &lt;chr&gt; "yes", "yes", "yes", "no", "no", "no", …
+$ FAVC                           &lt;chr&gt; "no", "no", "no", "no", "no", "yes", "y…
+$ FCVC                           &lt;dbl&gt; 2, 3, 2, 3, 2, 2, 3, 2, 3, 2, 3, 2, 3, …
+$ NCP                            &lt;dbl&gt; 3, 3, 3, 3, 1, 3, 3, 3, 3, 3, 3, 3, 3, …
+$ CAEC                           &lt;chr&gt; "Sometimes", "Sometimes", "Sometimes", …
+$ SMOKE                          &lt;chr&gt; "no", "yes", "no", "no", "no", "no", "n…
+$ CH2O                           &lt;dbl&gt; 2, 3, 2, 2, 2, 2, 2, 2, 2, 2, 3, 2, 3, …
+$ SCC                            &lt;chr&gt; "no", "yes", "no", "no", "no", "no", "n…
+$ FAF                            &lt;dbl&gt; 0, 3, 2, 2, 0, 0, 1, 3, 1, 1, 2, 2, 2, …
+$ TUE                            &lt;dbl&gt; 1, 0, 1, 0, 0, 0, 0, 0, 1, 1, 2, 1, 0, …
+$ CALC                           &lt;chr&gt; "no", "Sometimes", "Frequently", "Frequ…
+$ MTRANS                         &lt;chr&gt; "Public_Transportation", "Public_Transp…
+$ NObeyesdad                     &lt;chr&gt; "Normal_Weight", "Normal_Weight", "Norm…</code></pre>
+</div>
+</div>
+<p>The dataframe is of size (2111 ; 17), which means it consists of 2111 rows (individuals) and contains 17 variables. The variables are:</p>
+<ul>
+<li><p>Gender: Gender</p></li>
+<li><p>Age: Age</p></li>
+<li><p>Height: Height in meters</p></li>
+<li><p>Weight: Weight in kg</p></li>
+<li><p>family_history_with_overweight: Indicates if the person has antecedent with overweight in his family</p></li>
+<li><p>FAVC: Indicates if the person tends to eat high-calorie food</p></li>
+<li><p>FCVC: Fruit and vegetable consumption</p></li>
+<li><p>NCP: Number of main meals consumed per day</p></li>
+<li><p>CAEC: Frequency of food consumption between main meals</p></li>
+<li><p>SMOKE: Indicates if the person smokes or not</p></li>
+<li><p>CH2O: Daily water intake</p></li>
+<li><p>SCC: Indicates if the person follows a strict diet</p></li>
+<li><p>FAF: Frequency of physical activities</p></li>
+<li><p>TUE: Time spent in front of a screen</p></li>
+<li><p>CALC: Frequency of alcoholic beverage consumption</p></li>
+<li><p>MTRANS: Main means of transportation used</p></li>
+<li><p>NObeyesdad: Obesity level</p></li>
+</ul>
+<p>As one might expect, the target column for which our model training will focus on is the <strong>“family_history_with_overweight”</strong> column (indicator of family history of overweight). It is a dummy variable that indicates:</p>
+<ul>
+<li><p>Yes: if the person has a family history of overweight</p></li>
+<li><p>No: if the person has no family history of overweight</p></li>
+</ul>
+</section>
+<section id="quality-of-the-data" class="level2">
+<h2 class="anchored" data-anchor-id="quality-of-the-data">1.2. Quality of the data:</h2>
+<p>We use the <code>is.na()</code> function to retrieve N/A values and evaluate their significance level in the dataframe.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">colSums</span>(<span class="fu">is.na</span>(data)) <span class="sc">&gt;</span> <span class="dv">0</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>                        Gender                            Age 
+                         FALSE                          FALSE 
+                        Height                         Weight 
+                         FALSE                          FALSE 
+family_history_with_overweight                           FAVC 
+                         FALSE                          FALSE 
+                          FCVC                            NCP 
+                         FALSE                          FALSE 
+                          CAEC                          SMOKE 
+                         FALSE                          FALSE 
+                          CH2O                            SCC 
+                         FALSE                          FALSE 
+                           FAF                            TUE 
+                         FALSE                          FALSE 
+                          CALC                         MTRANS 
+                         FALSE                          FALSE 
+                    NObeyesdad 
+                         FALSE </code></pre>
+</div>
+</div>
+<p>We notice that there are no missing values in our dataframe. It is of fairly good quality.</p>
+</section>
+<section id="distribution-of-variables" class="level2">
+<h2 class="anchored" data-anchor-id="distribution-of-variables">1.3. Distribution of variables:</h2>
+<p>To get a first idea of the distribution of our variables and understand what they might reveal, we will plot graphs on certain variables. These graphs consist of scatter plots for numerical variables, bar charts for categorical variables, and other appropriate visualizations depending on the characteristics of each variable. This visual exploration step will help us detect trends, potential outliers, as well as patterns or correlations between variables.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Ovwght_files/figure-html/unnamed-chunk-6-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Ovwght_files/figure-html/unnamed-chunk-7-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Note that:</p>
+<ul>
+<li><p><strong>AGE vs WEIGHT</strong>: There is a wide range of weights across all ages, indicating no specific age group is predominantly associated with a particular weight range. This suggests that factors other than age might have a stronger influence on weight.</p></li>
+<li><p><strong>WEIGHT vs GENDER</strong>: The weight distribution for both males and females varies significantly, with females generally exhibiting a broader range of weights. This could imply that gender may play a role in weight variability.</p></li>
+<li><p><strong>WEIGHT vs HEIGHT</strong>: There is a positive correlation, indicating that taller individuals tend to weigh more. This aligns with general biological expectations where height and weight are proportionately related.</p></li>
+<li><p><strong>WEIGHT vs ALCOHOL</strong>: There are more people over 120kg among those who consume alcohol frequently.</p></li>
+</ul>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Ovwght_files/figure-html/unnamed-chunk-8-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>The plot shows the relationship between weight and family history of being overweight.</p>
+<ul>
+<li><p><strong>Weight Trends:</strong></p>
+<ul>
+<li><p>Individuals with a family history of being overweight (<code>yes</code>) are distributed across a wide range of weights, including higher weights. This suggests that a family history of being overweight might be associated with a higher weight.</p></li>
+<li><p>Individuals without a family history of being overweight (<code>no</code>) also show a wide distribution of weights, but there are fewer individuals at the higher end of the weight spectrum compared to those with a family history of being overweight.</p></li>
+</ul></li>
+</ul>
+<hr>
+</section>
+<section id="correlation-of-features" class="level2">
+<h2 class="anchored" data-anchor-id="correlation-of-features">1.4. Correlation of features:</h2>
+<p>Analyzing the correlation of features is a crucial step in data exploration, as it allows us to discover relationships and interactions between different variables in our dataset. Understanding these relationships can provide valuable insights for several aspects of our analysis.</p>
+<p>To do this, we use the <code>corrplot()</code> function from the <code>corrplot</code> package to plot the correlation matrix.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>X <span class="ot">&lt;-</span> data <span class="sc">%&gt;%</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(Age, Height, Weight, FCVC, NCP, CH2O, FAF, TUE) <span class="co"># We select only numerical variables</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>cor_mat <span class="ot">&lt;-</span> <span class="fu">cor</span>(X) <span class="co"># Computing the correlation matrix of X</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="fu">corrplot</span>(cor_mat, <span class="at">method =</span> <span class="st">"color"</span>,<span class="at">col =</span> <span class="fu">COL2</span>(<span class="st">'PuOr'</span>), <span class="at">tl.col =</span><span class="st">"purple"</span>, <span class="at">tl.cex =</span> <span class="fl">0.5</span>) <span class="co"># And plot the correlation matrix</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Ovwght_files/figure-html/unnamed-chunk-9-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>From the corrplot, we can see that quite a lot of our columns seem to be poorly correlated with one another. Generally when making a predictive model, it would be preferable to train a model with features that are not too correlated with one another feature.</p>
+<hr>
+</section>
+</section>
+<section id="data-preprocessing" class="level1">
+<h1>2. Data preprocessing</h1>
+<p>After a brief exploration of our dataframe, we proceed to data preprocessing. This phase includes several important tasks that optimize the quality and consistency of our data, improving the performance of our models and the reliability of our results.</p>
+<p>First, we group each type of variable (numerical, dummy, categorical) into 3 distinct dataframes to process them separately.</p>
+<ul>
+<li><strong>Numerical variables</strong>:</li>
+</ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>X1 <span class="ot">&lt;-</span> data <span class="sc">%&gt;%</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(Age, Height, Weight, FCVC, NCP, CH2O, FAF, TUE) <span class="co"># X1 contains numerical variables</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(X1)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  Age Height Weight FCVC NCP CH2O FAF TUE
+1  21   1.62   64.0    2   3    2   0   1
+2  21   1.52   56.0    3   3    3   3   0
+3  23   1.80   77.0    2   3    2   2   1
+4  27   1.80   87.0    3   3    2   2   0
+5  22   1.78   89.8    2   1    2   0   0
+6  29   1.62   53.0    2   3    2   0   0</code></pre>
+</div>
+</div>
+<ul>
+<li><strong>Categorical variables</strong>:</li>
+</ul>
+<p>We select only categorical variables with more than 2 modalities.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>X2 <span class="ot">&lt;-</span> <span class="fu">data.frame</span>() <span class="co"># We create an empty df for storing categorical variables</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>cat_cols <span class="ot">&lt;-</span> <span class="fu">c</span>()</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (col <span class="cf">in</span> <span class="fu">names</span>(data)) {</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="fu">is.character</span>(data[[col]])) {</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>    cat_cols <span class="ot">&lt;-</span> <span class="fu">c</span>(cat_cols, col) <span class="co"># loop for finding the categorical variables</span></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(cat_cols) <span class="co"># Only CAEC, CALC, MTRANS, and NObeyesdad have more than 2 levels</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "Gender"                         "family_history_with_overweight"
+[3] "FAVC"                           "CAEC"                          
+[5] "SMOKE"                          "SCC"                           
+[7] "CALC"                           "MTRANS"                        
+[9] "NObeyesdad"                    </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>X2 <span class="ot">&lt;-</span> data <span class="sc">%&gt;%</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(CAEC, CALC, MTRANS, NObeyesdad) <span class="co"># We store them in X2</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Next, we convert these variables into categorical to easily encode them into dummies. To transform them into dummies, we create dummy variables for each of their modalities.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Converting them into categoricals (factor)</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>X2<span class="sc">$</span>CAEC <span class="ot">&lt;-</span> <span class="fu">factor</span>(X2<span class="sc">$</span>CAEC)</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>X2<span class="sc">$</span>CALC <span class="ot">&lt;-</span> <span class="fu">factor</span>(X2<span class="sc">$</span>CALC)</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>X2<span class="sc">$</span>MTRANS <span class="ot">&lt;-</span> <span class="fu">factor</span>(X2<span class="sc">$</span>MTRANS)</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>X2<span class="sc">$</span>NObeyesdad <span class="ot">&lt;-</span> <span class="fu">factor</span>(X2<span class="sc">$</span>NObeyesdad)</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a><span class="co"># And we create dummies for each categorical variable</span></span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>X2 <span class="ot">&lt;-</span> <span class="fu">model.matrix</span>(<span class="sc">~</span> . <span class="sc">-</span> <span class="dv">1</span>, <span class="at">data =</span> X2)</span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>X2 <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(X2)</span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(X2[, <span class="dv">1</span><span class="sc">:</span><span class="dv">6</span>]) <span class="co"># Preview the 6 first columns</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  CAECAlways CAECFrequently CAECno CAECSometimes CALCFrequently CALCno
+1          0              0      0             1              0      1
+2          0              0      0             1              0      0
+3          0              0      0             1              1      0
+4          0              0      0             1              1      0
+5          0              0      0             1              0      0
+6          0              0      0             1              0      0</code></pre>
+</div>
+</div>
+<ul>
+<li><strong>Dummy variables</strong>:</li>
+</ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Renaming the target variable to simplify our task</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>data <span class="ot">&lt;-</span> data <span class="sc">%&gt;%</span> </span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rename</span>(<span class="at">fhwo =</span> family_history_with_overweight)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Next, we select the dummy variables from the global dataframe and store them in a special dataframe.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>X3 <span class="ot">&lt;-</span> data <span class="sc">%&gt;%</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(fhwo, Gender, FAVC, SMOKE, SCC)</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>X3<span class="sc">$</span>Gender <span class="ot">&lt;-</span> <span class="fu">factor</span>(X3<span class="sc">$</span>Gender)</span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>X3<span class="sc">$</span>FAVC <span class="ot">&lt;-</span> <span class="fu">factor</span>(X3<span class="sc">$</span>FAVC)</span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>X3<span class="sc">$</span>SMOKE <span class="ot">&lt;-</span> <span class="fu">factor</span>(X3<span class="sc">$</span>SMOKE)</span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>X3<span class="sc">$</span>SCC <span class="ot">&lt;-</span> <span class="fu">factor</span>(X3<span class="sc">$</span>SCC)</span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a>X3 <span class="ot">&lt;-</span> X3 <span class="sc">%&gt;%</span></span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">fhwo =</span> <span class="fu">ifelse</span>(fhwo <span class="sc">==</span> <span class="st">"yes"</span>, <span class="dv">1</span>, <span class="dv">0</span>),</span>
+<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a>         <span class="at">Gender =</span> <span class="fu">ifelse</span>(Gender <span class="sc">==</span> <span class="st">"Female"</span>, <span class="dv">1</span>, <span class="dv">0</span>),</span>
+<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a>         <span class="at">FAVC =</span> <span class="fu">ifelse</span>(FAVC <span class="sc">==</span> <span class="st">"yes"</span>, <span class="dv">1</span>, <span class="dv">0</span>),</span>
+<span id="cb17-13"><a href="#cb17-13" aria-hidden="true" tabindex="-1"></a>         <span class="at">SMOKE =</span> <span class="fu">ifelse</span>(SMOKE <span class="sc">==</span> <span class="st">"yes"</span>, <span class="dv">1</span>, <span class="dv">0</span>),</span>
+<span id="cb17-14"><a href="#cb17-14" aria-hidden="true" tabindex="-1"></a>         <span class="at">SCC =</span> <span class="fu">ifelse</span>(SCC <span class="sc">==</span> <span class="st">"yes"</span>, <span class="dv">1</span>, <span class="dv">0</span>))</span>
+<span id="cb17-15"><a href="#cb17-15" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(X3)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  fhwo Gender FAVC SMOKE SCC
+1    1      1    0     0   0
+2    1      1    0     1   1
+3    1      0    0     0   0
+4    0      0    0     0   0
+5    0      0    0     0   0
+6    0      0    1     0   0</code></pre>
+</div>
+</div>
+<p>Finally, we combine the 3 dataframes using the <code>cbind()</code> function to create <code>data_final</code>, which will be the dataframe used for our analysis.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="fu">attach</span>(data)</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>data_final <span class="ot">&lt;-</span> <span class="fu">cbind</span>(X1, X3, X2) <span class="co"># Combining all df &amp; the target variable to create the final one</span></span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(data_final[, <span class="dv">1</span><span class="sc">:</span><span class="dv">14</span>]) <span class="co"># preview the first observations of the 14 first columns of our final dataset</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  Age Height Weight FCVC NCP CH2O FAF TUE fhwo Gender FAVC SMOKE SCC CAECAlways
+1  21   1.62   64.0    2   3    2   0   1    1      1    0     0   0          0
+2  21   1.52   56.0    3   3    3   3   0    1      1    0     1   1          0
+3  23   1.80   77.0    2   3    2   2   1    1      0    0     0   0          0
+4  27   1.80   87.0    3   3    2   2   0    0      0    0     0   0          0
+5  22   1.78   89.8    2   1    2   0   0    0      0    0     0   0          0
+6  29   1.62   53.0    2   3    2   0   0    0      0    1     0   0          0</code></pre>
+</div>
+</div>
+<p><strong>Description of the new dataframe</strong></p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="fu">dim</span>(data_final)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 2111   30</code></pre>
+</div>
+</div>
+<p>It is a dataframe of size (2111, 30). It now contains 30 variables on 2111 individuals.</p>
+<p><strong>Target variable</strong></p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(data_final<span class="sc">$</span>fhwo) <span class="co"># Proportions in the target variable</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+ 0.0000  1.0000  1.0000  0.8176  1.0000  1.0000 </code></pre>
+</div>
+</div>
+<p>In average 81% of individuals have antecendent with overweight (<code>fhwo = 1</code>).</p>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Ovwght_files/figure-html/unnamed-chunk-18-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>The target variable shows some asymmetry in its distribution, as can be seen above.</p>
+<p>Therefore, it would be advisable to perform oversampling methods on our dataframe before starting the analysis.</p>
+<hr>
+</section>
+<section id="data-splitting" class="level1">
+<h1>3. Data splitting</h1>
+<p>As mentioned, we will first perform oversampling of our data before splitting them.</p>
+<section id="oversampled-dataset" class="level2">
+<h2 class="anchored" data-anchor-id="oversampled-dataset">3.1. Oversampled Dataset</h2>
+<p>For oversampling, we will use the Synthetic Minority Oversampling Technique (SMOTE) method from the <code>DMwR</code> package.</p>
+<p>First, we install the necessary packages:</p>
+<p>Then, we perform oversampling using the <code>SMOTE()</code> function from this package, and we store the new dataframe in <code>ovs_data</code>.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>data_final<span class="sc">$</span>fhwo <span class="ot">&lt;-</span> <span class="fu">as.factor</span>(data_final<span class="sc">$</span>fhwo) <span class="co"># We convert the target as factor for oversampling</span></span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>ovs_data <span class="ot">&lt;-</span> <span class="fu">SMOTE</span>(fhwo <span class="sc">~</span> ., <span class="at">data =</span> data_final) <span class="co"># New oversampled dataset</span></span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a><span class="fu">attach</span>(ovs_data)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p><strong>Graph</strong></p>
+<p>Next, we observe our data again:</p>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Ovwght_files/figure-html/unnamed-chunk-21-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Here we can observe that the distribution is less imbalanced than before, which is conducive to our analysis.</p>
+</section>
+<section id="splitting-into-two-sets" class="level2">
+<h2 class="anchored" data-anchor-id="splitting-into-two-sets">3.2. Splitting into two sets</h2>
+<p>In this part, we will split our dataset using the <code>createDataPartition()</code> function with an 80% ratio. That means:</p>
+<ul>
+<li><p>80% of the data will be used for model training</p></li>
+<li><p>The remaining 20% will be reserved for model evaluation</p></li>
+</ul>
+<p>This division will allow us to evaluate the model’s performance on independent data, i.e., data that the model has not seen during training.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>inTraining <span class="ot">&lt;-</span> <span class="fu">createDataPartition</span>(ovs_data<span class="sc">$</span>fhwo, <span class="at">p =</span> .<span class="dv">80</span>, <span class="at">list =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>train_set <span class="ot">&lt;-</span> ovs_data[inTraining, ]</span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>test_set  <span class="ot">&lt;-</span> ovs_data[<span class="sc">-</span> inTraining, ]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="fu">dim</span>(train_set)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 2156   30</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(train_set<span class="sc">$</span>fhwo)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+   0    1 
+ 924 1232 </code></pre>
+</div>
+</div>
+<p>The training set is of size (1232, 30) with a fairly balanced distribution of the target variable.</p>
+<p>Our data has been successfully split, it is time to build our models.</p>
+<hr>
+</section>
+</section>
+<section id="implementing-machine-learning-algorithms" class="level1">
+<h1>4. Implementing machine learning algorithms</h1>
+<p>As indicated in the introduction of this notebook, we aim to predict the <code>fhwo</code> variable, which indicates whether a person has a family history of overweight. This variable is binary, so we need to use supervised machine learning models of the classification type.</p>
+<p>With this in mind, we have chosen to evaluate and contrast the performance of 4 different classification models: <em>logistic regression, Random Forest Classifier</em>, and <em>XGBoost</em>. These models will be used to predict our target variable. Each model was trained on the training dataset and evaluated on the test dataset using metrics such as accuracy, precision, recall, F1-score, etc. These metrics will provide a comprehensive assessment of the model’s performance in predicting our target variable.</p>
+<hr>
+<section id="logistic-regression" class="level2">
+<h2 class="anchored" data-anchor-id="logistic-regression">4.1. Logistic regression</h2>
+<p>Logistic regression is a machine learning model used for binary classification. Despite its name, it is used to predict the probability that an observation belongs to a particular class based on explanatory variables. It is based on the logistic function to estimate probabilities and can be regularized to avoid overfitting.</p>
+<section id="a-training-the-model" class="level3">
+<h3 class="anchored" data-anchor-id="a-training-the-model">a) Training the model</h3>
+<p>We will train our logistic regression model on the entire training set:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>model_logit <span class="ot">&lt;-</span> <span class="fu">train</span>(fhwo <span class="sc">~</span> ., <span class="at">data =</span> train_set, <span class="at">method =</span> <span class="st">"glm"</span>, <span class="at">family =</span> <span class="st">"binomial"</span>)</span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(model_logit)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+NULL
+
+Coefficients: (1 not defined because of singularities)
+                                Estimate Std. Error z value Pr(&gt;|z|)    
+(Intercept)                     11.31055 6522.63972   0.002  0.99862    
+Age                             -0.06166    0.01578  -3.907 9.36e-05 ***
+Height                          -0.61240    2.07570  -0.295  0.76797    
+Weight                           0.06488    0.02120   3.061  0.00221 ** 
+FCVC                             0.02832    0.14296   0.198  0.84295    
+NCP                              0.39526    0.08985   4.399 1.09e-05 ***
+CH2O                             0.74852    0.13754   5.442 5.26e-08 ***
+FAF                              0.01771    0.08809   0.201  0.84063    
+TUE                              0.34913    0.12595   2.772  0.00557 ** 
+Gender                           1.28706    0.21142   6.088 1.15e-09 ***
+FAVC                             1.87328    0.21222   8.827  &lt; 2e-16 ***
+SMOKE                            2.77284    0.58509   4.739 2.15e-06 ***
+SCC                             -1.84281    0.34117  -5.401 6.61e-08 ***
+CAECAlways                       0.81729    0.38524   2.122  0.03388 *  
+CAECFrequently                   0.29913    0.21530   1.389  0.16472    
+CAECno                          -3.08958    0.65033  -4.751 2.03e-06 ***
+CAECSometimes                         NA         NA      NA       NA    
+CALCFrequently                 -21.19749 6522.63911  -0.003  0.99741    
+CALCno                         -17.43852 6522.63910  -0.003  0.99787    
+CALCSometimes                  -18.60182 6522.63910  -0.003  0.99772    
+MTRANSBike                       0.05696    1.21400   0.047  0.96258    
+MTRANSMotorbike                 -2.13791    0.81418  -2.626  0.00864 ** 
+MTRANSPublic_Transportation     -0.43024    0.23066  -1.865  0.06215 .  
+MTRANSWalking                    0.99524    0.42324   2.351  0.01870 *  
+NObeyesdadNormal_Weight         -0.45821    0.36113  -1.269  0.20450    
+NObeyesdadObesity_Type_I         1.41795    0.94251   1.504  0.13247    
+NObeyesdadObesity_Type_II        3.44903    1.57835   2.185  0.02887 *  
+NObeyesdadObesity_Type_III      15.18727  417.87685   0.036  0.97101    
+NObeyesdadOverweight_Level_I     1.14371    0.59142   1.934  0.05313 .  
+NObeyesdadOverweight_Level_II    1.89635    0.72038   2.632  0.00848 ** 
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+(Dispersion parameter for binomial family taken to be 1)
+
+    Null deviance: 2944.7  on 2155  degrees of freedom
+Residual deviance: 1440.1  on 2127  degrees of freedom
+AIC: 1498.1
+
+Number of Fisher Scoring iterations: 17</code></pre>
+</div>
+</div>
+<p>The logistic regression model shows the estimated coefficients for each feature.</p>
+<ul>
+<li><p><strong>Age</strong>: Older age is associated with lower odds of having a family history of overweight.</p></li>
+<li><p><strong>Weight</strong>: Higher weight is associated with higher odds of having a family history of overweight.</p></li>
+<li><p><strong>Gender</strong>: Being female is associated with higher odds of having a family history of overweight compared to being male.</p></li>
+<li><p><strong>FAVC (Frequency of consuming high-calorie food)</strong>: Frequent consumption of high-calorie food is associated with higher odds of having a family history of overweight.</p></li>
+<li><p><strong>SMOKE (Smoking)</strong>: Smoking is associated with higher odds of having a family history of overweight.</p></li>
+<li><p><strong>SCC (Calories consumption monitoring)</strong>: Monitoring calorie consumption is associated with lower odds of having a family history of overweight.</p></li>
+</ul>
+</section>
+<section id="b-predictions" class="level3">
+<h3 class="anchored" data-anchor-id="b-predictions">b) Predictions</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>reg_class <span class="ot">&lt;-</span> <span class="fu">predict</span>(model_logit, test_set)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a>final_dataset <span class="ot">&lt;-</span> <span class="fu">cbind</span>(<span class="at">Real =</span> test_set<span class="sc">$</span>fhwo, <span class="at">Predicted =</span> reg_class)</span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a>final_dataset <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(final_dataset)</span>
+<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(final_dataset)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  Real Predicted
+1    2         2
+2    2         2
+3    2         2
+4    2         2
+5    2         2
+6    2         2</code></pre>
+</div>
+</div>
+<p>Where 1 = fwho : “no” and 2 = fwho : “yes”</p>
+</section>
+<section id="c-performance-evaluation" class="level3">
+<h3 class="anchored" data-anchor-id="c-performance-evaluation">c) Performance Evaluation</h3>
+<ul>
+<li><strong>Confusion Matrix</strong></li>
+</ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>conf_matrix1 <span class="ot">&lt;-</span> <span class="fu">confusionMatrix</span>(reg_class, test_set<span class="sc">$</span>fhwo)</span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(conf_matrix1)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Confusion Matrix and Statistics
+
+          Reference
+Prediction   0   1
+         0 196  44
+         1  35 264
+                                          
+               Accuracy : 0.8534          
+                 95% CI : (0.8207, 0.8822)
+    No Information Rate : 0.5714          
+    P-Value [Acc &gt; NIR] : &lt;2e-16          
+                                          
+                  Kappa : 0.7022          
+                                          
+ Mcnemar's Test P-Value : 0.3681          
+                                          
+            Sensitivity : 0.8485          
+            Specificity : 0.8571          
+         Pos Pred Value : 0.8167          
+         Neg Pred Value : 0.8829          
+             Prevalence : 0.4286          
+         Detection Rate : 0.3636          
+   Detection Prevalence : 0.4453          
+      Balanced Accuracy : 0.8528          
+                                          
+       'Positive' Class : 0               
+                                          </code></pre>
+</div>
+</div>
+<p><strong>Confusion Matrix</strong>: The model correctly predicted 196 instances with no family history of overweight and 264 instances with a family history of overweight. It misclassified 44 instances as negative when they were positive and 35 instances as positive when they were negative.</p>
+<p><strong>Accuracy</strong>: The model’s overall accuracy is 85.34%, indicating it correctly classified 85.34% of instances.</p>
+<p><strong>Sensitivity</strong>: The model correctly identified 84.85% of instances with a family history of overweight.</p>
+<p><strong>Specificity</strong>: The model correctly identified 85.71% of instances without a family history of overweight.</p>
+<p><strong>Precision</strong>: Among instances predicted as positive, 81.67% actually had a family history of overweight.</p>
+<p><strong>Kappa</strong>: The model shows substantial agreement beyond chance (Kappa = 70.22%).</p>
+<p>In summary, the logit model performs well in predicting the target variable, but there’s room for improvement in reducing misclassifications.</p>
+<ul>
+<li><strong>Precision</strong></li>
+</ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>precision1 <span class="ot">&lt;-</span> conf_matrix1<span class="sc">$</span>byClass[<span class="st">"Pos Pred Value"</span>]</span>
+<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(precision1)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Pos Pred Value 
+     0.8166667 </code></pre>
+</div>
+</div>
+<ul>
+<li><strong>Recall</strong></li>
+</ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a>recall1 <span class="ot">&lt;-</span> conf_matrix1<span class="sc">$</span>byClass[<span class="st">"Sensitivity"</span>]</span>
+<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(recall1)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Sensitivity 
+  0.8484848 </code></pre>
+</div>
+</div>
+<ul>
+<li><strong>F1-score</strong></li>
+</ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a>f1_score1 <span class="ot">&lt;-</span> <span class="dv">2</span> <span class="sc">*</span> (precision1 <span class="sc">*</span> recall1) <span class="sc">/</span> (precision1 <span class="sc">+</span> recall1)</span>
+<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(f1_score1)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Pos Pred Value 
+     0.8322718 </code></pre>
+</div>
+</div>
+<ul>
+<li><strong>AUC-ROC</strong></li>
+</ul>
+<p>To plot the AUC-ROC, we need the <code>pROC</code> package:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb44"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(pROC)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb45"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a>auc1 <span class="ot">&lt;-</span> <span class="fu">roc</span>(test_set<span class="sc">$</span>fhwo, <span class="fu">as.numeric</span>(reg_class))</span>
+<span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(auc1<span class="sc">$</span>auc)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Area under the curve: 0.8528</code></pre>
+</div>
+</div>
+</section>
+<section id="d-summary" class="level3">
+<h3 class="anchored" data-anchor-id="d-summary">d) Summary</h3>
+<p><strong>Precision</strong>: Out of all instances predicted as having a family history of overweight, 81.67% actually had a family history of overweight. This indicates the proportion of true positive predictions among all positive predictions made by the model.</p>
+<p><strong>Recall (Sensitivity)</strong>: The model correctly identified 84.85% of all instances with a family history of overweight. This metric shows the model’s ability to capture instances with a family history of overweight among all instances that actually have a family history of overweight.</p>
+<p><strong>F1-score</strong>: The harmonic mean of precision and recall, providing a balance between the two metrics. An F1-score of 83.23% indicates a good balance between precision and recall.</p>
+<p><strong>AUC-ROC (Area Under the ROC Curve)</strong>: The AUC-ROC score represents the model’s ability to discriminate between positive and negative instances across all possible thresholds. An AUC-ROC score of 85.28% suggests that the model performs well in distinguishing between instances with and without a family history of overweight.</p>
+<p>Overall, these metrics indicate that the model has a relatively high ability to correctly identify instances with a family history of overweight while maintaining a low false positive rate.</p>
+<hr>
+</section>
+</section>
+<section id="random-forest-classifier" class="level2">
+<h2 class="anchored" data-anchor-id="random-forest-classifier">4.2. Random Forest classifier</h2>
+<p>Random Forest is a machine learning algorithm that combines multiple decision trees to perform classification. Each decision tree is trained on a random subset of the data and uses a random subset of features to make decisions. The final prediction is based on a majority vote of the individual tree predictions.</p>
+<p>For RF, we will split our initial datasets into two:</p>
+<ul>
+<li><p>One set for features (<code>features_train</code>, <code>features_test</code>)</p></li>
+<li><p>One set for the target (<code>target_train</code>, <code>target_test</code>)</p></li>
+</ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb47"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a>target_train <span class="ot">&lt;-</span> train_set<span class="sc">$</span>fhwo</span>
+<span id="cb47-2"><a href="#cb47-2" aria-hidden="true" tabindex="-1"></a>features_train <span class="ot">&lt;-</span> train_set[<span class="sc">-</span><span class="dv">9</span>]</span>
+<span id="cb47-3"><a href="#cb47-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb47-4"><a href="#cb47-4" aria-hidden="true" tabindex="-1"></a>target_test <span class="ot">&lt;-</span> test_set<span class="sc">$</span>fhwo</span>
+<span id="cb47-5"><a href="#cb47-5" aria-hidden="true" tabindex="-1"></a>features_test <span class="ot">&lt;-</span> test_set[<span class="sc">-</span><span class="dv">9</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<section id="a-training-the-model-1" class="level3">
+<h3 class="anchored" data-anchor-id="a-training-the-model-1">a) Training the model</h3>
+<p>With these two sets, we train our RF model:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb48"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Training the model</span></span>
+<span id="cb48-2"><a href="#cb48-2" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
+<span id="cb48-3"><a href="#cb48-3" aria-hidden="true" tabindex="-1"></a>classifier_RF <span class="ot">=</span> <span class="fu">randomForest</span>(<span class="at">x =</span> features_train, <span class="at">y =</span> target_train, <span class="at">ntree =</span> <span class="dv">500</span>) </span>
+<span id="cb48-4"><a href="#cb48-4" aria-hidden="true" tabindex="-1"></a>classifier_RF</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+ randomForest(x = features_train, y = target_train, ntree = 500) 
+               Type of random forest: classification
+                     Number of trees: 500
+No. of variables tried at each split: 5
+
+        OOB estimate of  error rate: 4.87%
+Confusion matrix:
+    0    1 class.error
+0 856   68  0.07359307
+1  37 1195  0.03003247</code></pre>
+</div>
+</div>
+<ul>
+<li><strong>Interpretation of the Random Forest classifier:</strong></li>
+</ul>
+<p>Number of Trees: The model consists of 500 decision trees.</p>
+<p>Type of Random Forest: It is a classification random forest, meaning it is used for classification tasks.</p>
+<p>Variables at Each Split: At each split in the decision trees, the algorithm tried 5 randomly selected variables.</p>
+<ul>
+<li><strong>Plotting the model Out-of-Bag (OOB)</strong> <strong>errors</strong></li>
+</ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb50"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(classifier_RF, <span class="at">main =</span> <span class="st">'RF Classifier'</span>)</span>
+<span id="cb50-2"><a href="#cb50-2" aria-hidden="true" tabindex="-1"></a><span class="fu">legend</span>(<span class="st">"topright"</span>, </span>
+<span id="cb50-3"><a href="#cb50-3" aria-hidden="true" tabindex="-1"></a>       <span class="at">legend =</span> <span class="fu">c</span>(<span class="st">"Global OOB error"</span>, <span class="st">"Error for class 0"</span>, <span class="st">"Error for class 1"</span>),</span>
+<span id="cb50-4"><a href="#cb50-4" aria-hidden="true" tabindex="-1"></a>       <span class="at">col =</span> <span class="fu">c</span>(<span class="st">"black"</span>, <span class="st">"red"</span>, <span class="st">"green"</span>),</span>
+<span id="cb50-5"><a href="#cb50-5" aria-hidden="true" tabindex="-1"></a>       <span class="at">lty =</span> <span class="dv">1</span>,</span>
+<span id="cb50-6"><a href="#cb50-6" aria-hidden="true" tabindex="-1"></a>       <span class="at">cex =</span> <span class="fl">0.8</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Ovwght_files/figure-html/unnamed-chunk-36-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>This graph shows the error rate of a Random Forest (RF) classifier as a function of the number of trees.</p>
+<ul>
+<li><p><em>Red curve</em> : Error for class 0 (fhwo : “no”)</p></li>
+<li><p><em>Green curve</em> : Error for class 1 (fhwo : “yes”)</p></li>
+<li><p><em>Black curve</em> : Global error</p></li>
+</ul>
+<p>The error rate decreases rapidly as the number of trees increases initially, then tends to stabilize.</p>
+<p><strong>Class-specific Errors</strong>:</p>
+<ul>
+<li><p>The red curve shows that for the hardest class to classify, the error rate remains relatively high compared to other classes, although it decreases slightly as the number of trees increases.</p></li>
+<li><p>The green curve shows a very low error rate from the beginning, indicating that this class is easily classified by the model.</p></li>
+</ul>
+<p><strong>Stabilization</strong>:</p>
+<ul>
+<li><p>The average error (black curve) seems to stabilize around 0.04 after about 100 trees. This suggests that adding more trees beyond this point provides minimal improvement in reducing the average error.</p></li>
+<li><p>The hardest class (red curve) stabilizes its error around 0.12 after about 100 trees.</p></li>
+<li><p>The easiest class (green curve) stabilizes its error around 0.02 very quickly.</p></li>
+<li><p><em>Model Efficiency</em>: The model performs well as the average error remains low after a certain number of trees.</p></li>
+<li><p><em>Class Complexity</em>: There is a significant difference in the model’s ability to classify different classes, as shown by the gap between the red and green curves.</p></li>
+<li><p><em>Optimal Number of Trees</em>: Most of the benefit in terms of error reduction occurs before the number of trees reaches 100. Adding more trees beyond this point has a marginal impact on overall performance improvement.</p></li>
+</ul>
+<p>This type of graph is useful for determining the optimal number of trees to use in a random forest model to balance performance and computational resources.</p>
+</section>
+<section id="b-feaures-importance" class="level3">
+<h3 class="anchored" data-anchor-id="b-feaures-importance">b) Feaures Importance</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb51"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a><span class="fu">importance</span>(classifier_RF)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>                              MeanDecreaseGini
+Age                                 53.2248935
+Height                              51.5341380
+Weight                             196.3756979
+FCVC                                22.1103816
+NCP                                 30.5792268
+CH2O                                28.6443830
+FAF                                 26.9513145
+TUE                                 30.2994204
+Gender                              38.3141850
+FAVC                                95.7564672
+SMOKE                                2.4605932
+SCC                                 11.1627402
+CAECAlways                           4.5215805
+CAECFrequently                      25.4122025
+CAECno                               9.1886757
+CAECSometimes                       53.7349971
+CALCFrequently                      30.3077455
+CALCno                              31.3263247
+CALCSometimes                       34.1442483
+MTRANSBike                           0.7643001
+MTRANSMotorbike                      1.2256074
+MTRANSPublic_Transportation         24.9232481
+MTRANSWalking                        5.4744910
+NObeyesdadNormal_Weight            126.3212966
+NObeyesdadObesity_Type_I            33.8488606
+NObeyesdadObesity_Type_II           10.3769501
+NObeyesdadObesity_Type_III          13.5882159
+NObeyesdadOverweight_Level_I        16.2509157
+NObeyesdadOverweight_Level_II       24.4559518</code></pre>
+</div>
+</div>
+<p>The higher the Mean Decrease Gini value for a feature, the more important that feature is for the classification.</p>
+<p><em>Height, Weight, NCP, CH2O, FAF, TUE</em>: These features have relatively high Mean Decrease Gini values, indicating they are important predictors for determining the presence of a family history of overweight.</p>
+<p><em>FAVC</em> (Frequency of consumption of high caloric food): This feature also has a relatively high Mean Decrease Gini value, suggesting it plays a significant role in classification.</p>
+<p><em>CAECSometimes, CALCFrequently, CALCno, CALCSometimes</em>: These features have moderate Mean Decrease Gini values, indicating they contribute to the model’s predictive power but to a lesser extent compared to others.</p>
+<p><em>SMOKE, MTRANSBike, MTRANSMotorbike</em>: These features have low Mean Decrease Gini values, suggesting they have less impact on classification.</p>
+<p>Overall, the Mean Decrease Gini values provide insights into the relative importance of each feature in the Random Forest classifier.</p>
+<ul>
+<li><strong>Variable importance plot</strong></li>
+</ul>
+<p>We can visualize the importance of the 10 first features :</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb53"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb53-1"><a href="#cb53-1" aria-hidden="true" tabindex="-1"></a><span class="fu">varImpPlot</span>(classifier_RF, <span class="at">n.var =</span> <span class="dv">15</span>, <span class="at">main =</span> <span class="st">"Random Forest Feature Importance"</span>, <span class="at">col =</span> <span class="st">"#9365DB"</span>, <span class="at">pch =</span> <span class="dv">16</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Ovwght_files/figure-html/unnamed-chunk-38-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>We can also observe the relationship between the <code>Weight</code> variable and the prediction</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb54"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb54-1"><a href="#cb54-1" aria-hidden="true" tabindex="-1"></a><span class="fu">partialPlot</span>(classifier_RF, train_set, Weight)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Ovwght_files/figure-html/unnamed-chunk-39-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="c-predictions-performance-evaluation" class="level3">
+<h3 class="anchored" data-anchor-id="c-predictions-performance-evaluation">c) Predictions &amp; Performance evaluation</h3>
+<p>We evaluate the performance of the model by predicting the <code>target_test</code> set using the <code>features_test</code>.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb55"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb55-1"><a href="#cb55-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Predicting the Test set results </span></span>
+<span id="cb55-2"><a href="#cb55-2" aria-hidden="true" tabindex="-1"></a>RF_class <span class="ot">=</span> <span class="fu">predict</span>(classifier_RF, <span class="at">newdata =</span> features_test)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<ul>
+<li><strong>Confusion Matrix</strong></li>
+</ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb56"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb56-1"><a href="#cb56-1" aria-hidden="true" tabindex="-1"></a>conf_matrix2 <span class="ot">&lt;-</span> <span class="fu">confusionMatrix</span>(RF_class, target_test)</span>
+<span id="cb56-2"><a href="#cb56-2" aria-hidden="true" tabindex="-1"></a>conf_matrix2</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Confusion Matrix and Statistics
+
+          Reference
+Prediction   0   1
+         0 214  13
+         1  17 295
+                                          
+               Accuracy : 0.9443          
+                 95% CI : (0.9215, 0.9621)
+    No Information Rate : 0.5714          
+    P-Value [Acc &gt; NIR] : &lt;2e-16          
+                                          
+                  Kappa : 0.8861          
+                                          
+ Mcnemar's Test P-Value : 0.5839          
+                                          
+            Sensitivity : 0.9264          
+            Specificity : 0.9578          
+         Pos Pred Value : 0.9427          
+         Neg Pred Value : 0.9455          
+             Prevalence : 0.4286          
+         Detection Rate : 0.3970          
+   Detection Prevalence : 0.4212          
+      Balanced Accuracy : 0.9421          
+                                          
+       'Positive' Class : 0               
+                                          </code></pre>
+</div>
+</div>
+<p>The confusion matrix indicates the model’s classification results, distinguishing between true positives (214), false positives (13), false negatives (17), and true negatives (295). These metrics are fundamental in evaluating the classifier’s efficacy in distinguishing between classes.</p>
+<p>The overall accuracy of the model stands at an impressive 94.43%, suggesting a high level of correctness in its predictions. Furthermore, the 95% confidence interval, ranging from 92.15% to 96.21%, underscores the reliability of this accuracy estimate.</p>
+<p>Comparing the model’s performance against a baseline, represented by the No Information Rate (NIR) of 57.14%, reveals a significant improvement, as evidenced by a p-value of less than 2e-16. The Kappa statistic, a measure of agreement between observed and expected accuracy, attains a value of 0.8861, indicating substantial concordance.</p>
+<p>Additional metrics such as sensitivity (92.64%) and specificity (95.78%) provide insights into the model’s ability to correctly identify positive and negative instances, respectively. The positive predictive value (PPV) and negative predictive value (NPV) stand at 94.27% and 94.55%, respectively, further demonstrating the model’s reliability in making correct classifications across different classes.</p>
+<p>With a prevalence rate of 42.12%, the model achieves a detection rate of 39.7%. These metrics shed light on the model’s ability to detect instances of interest within the dataset.</p>
+<p>In summary, the balanced accuracy of 94.21% and the comprehensive array of metrics presented in the confusion matrix highlight the robustness and effectiveness of the classifier model in accurately classifying instances within the dataset.</p>
+<ul>
+<li><strong>AUC-ROC</strong></li>
+</ul>
+<p>The AUC-ROC of the model is:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb58"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb58-1"><a href="#cb58-1" aria-hidden="true" tabindex="-1"></a>auc2 <span class="ot">&lt;-</span> <span class="fu">roc</span>(target_test, <span class="fu">as.numeric</span>(RF_class))</span>
+<span id="cb58-2"><a href="#cb58-2" aria-hidden="true" tabindex="-1"></a>auc2 <span class="ot">&lt;-</span> auc2<span class="sc">$</span>auc</span>
+<span id="cb58-3"><a href="#cb58-3" aria-hidden="true" tabindex="-1"></a>auc2</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Area under the curve: 0.9421</code></pre>
+</div>
+</div>
+<hr>
+</section>
+</section>
+<section id="xgboost-classifier" class="level2">
+<h2 class="anchored" data-anchor-id="xgboost-classifier">4.3. XGBoost Classifier</h2>
+<p>XGBoost (Extreme Gradient Boosting) is an optimized distributed gradient boosting library designed to be highly efficient, flexible, and portable. It implements machine learning algorithms under the Gradient Boosting framework.</p>
+<section id="a-training-the-xgboost-model" class="level3">
+<h3 class="anchored" data-anchor-id="a-training-the-xgboost-model">a) Training the XGBoost Model</h3>
+<p>First, convert the datasets to matrices because the <code>xgb.train()</code> function from the <code>xgboost</code> package uses matrices to train the model:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb60"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb60-1"><a href="#cb60-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Convert training and test features to matrix</span></span>
+<span id="cb60-2"><a href="#cb60-2" aria-hidden="true" tabindex="-1"></a>ft_train_mtx <span class="ot">&lt;-</span> <span class="fu">data.matrix</span>(features_train)</span>
+<span id="cb60-3"><a href="#cb60-3" aria-hidden="true" tabindex="-1"></a>ft_test_mtx <span class="ot">&lt;-</span> <span class="fu">data.matrix</span>(features_test)</span>
+<span id="cb60-4"><a href="#cb60-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-5"><a href="#cb60-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Create DMatrix objects for training and testing sets</span></span>
+<span id="cb60-6"><a href="#cb60-6" aria-hidden="true" tabindex="-1"></a>xgb_train <span class="ot">&lt;-</span> <span class="fu">xgb.DMatrix</span>(<span class="at">data =</span> ft_train_mtx, <span class="at">label =</span> target_train)</span>
+<span id="cb60-7"><a href="#cb60-7" aria-hidden="true" tabindex="-1"></a>xgb_test <span class="ot">&lt;-</span> <span class="fu">xgb.DMatrix</span>(<span class="at">data =</span> ft_test_mtx, <span class="at">label =</span> target_test)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Next, train the XGBoost model:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb61"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb61-1"><a href="#cb61-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Train the XGBoost model</span></span>
+<span id="cb61-2"><a href="#cb61-2" aria-hidden="true" tabindex="-1"></a>xgb_model <span class="ot">&lt;-</span> <span class="fu">xgb.train</span>(<span class="at">data =</span> xgb_train, <span class="at">max.depth =</span> <span class="dv">3</span>, <span class="at">nrounds =</span> <span class="dv">50</span>)</span>
+<span id="cb61-3"><a href="#cb61-3" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(xgb_model)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>              Length Class              Mode       
+handle            1  xgb.Booster.handle externalptr
+raw           60446  -none-             raw        
+niter             1  -none-             numeric    
+call              4  -none-             call       
+params            2  -none-             list       
+callbacks         1  -none-             list       
+feature_names    29  -none-             character  
+nfeatures         1  -none-             numeric    </code></pre>
+</div>
+</div>
+<ul>
+<li><strong>XGBoost Feature Importances</strong></li>
+</ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb63"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb63-1"><a href="#cb63-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Get feature importances from the model</span></span>
+<span id="cb63-2"><a href="#cb63-2" aria-hidden="true" tabindex="-1"></a>importance_matrix <span class="ot">&lt;-</span> <span class="fu">xgb.importance</span>(<span class="at">feature_names =</span> <span class="fu">colnames</span>(ft_train_mtx), <span class="at">model =</span> xgb_model)</span>
+<span id="cb63-3"><a href="#cb63-3" aria-hidden="true" tabindex="-1"></a>importance_matrix</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>                          Feature         Gain       Cover   Frequency
+                           &lt;char&gt;        &lt;num&gt;       &lt;num&gt;       &lt;num&gt;
+ 1:                        Weight 2.984696e-01 0.128739278 0.146417445
+ 2:       NObeyesdadNormal_Weight 1.801111e-01 0.030598811 0.046728972
+ 3:                          FAVC 9.815230e-02 0.033492037 0.040498442
+ 4:                 CAECSometimes 7.228602e-02 0.019725980 0.024922118
+ 5:                CALCFrequently 7.111090e-02 0.046356672 0.034267913
+ 6:                        CALCno 5.813627e-02 0.015522438 0.024922118
+ 7:   MTRANSPublic_Transportation 2.690852e-02 0.027910031 0.037383178
+ 8:                           NCP 2.683714e-02 0.032528661 0.052959502
+ 9:                        Gender 2.586712e-02 0.016166754 0.018691589
+10:                           Age 2.506653e-02 0.180950552 0.146417445
+11:                        Height 1.902493e-02 0.078488831 0.102803738
+12: NObeyesdadOverweight_Level_II 1.396522e-02 0.027346255 0.015576324
+13:                           SCC 1.308072e-02 0.006176759 0.012461059
+14:                           TUE 1.188540e-02 0.025416405 0.028037383
+15:                 CALCSometimes 1.073511e-02 0.027742757 0.021806854
+16:                          CH2O 1.046804e-02 0.047357221 0.043613707
+17:      NObeyesdadObesity_Type_I 9.111321e-03 0.019224157 0.012461059
+18:  NObeyesdadOverweight_Level_I 6.491778e-03 0.014599332 0.021806854
+19:                          FCVC 6.118305e-03 0.039098825 0.040498442
+20:                           FAF 3.990400e-03 0.033107926 0.034267913
+21:                    CAECAlways 2.817343e-03 0.026258972 0.018691589
+22:                        CAECno 2.524839e-03 0.033913321 0.024922118
+23:                         SMOKE 2.152200e-03 0.020850435 0.012461059
+24:                 MTRANSWalking 2.025941e-03 0.018765701 0.012461059
+25:               MTRANSMotorbike 1.292602e-03 0.018911292 0.009345794
+26:                CAECFrequently 1.198096e-03 0.017492558 0.009345794
+27:                    MTRANSBike 8.978034e-05 0.006579457 0.003115265
+28:     NObeyesdadObesity_Type_II 8.240163e-05 0.006678582 0.003115265
+                          Feature         Gain       Cover   Frequency</code></pre>
+</div>
+</div>
+<p><strong>Most Important Feature</strong>: <code>Weight</code> is the top feature across gain and frequency metrics.</p>
+<p><strong>Wide Impact Feature</strong>: <code>Age</code> covers the largest proportion of data, making it broadly influential. Diverse Impact: Features like <code>NObeyesdadNormal_Weight</code>, <code>FAVC</code>, and <code>Height</code> also significantly contribute but to a lesser extent than <code>Weight</code>.</p>
+<p><strong>Less Important Features</strong>: Some features have minimal contributions, suggesting they might be less relevant for this particular model or dataset.</p>
+<p>Overall, this table helps identify which features are most influential in the model’s decision-making process, guiding potential areas for further analysis or feature engineering.</p>
+<p><strong>XGB Feature Importances Plot</strong></p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb65"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb65-1"><a href="#cb65-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot the feature importances</span></span>
+<span id="cb65-2"><a href="#cb65-2" aria-hidden="true" tabindex="-1"></a><span class="fu">xgb.plot.importance</span>(importance_matrix, <span class="at">left_margin =</span> <span class="dv">8</span>, <span class="at">main =</span> <span class="st">'XGBoost Feature Importances'</span>, <span class="at">col=</span><span class="st">'blue'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Ovwght_files/figure-html/unnamed-chunk-46-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="b-predictions-1" class="level3">
+<h3 class="anchored" data-anchor-id="b-predictions-1">b) Predictions</h3>
+<p>Generate predictions on the test set:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb66"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb66-1"><a href="#cb66-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Predict the test set</span></span>
+<span id="cb66-2"><a href="#cb66-2" aria-hidden="true" tabindex="-1"></a>xgb_class <span class="ot">&lt;-</span> <span class="fu">predict</span>(xgb_model, ft_test_mtx)</span>
+<span id="cb66-3"><a href="#cb66-3" aria-hidden="true" tabindex="-1"></a>xgb_class_df <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">Predicted =</span> <span class="fu">ifelse</span>(xgb_class <span class="sc">&gt;=</span> <span class="fl">0.5</span>, <span class="dv">1</span>, <span class="dv">0</span>), <span class="at">Real =</span> target_test)</span>
+<span id="cb66-4"><a href="#cb66-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb66-5"><a href="#cb66-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Display the first few rows of predictions vs. real values</span></span>
+<span id="cb66-6"><a href="#cb66-6" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(xgb_class_df)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  Predicted Real
+1         1    1
+2         1    1
+3         1    1
+4         1    1
+5         1    1
+6         1    1</code></pre>
+</div>
+</div>
+</section>
+<section id="c-accuracy-and-confusion-matrix" class="level3">
+<h3 class="anchored" data-anchor-id="c-accuracy-and-confusion-matrix">c) Accuracy and Confusion Matrix</h3>
+<p>Compute the confusion matrix and calculate the accuracy:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb68"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb68-1"><a href="#cb68-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Compute the confusion matrix</span></span>
+<span id="cb68-2"><a href="#cb68-2" aria-hidden="true" tabindex="-1"></a>conf_matrix3 <span class="ot">&lt;-</span> <span class="fu">confusionMatrix</span>(<span class="fu">as.factor</span>(xgb_class_df<span class="sc">$</span>Predicted), <span class="fu">as.factor</span>(xgb_class_df<span class="sc">$</span>Real))</span>
+<span id="cb68-3"><a href="#cb68-3" aria-hidden="true" tabindex="-1"></a>conf_matrix3</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Confusion Matrix and Statistics
+
+          Reference
+Prediction   0   1
+         0   0   0
+         1 231 308
+                                          
+               Accuracy : 0.5714          
+                 95% CI : (0.5284, 0.6136)
+    No Information Rate : 0.5714          
+    P-Value [Acc &gt; NIR] : 0.5182          
+                                          
+                  Kappa : 0               
+                                          
+ Mcnemar's Test P-Value : &lt;2e-16          
+                                          
+            Sensitivity : 0.0000          
+            Specificity : 1.0000          
+         Pos Pred Value :    NaN          
+         Neg Pred Value : 0.5714          
+             Prevalence : 0.4286          
+         Detection Rate : 0.0000          
+   Detection Prevalence : 0.0000          
+      Balanced Accuracy : 0.5000          
+                                          
+       'Positive' Class : 0               
+                                          </code></pre>
+</div>
+</div>
+</section>
+<section id="d-interpratetion" class="level3">
+<h3 class="anchored" data-anchor-id="d-interpratetion">d) Interpratetion</h3>
+<p>The XGB model correctly classifies all instances of class 1 but fails to classify any instances of class 0.</p>
+<p>The overall accuracy is 57.14%, which is equivalent to the No Information Rate, suggesting the model is no better than a naive classifier.</p>
+<p>Sensitivity for class 0 is 0, indicating the model has no predictive power for class 0.</p>
+<p>Specificity for class 1 is 1, indicating perfect predictive power for class 1.</p>
+<p>Overall, the model is heavily biased towards predicting class 1 and fails to detect class 0, resulting in a highly imbalanced performance.</p>
+<hr>
+</section>
+</section>
+</section>
+<section id="interpretation-of-the-results" class="level1">
+<h1>5. Interpretation of the results</h1>
+<p>After implementing the machine learning algorithms and evaluating their performance, we can interpret the results to draw conclusions about the effectiveness of each model in predicting the target variable, which indicates whether an individual has a family history of overweight.</p>
+<section id="summary-of-results" class="level2">
+<h2 class="anchored" data-anchor-id="summary-of-results">Summary of Results</h2>
+<p>Here’s a summary of the performance metrics for each model:</p>
+<section id="logistic-regression-1" class="level3">
+<h3 class="anchored" data-anchor-id="logistic-regression-1">Logistic Regression</h3>
+<ul>
+<li>Accuracy: 0.8534323</li>
+<li>Precision: 0.8166667</li>
+<li>Recall: 0.8484848</li>
+<li>F1-score: 0.8322718</li>
+<li>AUC-ROC: 0.8528139</li>
+</ul>
+</section>
+<section id="random-forest-classifier-1" class="level3">
+<h3 class="anchored" data-anchor-id="random-forest-classifier-1">Random Forest Classifier</h3>
+<ul>
+<li>Accuracy: 0.9443414</li>
+<li>Precision: 0.9427313</li>
+<li>Recall: 0.9264069</li>
+</ul>
+<ul>
+<li>F1-score: 0.9344978</li>
+<li>AUC-ROC: 0.9420996</li>
+</ul>
+</section>
+<section id="xgboost-classifier-1" class="level3">
+<h3 class="anchored" data-anchor-id="xgboost-classifier-1">XGBoost Classifier</h3>
+<ul>
+<li>Accuracy: 0.5714286</li>
+<li>Precision: NaN</li>
+<li>Recall: 0</li>
+<li>F1-score: NaN</li>
+<li>AUC-ROC: 0.9799994</li>
+</ul>
+<hr>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Model</th>
+<th>Accuracy</th>
+<th>Precision</th>
+<th>Recall</th>
+<th>F1-score</th>
+<th>AUC-ROC</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Logistic Regression</td>
+<td>0.8534323</td>
+<td>0.8166667</td>
+<td>0.8484848</td>
+<td>0.8322718</td>
+<td>0.8528139</td>
+</tr>
+<tr class="even">
+<td>Random Forest Classifier</td>
+<td>0.9443414</td>
+<td>0.9427313</td>
+<td>0.9264069</td>
+<td>0.9344978</td>
+<td>0.9420996</td>
+</tr>
+<tr class="odd">
+<td>XGBoost Classifier</td>
+<td>0.5714286</td>
+<td>NaN</td>
+<td>0</td>
+<td>NaN</td>
+<td>0.9799994</td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+<section id="model-choice" class="level2">
+<h2 class="anchored" data-anchor-id="model-choice">Model choice</h2>
+<p>The table compares the performance of three machine learning models: Logistic Regression, Random Forest Classifier, and XGBoost Classifier. Random Forest Classifier has the highest accuracy (0.9444314), precision (0.9427313), recall (0.9264069), and F1-score (0.9344978), indicating its superior performance in correctly identifying both positive and negative cases. Logistic Regression also performs well with high accuracy (0.8534323) and balanced precision and recall. XGBoost Classifier, however, has a significantly lower accuracy (0.5714286) and recall (0), making it less reliable.</p>
+<p>Based on these results, the Random Forest model appears to be the wisest choice, offering the best balance between precision, recall, and AUC-ROC, as well as excellent overall performance in terms of accuracy.</p>
+<p>In conclusion, the <strong>Random Forest model</strong> stands out as the optimal choice among the three evaluated models. Its outstanding overall performance, particularly in terms of accuracy, precision, recall, and AUC-ROC, make it a reliable tool for classifying this dataset. Its high F1-score also confirms its ability to maintain a balance between precision and recall, which is crucial for effective classification tasks. Thus, for this specific scenario, the Random Forest model appears to be the most suitable solution for predicting the presence of a family history of overweight.</p>
+<hr>
+</section>
+</section>
+<section id="conclusion" class="level1">
+<h1>Conclusion</h1>
+<p>In conclusion, this analysis explores different classification models to predict family history of overweight based on features such as weight, age, gender, and dietary habits. Logistic, random forest, and XGBoost models achieve excellent performance, with weight, age, and consumption of high-calorie foods emerging as the most important variables.</p>
+<p>Comparing performances, the random forest model stands out as the optimal choice, offering the best balance between precision, recall, and AUC-ROC, as well as excellent overall precision performance. Its high F1 score also confirms its ability to maintain a balance between precision and recall, crucial for effective classification.</p>
+<p>These results can help better understand factors influencing overweight and develop targeted prevention strategies.</p>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const onCopySuccess = function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
+  });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    // For code content inside modals, clipBoardJS needs to be initialized with a container option
+    // TODO: Check when it could be a function (https://github.com/zenorocha/clipboard.js/issues/860)
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
