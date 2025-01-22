@@ -1,0 +1,2755 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.5.57">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Depute Infos</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script><script src="assemble_files/libs/clipboard/clipboard.min.js"></script>
+<script src="assemble_files/libs/quarto-html/quarto.js"></script>
+<script src="assemble_files/libs/quarto-html/popper.min.js"></script>
+<script src="assemble_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="assemble_files/libs/quarto-html/anchor.min.js"></script>
+<link href="assemble_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="assemble_files/libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="assemble_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="assemble_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="assemble_files/libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" integrity="sha512-c3Nl8+7g4LMSTdrm621y7kf9v3SDPnhxLNhcjFJbKECVnmZHTdo+IRO05sNLTH/D3vA6u1X32ehoLC7WFVdheg==" crossorigin="anonymous"></script>
+
+<script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
+
+
+</head>
+
+<body class="fullcontent">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Depute Infos</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<div id="cell-1" class="cell" data-execution_count="60">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> re</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> html</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> seaborn <span class="im">as</span> sns</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> os</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> requests</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> time</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>time.sleep(<span class="dv">60</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="cell-3" class="cell" data-execution_count="88">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>request_header<span class="op">=</span> {<span class="st">"User-Agent"</span>: <span class="st">"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36 Edg/129.0.0.0"</span>}</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>req<span class="op">=</span> requests.get(<span class="st">'https://www2.assemblee-nationale.fr/16/archives-de-la-xvi-legislature/liste-des-deputes/liste-des-deputes-de-la-xvi-legislature-2022-2024-par-ordre-alphabetique'</span>, headers<span class="op">=</span> request_header, timeout<span class="op">=</span> <span class="dv">30</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="cell-4" class="cell" data-execution_count="89">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> req.status_code<span class="op">==</span><span class="dv">200</span>:</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    contenu <span class="op">=</span> req.text</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">with</span> <span class="bu">open</span>(<span class="st">'list_deput.html'</span>,<span class="st">'w'</span>,encoding<span class="op">=</span><span class="st">'utf8'</span>) <span class="im">as</span> output:</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>        output.write(contenu)</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="cf">else</span>:</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">'pb status code'</span>,req.status_code)</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a> </span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> <span class="bu">open</span>(<span class="st">'list_deput.html'</span>, <span class="st">'r'</span>, encoding<span class="op">=</span><span class="st">'utf8'</span>) <span class="im">as</span> output:</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>    text<span class="op">=</span>output.read()</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>text <span class="op">=</span> html.unescape(text)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="cell-5" class="cell" data-execution_count="90">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> <span class="bu">open</span>(<span class="st">'content.txt'</span>, <span class="st">'w'</span>) <span class="im">as</span> f:</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    f.write(text)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="cell-6" class="cell" data-execution_count="340">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>pattern <span class="op">=</span> <span class="st">"""(?s)&lt;li&gt;           &lt;a href="https://www2.assemblee-nationale.fr/deputes/fiche/OMC_(.*?)" target="_self"&gt;(.*?)&lt;/a&gt;"""</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>infos <span class="op">=</span> re.findall(pattern, text)</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="co"># infos</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="cell-7" class="cell" data-execution_count="341">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>codes <span class="op">=</span> []</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>noms <span class="op">=</span> []</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i <span class="kw">in</span> infos:</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    codes.append(i[<span class="dv">0</span>])</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>    noms.append(i[<span class="dv">1</span>])</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>url <span class="op">=</span> [<span class="st">"https://www.assemblee-nationale.fr/dyn/deputes/"</span> <span class="op">+</span> link  <span class="cf">for</span> link <span class="kw">in</span> codes]</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a><span class="co"># url</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="cell-8" class="cell" data-execution_count="65">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="bu">len</span>(url)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="65">
+<pre><code>577</code></pre>
+</div>
+</div>
+<div id="cell-9" class="cell" data-execution_count="66">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i, j <span class="kw">in</span> <span class="bu">zip</span>(url, noms):</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    request_header <span class="op">=</span> {<span class="st">"User-Agent"</span>: <span class="st">"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36"</span>}</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">try</span>:</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>        req <span class="op">=</span> requests.get(i, headers<span class="op">=</span>request_header, timeout<span class="op">=</span><span class="dv">30</span>)</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> req.status_code <span class="op">==</span> <span class="dv">200</span>:</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>            contenu <span class="op">=</span> req.text</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>            nom_fichier <span class="op">=</span> j.replace(<span class="st">" "</span>, <span class="st">"_"</span>).replace(<span class="st">"/"</span>, <span class="st">""</span>).replace(<span class="st">"."</span>, <span class="st">""</span>).replace(<span class="st">","</span>, <span class="st">""</span>) <span class="op">+</span> <span class="st">'.html'</span></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>            <span class="cf">with</span> <span class="bu">open</span>(<span class="ss">f'Data/</span><span class="sc">{</span>nom_fichier<span class="sc">}</span><span class="ss">'</span>, <span class="st">'w'</span>, encoding<span class="op">=</span><span class="st">'utf8'</span>) <span class="im">as</span> output:</span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>                output.write(contenu)</span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>        <span class="cf">else</span>:</span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>            <span class="bu">print</span>(<span class="ss">f"Problème avec l'URL </span><span class="sc">{</span>i<span class="sc">}</span><span class="ss">, code statut :"</span>, req.status_code)</span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>    <span class="cf">except</span> <span class="pp">Exception</span> <span class="im">as</span> e:</span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="ss">f"Erreur avec l'URL </span><span class="sc">{</span>i<span class="sc">}</span><span class="ss"> :"</span>, e)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="cell-10" class="cell" data-execution_count="138">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>colonnes <span class="op">=</span> [<span class="st">'id'</span>, <span class="st">'nom'</span>, <span class="st">'genre'</span>, <span class="st">'date_naiss'</span>, <span class="st">'lieu_naiss'</span>, <span class="st">'profession'</span>, <span class="st">'circons'</span>, <span class="st">'partie'</span>]</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>depute <span class="op">=</span> pd.DataFrame(columns<span class="op">=</span> colonnes)</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> page <span class="kw">in</span> os.listdir(<span class="st">'Data'</span>):</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>    file_path <span class="op">=</span> <span class="st">'Data/</span><span class="sc">{}</span><span class="st">'</span>.<span class="bu">format</span>(page)</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">with</span> <span class="bu">open</span>(file_path,<span class="st">'r'</span>,encoding <span class="op">=</span><span class="st">'utf8'</span>) <span class="im">as</span> output:</span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>        text <span class="op">=</span> output.read()</span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>    text <span class="op">=</span> html.unescape(text)</span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>    pattern <span class="op">=</span> <span class="st">"""(?s)&lt;p&gt;.*? le (.*?) à (.*?)&lt;br&gt;(.*?)&lt;/p&gt;"""</span></span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>    infos <span class="op">=</span> re.findall(pattern, text)</span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>    pattern <span class="op">=</span> <span class="st">"""(?s)&lt;meta name="description" content=".*? - (.*?) - .*? du groupe (.*?). Retrouvez ses travaux parlementaires"""</span></span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>    infoss <span class="op">=</span> re.findall(pattern, text)</span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="st">'M_'</span> <span class="kw">in</span> page:</span>
+<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a>        genre <span class="op">=</span> <span class="st">'H'</span></span>
+<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span>:</span>
+<span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a>        genre <span class="op">=</span> <span class="st">'F'</span></span>
+<span id="cb10-21"><a href="#cb10-21" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb10-22"><a href="#cb10-22" aria-hidden="true" tabindex="-1"></a>    nom <span class="op">=</span> page.replace(<span class="st">'M_'</span>, <span class="st">''</span>).replace(<span class="st">'Mme_'</span>, <span class="st">''</span>).replace(<span class="st">'.html'</span>, <span class="st">''</span>).replace(<span class="st">'_'</span>, <span class="st">' '</span>)</span>
+<span id="cb10-23"><a href="#cb10-23" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb10-24"><a href="#cb10-24" aria-hidden="true" tabindex="-1"></a>    idy <span class="op">=</span> <span class="st">"""(?s)&lt;meta property="og:url" content="https://www.assemblee-nationale.fr/dyn/deputes/(.*?)"&gt;"""</span></span>
+<span id="cb10-25"><a href="#cb10-25" aria-hidden="true" tabindex="-1"></a>    idy <span class="op">=</span> re.findall(idy, text)</span>
+<span id="cb10-26"><a href="#cb10-26" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb10-27"><a href="#cb10-27" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> infos:</span>
+<span id="cb10-28"><a href="#cb10-28" aria-hidden="true" tabindex="-1"></a>        <span class="bu">all</span> <span class="op">=</span> [idy[<span class="dv">0</span>], nom, genre, infos[<span class="dv">0</span>][<span class="dv">0</span>], infos[<span class="dv">0</span>][<span class="dv">1</span>], infos[<span class="dv">0</span>][<span class="dv">2</span>], infoss[<span class="dv">0</span>][<span class="dv">0</span>], infoss[<span class="dv">0</span>][<span class="dv">1</span>]]</span>
+<span id="cb10-29"><a href="#cb10-29" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span>:</span>
+<span id="cb10-30"><a href="#cb10-30" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="ss">f"Aucune information trouvée dans </span><span class="sc">{</span>page<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb10-31"><a href="#cb10-31" aria-hidden="true" tabindex="-1"></a>        <span class="cf">continue</span></span>
+<span id="cb10-32"><a href="#cb10-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-33"><a href="#cb10-33" aria-hidden="true" tabindex="-1"></a>    temp <span class="op">=</span> pd.DataFrame([<span class="bu">all</span>], columns<span class="op">=</span> colonnes)</span>
+<span id="cb10-34"><a href="#cb10-34" aria-hidden="true" tabindex="-1"></a>    depute <span class="op">=</span> pd.concat([depute, temp], ignore_index<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb10-35"><a href="#cb10-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-36"><a href="#cb10-36" aria-hidden="true" tabindex="-1"></a>depute.to_csv(<span class="st">'depute_naissance.csv'</span>, index<span class="op">=</span><span class="va">False</span>, encoding<span class="op">=</span><span class="st">'utf8'</span>)</span>
+<span id="cb10-37"><a href="#cb10-37" aria-hidden="true" tabindex="-1"></a>depute.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="138">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">id</th>
+<th data-quarto-table-cell-role="th">nom</th>
+<th data-quarto-table-cell-role="th">genre</th>
+<th data-quarto-table-cell-role="th">date_naiss</th>
+<th data-quarto-table-cell-role="th">lieu_naiss</th>
+<th data-quarto-table-cell-role="th">profession</th>
+<th data-quarto-table-cell-role="th">circons</th>
+<th data-quarto-table-cell-role="th">partie</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0</td>
+<td>PA267780</td>
+<td>Agnès Firmin Le Bodo</td>
+<td>F</td>
+<td>20 novembre 1968</td>
+<td>Le Havre (Seine-Maritime)</td>
+<td>Pharmacien</td>
+<td>Seine-Maritime (7e circonscription)</td>
+<td>Horizons &amp; Indépendants</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>PA793342</td>
+<td>Alexandra Martin (Alpes-Maritimes)</td>
+<td>F</td>
+<td>25 octobre 1968</td>
+<td>Nice (Alpes-Maritimes)</td>
+<td>Employé civil et agent de service de la foncti...</td>
+<td>Alpes-Maritimes (8e circonscription)</td>
+<td>Droite Républicaine</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2</td>
+<td>PA793944</td>
+<td>Alexandra Martin (Gironde)</td>
+<td>F</td>
+<td>28 juillet 1976</td>
+<td>Bordeaux (Gironde)</td>
+<td>RESPONSABLE CENTRE DE FORMATION</td>
+<td>Gironde (1re circonscription)</td>
+<td>Renaissance</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">3</td>
+<td>PA793314</td>
+<td>Alexandra Masson</td>
+<td>F</td>
+<td>2 juillet 1971</td>
+<td>Nice (Alpes-Maritimes)</td>
+<td>Profession libérale</td>
+<td>Alpes-Maritimes (4e circonscription)</td>
+<td>Rassemblement National</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">4</td>
+<td>PA795200</td>
+<td>Alma Dufour</td>
+<td>F</td>
+<td>6 mai 1990</td>
+<td>Auch (Gers)</td>
+<td>Responsable associative</td>
+<td>Seine-Maritime (4e circonscription)</td>
+<td>La France insoumise - Nouveau Front Populaire</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<div id="cell-11" class="cell" data-execution_count="76">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>place <span class="op">=</span> depute.groupby(<span class="st">'lieu_naiss'</span>).size().sort_values(ascending<span class="op">=</span><span class="va">False</span>).head(<span class="dv">15</span>)</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>sns.set_theme(style<span class="op">=</span><span class="st">'whitegrid'</span>)</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>plt.figure(figsize<span class="op">=</span>(<span class="dv">10</span>, <span class="dv">6</span>))</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>place.plot(kind<span class="op">=</span><span class="st">'barh'</span>)</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> index, value <span class="kw">in</span> <span class="bu">enumerate</span>(place):</span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>    plt.text(value <span class="op">+</span> <span class="fl">0.5</span>, index, <span class="bu">str</span>(value), va<span class="op">=</span><span class="st">'center'</span>, ha<span class="op">=</span><span class="st">'left'</span>, fontsize<span class="op">=</span><span class="dv">10</span>)</span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">''</span>)</span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">'Distribution des lieu de naissance des députés français (2024)'</span>)</span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>plt.gca().invert_yaxis()</span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>plt.grid(axis<span class="op">=</span><span class="st">'y'</span>)</span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="assemble_files/figure-html/cell-11-output-1.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<div id="cell-12" class="cell" data-execution_count="77">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>depute.groupby(<span class="st">'profession'</span>).size().sort_values(ascending<span class="op">=</span><span class="va">False</span>).head(<span class="dv">15</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="77">
+<pre><code>profession
+Cadre de la fonction publique                                33
+Profession libérale                                          20
+Cadre administratif et commercial d'entreprise               19
+Professeur, profession scientifique                          18
+Autre cadre (secteur privé)                                  15
+Avocat                                                       15
+Cadre supérieur (secteur privé)                              14
+Industriel-Chef d'entreprise                                 14
+Ancien cadre                                                 11
+Fonctionnaire de catégorie A                                 10
+Avocate                                                      10
+Chef d'entreprise                                             9
+Médecin                                                       8
+Profession intermédiaire de la santé et du travail social     7
+Ingénieur                                                     6
+dtype: int64</code></pre>
+</div>
+</div>
+<section id="depute-interventions" class="level1">
+<h1>Depute Interventions</h1>
+<div id="cell-14" class="cell" data-execution_count="91">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> <span class="bu">open</span>(<span class="st">'content.txt'</span>, <span class="st">'r'</span>) <span class="im">as</span> f:</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>    text<span class="op">=</span>f.read()</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>pattern <span class="op">=</span> <span class="st">"""(?s)&lt;li&gt;           &lt;a href="https://www2.assemblee-nationale.fr/deputes/fiche/OMC_(.*?)" target="_self"&gt;(.*?)&lt;/a&gt;"""</span></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>infos <span class="op">=</span> re.findall(pattern, text)</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>codes <span class="op">=</span> []</span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>noms <span class="op">=</span> []</span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i <span class="kw">in</span> infos:</span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>    codes.append(i[<span class="dv">0</span>])</span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>    noms.append(i[<span class="dv">1</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="cell-15" class="cell" data-execution_count="92">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>url <span class="op">=</span> [<span class="ss">f"https://www.assemblee-nationale.fr/dyn/deputes/</span><span class="sc">{</span>co<span class="sc">}</span><span class="ss">/interventions?legislature=archive"</span> <span class="cf">for</span> co <span class="kw">in</span> codes]</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>url</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="92">
+<pre><code>['https://www.assemblee-nationale.fr/dyn/deputes/PA605036/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA719866/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA795228/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA719146/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA722038/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA605963/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA794278/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA793262/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA793992/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA793432/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA794906/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA795950/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA794138/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA795588/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA721158/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA719318/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA719100/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA795084/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA795144/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA793780/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA588884/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA796118/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA642764/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA793560/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA719558/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA794562/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA720256/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA643143/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA793238/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA721046/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA794214/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA335999/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA342415/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA721522/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA793374/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA795058/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA642847/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA718884/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA774109/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA793158/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA642935/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA720362/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA719910/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA795278/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA795362/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA796106/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA795454/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA332228/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA794434/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA721828/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA805166/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA795572/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA720430/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA719488/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA794522/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA309643/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA793772/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA720822/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA795616/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA720668/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA794886/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA719024/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA774954/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA796042/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA720162/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA793444/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA719968/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA721410/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA266793/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA793500/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA793844/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA717161/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA642695/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA721816/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA606507/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA793528/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA794094/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA794938/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA342240/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA721608/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA720838/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA719032/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA793182/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA795318/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA718710/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA721908/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA795990/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA330008/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA267766/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA605069/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA793508/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA721336/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA794330/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA720772/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA721328/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA719890/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA718838/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA793624/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA722000/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA794798/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA793134/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA795836/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA795762/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA721750/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA795330/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA796090/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA793912/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA719138/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA795868/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA794638/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA719922/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA719472/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA795864/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA795192/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA795508/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA267306/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA794008/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA795580/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA795908/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA720468/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA791812/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA642868/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA794198/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA330240/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA719294/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA793736/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA719814/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA718910/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA719286/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA793548/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA721202/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA721210/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA718850/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA719118/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA722390/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA793520/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA719624/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA795136/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA942/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA794222/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA793680/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA793876/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA793716/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA719266/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA793322/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA795644/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA720932/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA332523/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA719914/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA793122/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA793452/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA1008/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA794510/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA793394/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA795430/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA793464/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA794982/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA720696/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA330909/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA720862/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA794194/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA793166/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA718926/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA720386/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA793928/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA722382/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA712015/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA794762/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA795774/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA793146/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA793476/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA720154/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA608826/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA795200/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA720684/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA721094/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA643175/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA1206/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA330357/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA794854/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA795688/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA794718/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA795844/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA607193/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA793792/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA794458/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA794658/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA793246/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA605694/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA721896/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA609332/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA267042/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA794786/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA795884/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA794870/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA720286/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA722134/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA267780/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA795604/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA1327/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA793964/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA793980/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA794538/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA794678/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA719190/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA822617/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA722284/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA722366/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA796070/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA793892/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA795010/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA333285/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA796132/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA722358/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA721760/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA267324/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA720006/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA721024/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA605991/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA794470/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA719108/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA794234/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA721722/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA796034/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA793832/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA793102/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA720222/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA267336/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA718674/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA793362/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA266797/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA721296/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA794418/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA720560/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA720170/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA793592/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA267318/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA795540/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA794058/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA1567/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA795310/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA795934/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA794734/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA794478/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA793218/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA795258/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA783457/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA1592/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA695100/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA795958/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA722054/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA795828/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA795900/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA720054/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA722070/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA1630/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA608416/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA794082/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA721150/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA722150/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA793632/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA795708/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA331835/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA794022/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA722374/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA795652/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA794598/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA720354/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA719874/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA720074/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA796114/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA719778/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA794030/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA720038/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA643192/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA722344/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA722202/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA346782/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA795998/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA267901/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA335054/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA795438/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA795156/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA794130/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA719052/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA643184/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA794818/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA719798/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA720846/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA794450/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA794146/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA795516/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA721004/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA719382/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA643048/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA794354/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA718978/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA719396/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA720764/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA721984/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA720022/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA795912/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA719664/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA719412/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA1874/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA719404/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA795672/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA795184/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA721466/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA345722/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA794426/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA719388/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA719756/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA720342/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA720614/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA719006/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA795746/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA774962/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA795108/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA795374/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA796026/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA335612/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA712014/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA794402/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA795386/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA795298/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA791824/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA793290/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA794838/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA721632/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA795244/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA642988/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA793532/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA774958/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA793608/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA794702/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA720446/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA793672/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA793904/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA721932/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA795974/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA794590/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA608016/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA795216/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA795636/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA721530/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA720230/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA717379/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA719718/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA796010/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA794114/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA346054/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA334116/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA605782/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA794530/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA795730/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA794974/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA794206/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA606098/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA719080/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA793342/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA793944/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA719154/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA342384/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA793688/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA795100/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA795692/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA794770/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA720146/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA793314/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA793330/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA720976/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA794066/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA720728/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA795422/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA793616/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA794686/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA677483/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA719436/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA719338/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA793354/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA795786/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA794322/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA719608/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA720370/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA794386/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA719640/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA795176/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA719272/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA795482/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA793852/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA719882/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA795664/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA817203/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA721976/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA720630/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA607619/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA793174/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA719376/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA794810/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA266788/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA794878/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA720908/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA793696/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA795820/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA721486/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA643157/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA794038/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA610654/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA720644/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA721960/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA795552/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA795722/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA794830/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA793872/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA793588/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA795124/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA720334/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA333421/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA793210/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA719632/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA795050/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA720892/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA793282/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA719202/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA794314/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA794670/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA720480/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA795794/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA793398/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA718784/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA795926/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA795406/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA720414/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA718930/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA721442/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA344201/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA721182/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA721234/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA721270/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA721710/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA793708/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA794582/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA794270/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA817211/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA793756/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA608172/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA721844/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA793572/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA793664/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA793656/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA2449/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA719528/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA796062/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA794994/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA607553/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA720720/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA719600/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA795270/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA721916/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA793306/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA720100/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA719578/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA720422/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA609590/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA795966/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA720092/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA793230/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA793254/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA721062/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA720552/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA794154/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA793094/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA722398/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA721678/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA794778/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA795240/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA720900/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA795876/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA721426/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA720066/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA722252/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA794442/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA795528/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA266808/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA793884/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA721458/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA342196/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA795410/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA795076/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA720692/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA793270/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA340643/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA722292/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA722142/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA794894/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA794570/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA794626/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA720138/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA795982/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA793724/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA794954/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA605745/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA774960/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA610002/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA340343/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA721314/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA796050/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA795808/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA794410/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA757225/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA722308/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA720960/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA796018/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA794802/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA719672/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA720190/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA795466/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA794486/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA793744/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA720754/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA267794/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA720952/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA793382/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA736201/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA794178/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA795778/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA719550/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA794930/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA793796/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA794106/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA794166/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA794502/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA794650/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA721584/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA722336/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA643089/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA793948/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA719822/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA793816/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA720014/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA793298/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA607395/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA795164/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA722162/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA608695/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA721482/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA643134/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA719930/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA795596/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA720586/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA642788/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA794118/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA720704/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA794494/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA722102/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA607090/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA331582/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA606639/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA719512/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA795354/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA794946/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA421348/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA794914/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA795026/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA721474/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA721170/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA793194/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA721262/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA793110/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA2952/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA795326/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA720992/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA2960/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA795046/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA796078/interventions?legislature=archive',
+ 'https://www.assemblee-nationale.fr/dyn/deputes/PA718962/interventions?legislature=archive']</code></pre>
+</div>
+</div>
+<div id="cell-16" class="cell" data-execution_count="93">
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i, j <span class="kw">in</span> <span class="bu">zip</span>(url, noms):</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>    request_header <span class="op">=</span> {<span class="st">"User-Agent"</span>: <span class="st">"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36"</span>}</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">try</span>:</span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>        req <span class="op">=</span> requests.get(i, headers<span class="op">=</span>request_header, timeout<span class="op">=</span><span class="dv">30</span>)</span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> req.status_code <span class="op">==</span> <span class="dv">200</span>:</span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>            contenu <span class="op">=</span> req.text</span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>            nom_fichier <span class="op">=</span> j.replace(<span class="st">" "</span>, <span class="st">"_"</span>).replace(<span class="st">"/"</span>, <span class="st">""</span>).replace(<span class="st">"."</span>, <span class="st">""</span>).replace(<span class="st">","</span>, <span class="st">""</span>) <span class="op">+</span> <span class="st">'.html'</span></span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>            <span class="cf">with</span> <span class="bu">open</span>(<span class="ss">f'Interventions/</span><span class="sc">{</span>nom_fichier<span class="sc">}</span><span class="ss">'</span>, <span class="st">'w'</span>, encoding<span class="op">=</span><span class="st">'utf8'</span>) <span class="im">as</span> output:</span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a>                output.write(contenu)</span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a>        <span class="cf">else</span>:</span>
+<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a>            <span class="bu">print</span>(<span class="ss">f"Problème avec l'URL </span><span class="sc">{</span>i<span class="sc">}</span><span class="ss">, code statut :"</span>, req.status_code)</span>
+<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a>    <span class="cf">except</span> <span class="pp">Exception</span> <span class="im">as</span> e:</span>
+<span id="cb17-13"><a href="#cb17-13" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="ss">f"Erreur avec l'URL </span><span class="sc">{</span>i<span class="sc">}</span><span class="ss"> :"</span>, e)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="cell-17" class="cell" data-execution_count="94">
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>colonnes <span class="op">=</span> [<span class="st">'nom'</span>, <span class="st">'nb_interv'</span>]</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>depute <span class="op">=</span> pd.DataFrame(columns<span class="op">=</span> colonnes)</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> page <span class="kw">in</span> os.listdir(<span class="st">'Data'</span>):</span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>    file_path <span class="op">=</span> <span class="st">'Interventions/</span><span class="sc">{}</span><span class="st">'</span>.<span class="bu">format</span>(page)</span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">with</span> <span class="bu">open</span>(file_path,<span class="st">'r'</span>,encoding <span class="op">=</span><span class="st">'utf8'</span>) <span class="im">as</span> output:</span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a>        text <span class="op">=</span> output.read()</span>
+<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a>    text <span class="op">=</span> html.unescape(text)</span>
+<span id="cb18-11"><a href="#cb18-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-12"><a href="#cb18-12" aria-hidden="true" tabindex="-1"></a>    pattern <span class="op">=</span> <span class="st">"""(?s)&lt;span class=.*?total de (.*?)&lt;/span&gt;"""</span></span>
+<span id="cb18-13"><a href="#cb18-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-14"><a href="#cb18-14" aria-hidden="true" tabindex="-1"></a>    infos <span class="op">=</span> re.findall(pattern, text)</span>
+<span id="cb18-15"><a href="#cb18-15" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb18-16"><a href="#cb18-16" aria-hidden="true" tabindex="-1"></a>    nom <span class="op">=</span> page.replace(<span class="st">'M_'</span>, <span class="st">''</span>).replace(<span class="st">'Mme_'</span>, <span class="st">''</span>).replace(<span class="st">'.html'</span>, <span class="st">''</span>).replace(<span class="st">'_'</span>, <span class="st">' '</span>)</span>
+<span id="cb18-17"><a href="#cb18-17" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb18-18"><a href="#cb18-18" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> infos:</span>
+<span id="cb18-19"><a href="#cb18-19" aria-hidden="true" tabindex="-1"></a>        nb_interv <span class="op">=</span> infos[<span class="dv">0</span>]</span>
+<span id="cb18-20"><a href="#cb18-20" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span>:</span>
+<span id="cb18-21"><a href="#cb18-21" aria-hidden="true" tabindex="-1"></a>        nb <span class="op">=</span> <span class="st">"""&lt;li class="ha-grid-item _size-1"&gt;"""</span></span>
+<span id="cb18-22"><a href="#cb18-22" aria-hidden="true" tabindex="-1"></a>        nb_interv <span class="op">=</span> text.count(nb)</span>
+<span id="cb18-23"><a href="#cb18-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-24"><a href="#cb18-24" aria-hidden="true" tabindex="-1"></a>    temp <span class="op">=</span> pd.DataFrame([[nom, nb_interv]], columns<span class="op">=</span> colonnes)</span>
+<span id="cb18-25"><a href="#cb18-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-26"><a href="#cb18-26" aria-hidden="true" tabindex="-1"></a>    depute <span class="op">=</span> pd.concat([depute, temp], ignore_index<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb18-27"><a href="#cb18-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-28"><a href="#cb18-28" aria-hidden="true" tabindex="-1"></a>depute.to_csv(<span class="st">'interv.csv'</span>, index<span class="op">=</span><span class="va">False</span>, encoding<span class="op">=</span><span class="st">'utf8'</span>)</span>
+<span id="cb18-29"><a href="#cb18-29" aria-hidden="true" tabindex="-1"></a>depute.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="94">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">nom</th>
+<th data-quarto-table-cell-role="th">nb_interv</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0</td>
+<td>Agnès Firmin Le Bodo</td>
+<td>759</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>Alexandra Martin (Alpes-Maritimes)</td>
+<td>45</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2</td>
+<td>Alexandra Martin (Gironde)</td>
+<td>9</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">3</td>
+<td>Alexandra Masson</td>
+<td>54</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">4</td>
+<td>Alma Dufour</td>
+<td>64</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+</section>
+<section id="depute-commisions" class="level1">
+<h1>Depute Commisions</h1>
+<div id="cell-19" class="cell" data-execution_count="96">
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>url <span class="op">=</span> <span class="st">'https://www.assemblee-nationale.fr/dyn/16/organes/assemblee/assemblee/composition'</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>request_header <span class="op">=</span> {<span class="st">"User-Agent"</span>: <span class="st">"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36"</span>}</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>req <span class="op">=</span> requests.get(url, headers<span class="op">=</span>request_header, timeout<span class="op">=</span><span class="dv">30</span>)</span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> req.status_code <span class="op">==</span> <span class="dv">200</span>:</span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>    contenu <span class="op">=</span> req.text</span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">with</span> <span class="bu">open</span>(<span class="st">'commissions.html'</span>, <span class="st">'w'</span>, encoding<span class="op">=</span><span class="st">'utf8'</span>) <span class="im">as</span> output:</span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a>        output.write(contenu)</span>
+<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a><span class="cf">else</span>:</span>
+<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"Problème avec l'URL </span><span class="sc">{</span>i<span class="sc">}</span><span class="ss">, code statut :"</span>, req.status_code)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="cell-20" class="cell" data-execution_count="97">
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> <span class="bu">open</span>(<span class="st">'commissions.html'</span>,<span class="st">'r'</span>,encoding <span class="op">=</span><span class="st">'utf8'</span>) <span class="im">as</span> output:</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>    text <span class="op">=</span> output.read()</span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>text <span class="op">=</span> html.unescape(text)</span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>pattern <span class="op">=</span> <span class="vs">r"""&lt;span class="h5 _colored-primary"&gt;(.*?)&lt;/span&gt;\s*&lt;div&gt;\s*&lt;span&gt;(.*?)&lt;/span&gt;"""</span></span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>coms <span class="op">=</span> re.findall(pattern, text)</span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a><span class="bu">all</span> <span class="op">=</span> []</span>
+<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> name, commission <span class="kw">in</span> coms:</span>
+<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a>    name <span class="op">=</span> name.replace(<span class="st">'M. '</span>, <span class="st">''</span>).replace(<span class="st">'Mme '</span>, <span class="st">''</span>)</span>
+<span id="cb20-11"><a href="#cb20-11" aria-hidden="true" tabindex="-1"></a>    commission <span class="op">=</span> commission.replace(<span class="st">'Commission du '</span>, <span class="st">''</span>).replace(<span class="st">'Commission des '</span>, <span class="st">''</span>).replace(<span class="st">'Commission de la '</span>, <span class="st">''</span>).replace(<span class="st">'Commission de '</span>, <span class="st">''</span>).replace(<span class="st">"Commission de l'"</span>, <span class="st">''</span>)</span>
+<span id="cb20-12"><a href="#cb20-12" aria-hidden="true" tabindex="-1"></a>    <span class="bu">all</span>.append([name, commission])</span>
+<span id="cb20-13"><a href="#cb20-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-14"><a href="#cb20-14" aria-hidden="true" tabindex="-1"></a>coms <span class="op">=</span> pd.DataFrame(<span class="bu">all</span>, columns<span class="op">=</span>[<span class="st">'nom'</span>, <span class="st">'commission'</span>])</span>
+<span id="cb20-15"><a href="#cb20-15" aria-hidden="true" tabindex="-1"></a>coms.drop_duplicates(subset<span class="op">=</span><span class="st">'nom'</span>, inplace<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb20-16"><a href="#cb20-16" aria-hidden="true" tabindex="-1"></a>coms.to_csv(<span class="st">'commissions.csv'</span>, index<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb20-17"><a href="#cb20-17" aria-hidden="true" tabindex="-1"></a>coms.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="97">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">nom</th>
+<th data-quarto-table-cell-role="th">commission</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0</td>
+<td>Damien Abad</td>
+<td>développement durable et de l'aménagement du t...</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>Caroline Abadie</td>
+<td>lois constitutionnelles, de la législation et ...</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2</td>
+<td>Nadège Abomangoli</td>
+<td>affaires étrangères</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">3</td>
+<td>Jean-Félix Acquaviva</td>
+<td>défense nationale et des forces armées</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">4</td>
+<td>Damien Adam</td>
+<td>développement durable et de l'aménagement du t...</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<div id="cell-21" class="cell" data-execution_count="98">
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>coms.shape</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="98">
+<pre><code>(577, 2)</code></pre>
+</div>
+</div>
+</section>
+<section id="final-data" class="level1">
+<h1>Final Data</h1>
+<div id="cell-23" class="cell" data-execution_count="170">
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>info <span class="op">=</span> pd.read_csv(<span class="st">'depute_naissance.csv'</span>)</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>interv <span class="op">=</span> pd.read_csv(<span class="st">'interv.csv'</span>)</span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>commi <span class="op">=</span> pd.read_csv(<span class="st">'commissions.csv'</span>)</span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.merge(info, interv, on<span class="op">=</span><span class="st">'nom'</span>, how<span class="op">=</span><span class="st">'left'</span>)</span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>df.loc[<span class="dv">1</span>, <span class="st">'nom'</span>] <span class="op">=</span> <span class="st">'Alexandra Martin'</span></span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a>df.loc[<span class="dv">55</span>, <span class="st">'nom'</span>] <span class="op">=</span> <span class="st">'Christine Pirès Beaune'</span></span>
+<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a>df.loc[<span class="dv">211</span>, <span class="st">'nom'</span>] <span class="op">=</span> <span class="st">'Yaël Ménaché'</span></span>
+<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a>commi.loc[<span class="dv">280</span>, <span class="st">'nom'</span>] <span class="op">=</span> <span class="st">'Emeline KBidi'</span></span>
+<span id="cb23-10"><a href="#cb23-10" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.merge(df, commi, on<span class="op">=</span><span class="st">'nom'</span>, how<span class="op">=</span><span class="st">'left'</span>)</span>
+<span id="cb23-11"><a href="#cb23-11" aria-hidden="true" tabindex="-1"></a>df.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="170">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">id</th>
+<th data-quarto-table-cell-role="th">nom</th>
+<th data-quarto-table-cell-role="th">genre</th>
+<th data-quarto-table-cell-role="th">date_naiss</th>
+<th data-quarto-table-cell-role="th">lieu_naiss</th>
+<th data-quarto-table-cell-role="th">profession</th>
+<th data-quarto-table-cell-role="th">circons</th>
+<th data-quarto-table-cell-role="th">partie</th>
+<th data-quarto-table-cell-role="th">nb_interv</th>
+<th data-quarto-table-cell-role="th">commission</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0</td>
+<td>PA267780</td>
+<td>Agnès Firmin Le Bodo</td>
+<td>F</td>
+<td>20 novembre 1968</td>
+<td>Le Havre (Seine-Maritime)</td>
+<td>Pharmacien</td>
+<td>Seine-Maritime (7e circonscription)</td>
+<td>Horizons &amp; Indépendants</td>
+<td>759</td>
+<td>affaires culturelles et de l'éducation</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>PA793342</td>
+<td>Alexandra Martin</td>
+<td>F</td>
+<td>25 octobre 1968</td>
+<td>Nice (Alpes-Maritimes)</td>
+<td>Employé civil et agent de service de la foncti...</td>
+<td>Alpes-Maritimes (8e circonscription)</td>
+<td>Droite Républicaine</td>
+<td>45</td>
+<td>défense nationale et des forces armées</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2</td>
+<td>PA793944</td>
+<td>Alexandra Martin (Gironde)</td>
+<td>F</td>
+<td>28 juillet 1976</td>
+<td>Bordeaux (Gironde)</td>
+<td>RESPONSABLE CENTRE DE FORMATION</td>
+<td>Gironde (1re circonscription)</td>
+<td>Renaissance</td>
+<td>9</td>
+<td>finances, de l'économie générale et du contrôl...</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">3</td>
+<td>PA793314</td>
+<td>Alexandra Masson</td>
+<td>F</td>
+<td>2 juillet 1971</td>
+<td>Nice (Alpes-Maritimes)</td>
+<td>Profession libérale</td>
+<td>Alpes-Maritimes (4e circonscription)</td>
+<td>Rassemblement National</td>
+<td>54</td>
+<td>développement durable et de l'aménagement du t...</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">4</td>
+<td>PA795200</td>
+<td>Alma Dufour</td>
+<td>F</td>
+<td>6 mai 1990</td>
+<td>Auch (Gers)</td>
+<td>Responsable associative</td>
+<td>Seine-Maritime (4e circonscription)</td>
+<td>La France insoumise - Nouveau Front Populaire</td>
+<td>64</td>
+<td>finances, de l'économie générale et du contrôl...</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<div id="cell-24" class="cell" data-execution_count="171">
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>df[df.isna().<span class="bu">any</span>(axis<span class="op">=</span><span class="dv">1</span>)]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="171">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">id</th>
+<th data-quarto-table-cell-role="th">nom</th>
+<th data-quarto-table-cell-role="th">genre</th>
+<th data-quarto-table-cell-role="th">date_naiss</th>
+<th data-quarto-table-cell-role="th">lieu_naiss</th>
+<th data-quarto-table-cell-role="th">profession</th>
+<th data-quarto-table-cell-role="th">circons</th>
+<th data-quarto-table-cell-role="th">partie</th>
+<th data-quarto-table-cell-role="th">nb_interv</th>
+<th data-quarto-table-cell-role="th">commission</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">290</td>
+<td>PA795572</td>
+<td>Denis Bernaert</td>
+<td>H</td>
+<td>1er mai 1964</td>
+<td>Saint-Mandé (Val-de-Marne)</td>
+<td>NaN</td>
+<td>Yvelines (4e circonscription)</td>
+<td>Renaissance</td>
+<td>7</td>
+<td>défense nationale et des forces armées</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">510</td>
+<td>PA721678</td>
+<td>Robin Reda</td>
+<td>H</td>
+<td>10 mai 1991</td>
+<td>Savigny sur Orge (Essonne)</td>
+<td>NaN</td>
+<td>Essonne (7e circonscription)</td>
+<td>Renaissance</td>
+<td>531</td>
+<td>finances, de l'économie générale et du contrôl...</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<p>Pour ces deputés les infos ne sont pas dispo sur les pages</p>
+<div id="cell-26" class="cell" data-execution_count="172">
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>df.shape</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="172">
+<pre><code>(577, 10)</code></pre>
+</div>
+</div>
+<div id="cell-27" class="cell">
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="co"># d1 = pd.read_excel("Tweet/data_tweet.xlsx")</span></span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a><span class="co"># d2 = pd.read_excel("Tweet/data_retweet.xlsx")</span></span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a><span class="co"># df2 = pd.read_excel("Tweet/depute.xlsx")</span></span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a><span class="co"># df1 = pd.concat([d1, d2], axis=0)</span></span>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a><span class="co"># def col_low(var):</span></span>
+<span id="cb27-7"><a href="#cb27-7" aria-hidden="true" tabindex="-1"></a><span class="co">#     if pd.isna(var):</span></span>
+<span id="cb27-8"><a href="#cb27-8" aria-hidden="true" tabindex="-1"></a><span class="co">#         return var</span></span>
+<span id="cb27-9"><a href="#cb27-9" aria-hidden="true" tabindex="-1"></a><span class="co">#     else:</span></span>
+<span id="cb27-10"><a href="#cb27-10" aria-hidden="true" tabindex="-1"></a><span class="co">#         return var.lower()</span></span>
+<span id="cb27-11"><a href="#cb27-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-12"><a href="#cb27-12" aria-hidden="true" tabindex="-1"></a><span class="co"># df1['name'] = df1['name'].apply(col_low)</span></span>
+<span id="cb27-13"><a href="#cb27-13" aria-hidden="true" tabindex="-1"></a><span class="co"># df2['Twitter'] = df2['Twitter'].apply(col_low)</span></span>
+<span id="cb27-14"><a href="#cb27-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-15"><a href="#cb27-15" aria-hidden="true" tabindex="-1"></a><span class="co"># df2_cop = df2[['Twitter', 'Nom']]</span></span>
+<span id="cb27-16"><a href="#cb27-16" aria-hidden="true" tabindex="-1"></a><span class="co"># df = pd.merge(df1, df2_cop, how='left', left_on='name', right_on='Twitter')</span></span>
+<span id="cb27-17"><a href="#cb27-17" aria-hidden="true" tabindex="-1"></a><span class="co"># df = df.drop(columns=['date_tweet', 'date_tweet_original', 'name', 'id'])</span></span>
+<span id="cb27-18"><a href="#cb27-18" aria-hidden="true" tabindex="-1"></a><span class="co"># df.to_csv("tweets.csv", index = False, encoding='utf8')</span></span>
+<span id="cb27-19"><a href="#cb27-19" aria-hidden="true" tabindex="-1"></a><span class="co"># df.head()</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="cell-28" class="cell" data-execution_count="107">
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>tweets <span class="op">=</span> pd.read_csv(<span class="st">'tweets.csv'</span>)</span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>tweets.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="107">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">retweet</th>
+<th data-quarto-table-cell-role="th">text</th>
+<th data-quarto-table-cell-role="th">Twitter</th>
+<th data-quarto-table-cell-role="th">Nom</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0</td>
+<td>no</td>
+<td>Marie-Louise Fort a porté un engagement politi...</td>
+<td>@_didierparis</td>
+<td>m. didier paris</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>no</td>
+<td>Face au #Covid19\nLe @gouvernementFR facilite ...</td>
+<td>@_didierparis</td>
+<td>m. didier paris</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2</td>
+<td>no</td>
+<td>Ensemble, nous formons la #FranceUnie contre l...</td>
+<td>@_didierparis</td>
+<td>m. didier paris</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">3</td>
+<td>no</td>
+<td>Face au #Covid19\nAfin de faciliter le verseme...</td>
+<td>@_didierparis</td>
+<td>m. didier paris</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">4</td>
+<td>no</td>
+<td>🇫🇷 🏛 #DirectAN #QAG 🏛🇫🇷\n«&nbsp;Il appartient au @g...</td>
+<td>@_didierparis</td>
+<td>m. didier paris</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<div id="cell-29" class="cell">
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="co"># link = 'https://static.data.gouv.fr/resources/deputes-actifs-de-lassemblee-nationale-informations-et-statistiques/20250122-121657/deputes-active.csv'</span></span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a><span class="co"># infos = pd.read_csv(link)</span></span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a><span class="co"># infos.rename(columns={'twitter':'Twitter'}, inplace=True)</span></span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a><span class="co"># infos['Twitter'] = infos['Twitter'].str.lower()</span></span>
+<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a><span class="co"># infos = infos[['id', 'Twitter', 'website', 'nombreMandats', 'experienceDepute',</span></span>
+<span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a><span class="co">#                'scoreParticipation']]</span></span>
+<span id="cb29-7"><a href="#cb29-7" aria-hidden="true" tabindex="-1"></a><span class="co"># infos.head()</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="150">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">id</th>
+<th data-quarto-table-cell-role="th">Twitter</th>
+<th data-quarto-table-cell-role="th">website</th>
+<th data-quarto-table-cell-role="th">nombreMandats</th>
+<th data-quarto-table-cell-role="th">experienceDepute</th>
+<th data-quarto-table-cell-role="th">scoreParticipation</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0</td>
+<td>PA1008</td>
+<td>@alaindavid_an</td>
+<td>alain-david.com</td>
+<td>3</td>
+<td>8 ans</td>
+<td>0.04</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>PA1327</td>
+<td>@n_forissier</td>
+<td>NaN</td>
+<td>4</td>
+<td>13 ans</td>
+<td>0.05</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2</td>
+<td>PA1567</td>
+<td>@jeromeguedj</td>
+<td>jerome-guedj.fr</td>
+<td>4</td>
+<td>4 ans</td>
+<td>0.29</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">3</td>
+<td>PA1592</td>
+<td>@daviddhabib</td>
+<td>www.david-habib.fr</td>
+<td>6</td>
+<td>23 ans</td>
+<td>0.03</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">4</td>
+<td>PA1630</td>
+<td>@michelherbillon</td>
+<td>NaN</td>
+<td>6</td>
+<td>23 ans</td>
+<td>0.03</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<div id="cell-30" class="cell" data-execution_count="173">
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>infos <span class="op">=</span> tweets[[<span class="st">'Twitter'</span>, <span class="st">'Nom'</span>]]</span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>infos <span class="op">=</span> infos.drop_duplicates().reset_index(drop<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>infos[<span class="st">'Nom'</span>] <span class="op">=</span> infos[<span class="st">'Nom'</span>].<span class="bu">str</span>.replace(<span class="st">'m. '</span>, <span class="st">''</span>).<span class="bu">str</span>.replace(<span class="st">'mme '</span>, <span class="st">''</span>)</span>
+<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a>infos.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="173">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">Twitter</th>
+<th data-quarto-table-cell-role="th">Nom</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0</td>
+<td>@_didierparis</td>
+<td>didier paris</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>@_evasas</td>
+<td>eva sas</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2</td>
+<td>@_richardramos</td>
+<td>richard ramos</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">3</td>
+<td>@a_masson06</td>
+<td>alexandra masson</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">4</td>
+<td>@a_saintoul</td>
+<td>aurélien saintoul</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<div id="cell-31" class="cell" data-execution_count="174">
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>tw_pr_dept <span class="op">=</span> tweets.groupby(<span class="st">'Twitter'</span>).size().reset_index()</span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>tw_pr_dept <span class="op">=</span> pd.merge(tw_pr_dept, infos, on<span class="op">=</span><span class="st">'Twitter'</span>, how<span class="op">=</span><span class="st">'left'</span>)</span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a>tw_pr_dept[<span class="st">'posts_nb'</span>] <span class="op">=</span> tw_pr_dept[<span class="dv">0</span>]</span>
+<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a>tw_pr_dept.drop(columns<span class="op">=</span>[<span class="dv">0</span>], inplace<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb31-5"><a href="#cb31-5" aria-hidden="true" tabindex="-1"></a>retw_pr_dept <span class="op">=</span> tweets[tweets[<span class="st">'retweet'</span>]<span class="op">==</span><span class="st">'yes'</span>].groupby(<span class="st">'Twitter'</span>).size().reset_index()</span>
+<span id="cb31-6"><a href="#cb31-6" aria-hidden="true" tabindex="-1"></a>retw_pr_dept <span class="op">=</span> pd.merge(retw_pr_dept, infos, on<span class="op">=</span><span class="st">'Twitter'</span>, how<span class="op">=</span><span class="st">'left'</span>)</span>
+<span id="cb31-7"><a href="#cb31-7" aria-hidden="true" tabindex="-1"></a>retw_pr_dept[<span class="st">'retw_nb'</span>] <span class="op">=</span> retw_pr_dept[<span class="dv">0</span>]</span>
+<span id="cb31-8"><a href="#cb31-8" aria-hidden="true" tabindex="-1"></a>retw_pr_dept.drop(columns<span class="op">=</span>[<span class="dv">0</span>], inplace<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb31-9"><a href="#cb31-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-10"><a href="#cb31-10" aria-hidden="true" tabindex="-1"></a>df_tw <span class="op">=</span> pd.merge(tw_pr_dept, retw_pr_dept, on<span class="op">=</span><span class="st">'Twitter'</span>, how<span class="op">=</span><span class="st">'left'</span>).drop(columns<span class="op">=</span>[<span class="st">'Nom_y'</span>]).rename(columns<span class="op">=</span>{<span class="st">'Nom_x'</span>:<span class="st">'nom'</span>})</span>
+<span id="cb31-11"><a href="#cb31-11" aria-hidden="true" tabindex="-1"></a>df_tw</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="174">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">Twitter</th>
+<th data-quarto-table-cell-role="th">nom</th>
+<th data-quarto-table-cell-role="th">posts_nb</th>
+<th data-quarto-table-cell-role="th">retw_nb</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0</td>
+<td>@_didierparis</td>
+<td>didier paris</td>
+<td>3471</td>
+<td>240.0</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>@_evasas</td>
+<td>eva sas</td>
+<td>4112</td>
+<td>3441.0</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2</td>
+<td>@_richardramos</td>
+<td>richard ramos</td>
+<td>967</td>
+<td>360.0</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">3</td>
+<td>@a_masson06</td>
+<td>alexandra masson</td>
+<td>2734</td>
+<td>1519.0</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">4</td>
+<td>@a_saintoul</td>
+<td>aurélien saintoul</td>
+<td>2966</td>
+<td>1097.0</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">554</td>
+<td>@yannickneuder</td>
+<td>yannick neuder</td>
+<td>1615</td>
+<td>645.0</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">555</td>
+<td>@ychenevard83</td>
+<td>yannick chenevard</td>
+<td>171</td>
+<td>28.0</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">556</td>
+<td>@yfavennec</td>
+<td>yannick favennec-bécot</td>
+<td>3532</td>
+<td>1609.0</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">557</td>
+<td>@yhaury44</td>
+<td>yannick haury</td>
+<td>2108</td>
+<td>683.0</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">558</td>
+<td>@yoanngillet30</td>
+<td>yoann gillet</td>
+<td>3959</td>
+<td>2533.0</td>
+</tr>
+</tbody>
+</table>
+
+<p>559 rows × 4 columns</p>
+</div>
+</div>
+</div>
+<div id="cell-32" class="cell" data-execution_count="175">
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>df[<span class="st">'nom_min'</span>] <span class="op">=</span> df[<span class="st">'nom'</span>].<span class="bu">str</span>.lower()</span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>final <span class="op">=</span> pd.merge(df, df_tw, left_on<span class="op">=</span><span class="st">'nom_min'</span>, right_on<span class="op">=</span><span class="st">'nom'</span>, how<span class="op">=</span><span class="st">'left'</span>)</span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>final <span class="op">=</span> final.rename(columns<span class="op">=</span>{<span class="st">'nom_x'</span>:<span class="st">'nom'</span>}).drop(columns<span class="op">=</span>[<span class="st">'nom_min'</span>, <span class="st">'nom_y'</span>])</span>
+<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a>final</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="175">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">id</th>
+<th data-quarto-table-cell-role="th">nom</th>
+<th data-quarto-table-cell-role="th">genre</th>
+<th data-quarto-table-cell-role="th">date_naiss</th>
+<th data-quarto-table-cell-role="th">lieu_naiss</th>
+<th data-quarto-table-cell-role="th">profession</th>
+<th data-quarto-table-cell-role="th">circons</th>
+<th data-quarto-table-cell-role="th">partie</th>
+<th data-quarto-table-cell-role="th">nb_interv</th>
+<th data-quarto-table-cell-role="th">commission</th>
+<th data-quarto-table-cell-role="th">Twitter</th>
+<th data-quarto-table-cell-role="th">posts_nb</th>
+<th data-quarto-table-cell-role="th">retw_nb</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0</td>
+<td>PA267780</td>
+<td>Agnès Firmin Le Bodo</td>
+<td>F</td>
+<td>20 novembre 1968</td>
+<td>Le Havre (Seine-Maritime)</td>
+<td>Pharmacien</td>
+<td>Seine-Maritime (7e circonscription)</td>
+<td>Horizons &amp; Indépendants</td>
+<td>759</td>
+<td>affaires culturelles et de l'éducation</td>
+<td>@agnesfirmin</td>
+<td>4044.0</td>
+<td>881.0</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>PA793342</td>
+<td>Alexandra Martin</td>
+<td>F</td>
+<td>25 octobre 1968</td>
+<td>Nice (Alpes-Maritimes)</td>
+<td>Employé civil et agent de service de la foncti...</td>
+<td>Alpes-Maritimes (8e circonscription)</td>
+<td>Droite Républicaine</td>
+<td>45</td>
+<td>défense nationale et des forces armées</td>
+<td>@martinalex06</td>
+<td>2155.0</td>
+<td>1339.0</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2</td>
+<td>PA793944</td>
+<td>Alexandra Martin (Gironde)</td>
+<td>F</td>
+<td>28 juillet 1976</td>
+<td>Bordeaux (Gironde)</td>
+<td>RESPONSABLE CENTRE DE FORMATION</td>
+<td>Gironde (1re circonscription)</td>
+<td>Renaissance</td>
+<td>9</td>
+<td>finances, de l'économie générale et du contrôl...</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">3</td>
+<td>PA793314</td>
+<td>Alexandra Masson</td>
+<td>F</td>
+<td>2 juillet 1971</td>
+<td>Nice (Alpes-Maritimes)</td>
+<td>Profession libérale</td>
+<td>Alpes-Maritimes (4e circonscription)</td>
+<td>Rassemblement National</td>
+<td>54</td>
+<td>développement durable et de l'aménagement du t...</td>
+<td>@a_masson06</td>
+<td>2734.0</td>
+<td>1519.0</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">4</td>
+<td>PA795200</td>
+<td>Alma Dufour</td>
+<td>F</td>
+<td>6 mai 1990</td>
+<td>Auch (Gers)</td>
+<td>Responsable associative</td>
+<td>Seine-Maritime (4e circonscription)</td>
+<td>La France insoumise - Nouveau Front Populaire</td>
+<td>64</td>
+<td>finances, de l'économie générale et du contrôl...</td>
+<td>@alma_dufour</td>
+<td>5219.0</td>
+<td>2014.0</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">572</td>
+<td>PA795708</td>
+<td>Éric Husson</td>
+<td>H</td>
+<td>6 juillet 1963</td>
+<td>Chateaudun (Eure-et-Loir)</td>
+<td>cadre d'entreprise</td>
+<td>Essonne (9e circonscription)</td>
+<td>Renaissance</td>
+<td>0</td>
+<td>affaires culturelles et de l'éducation</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">573</td>
+<td>PA795100</td>
+<td>Éric Martineau</td>
+<td>H</td>
+<td>8 mai 1968</td>
+<td>Le Mans (Sarthe)</td>
+<td>Agriculteur sur moyenne exploitation</td>
+<td>Sarthe (3e circonscription)</td>
+<td>Les Démocrates</td>
+<td>97</td>
+<td>affaires économiques</td>
+<td>@emericmartineau</td>
+<td>246.0</td>
+<td>198.0</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">574</td>
+<td>PA718784</td>
+<td>Éric Pauget</td>
+<td>H</td>
+<td>18 août 1970</td>
+<td>Antibes (Alpes-Maritimes)</td>
+<td>Autre cadre (secteur privé)</td>
+<td>Alpes-Maritimes (7e circonscription)</td>
+<td>Droite Républicaine</td>
+<td>246</td>
+<td>lois constitutionnelles, de la législation et ...</td>
+<td>@ericpauget1</td>
+<td>3861.0</td>
+<td>1309.0</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">575</td>
+<td>PA719600</td>
+<td>Éric Poulliat</td>
+<td>H</td>
+<td>9 juillet 1974</td>
+<td>Bordeaux (Gironde)</td>
+<td>Fonctionnaire de catégorie B</td>
+<td>Gironde (6e circonscription)</td>
+<td>Renaissance</td>
+<td>253</td>
+<td>lois constitutionnelles, de la législation et ...</td>
+<td>@epoulliat</td>
+<td>2253.0</td>
+<td>1018.0</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">576</td>
+<td>PA2960</td>
+<td>Éric Woerth</td>
+<td>H</td>
+<td>29 janvier 1956</td>
+<td>Creil (Oise)</td>
+<td>Associé dans un cabinet d'audit international</td>
+<td>Oise (4e circonscription)</td>
+<td>Ensemble pour la République</td>
+<td>1648</td>
+<td>affaires étrangères</td>
+<td>@ericwoerth</td>
+<td>3523.0</td>
+<td>1327.0</td>
+</tr>
+</tbody>
+</table>
+
+<p>577 rows × 13 columns</p>
+</div>
+</div>
+</div>
+<div id="cell-33" class="cell" data-execution_count="176">
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>final.to_csv(<span class="st">'global_data.csv'</span>, index<span class="op">=</span><span class="va">False</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="observationss" class="level1">
+<h1><strong>Observationss</strong></h1>
+<div id="cell-35" class="cell" data-execution_count="276">
+<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> seaborn <span class="im">as</span> sns</span>
+<span id="cb34-5"><a href="#cb34-5" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.cluster <span class="im">import</span> KMeans</span>
+<span id="cb34-6"><a href="#cb34-6" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.preprocessing <span class="im">import</span> StandardScaler, OneHotEncoder</span>
+<span id="cb34-7"><a href="#cb34-7" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.metrics <span class="im">import</span> silhouette_score</span>
+<span id="cb34-8"><a href="#cb34-8" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.impute <span class="im">import</span> SimpleImputer</span>
+<span id="cb34-9"><a href="#cb34-9" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> datetime <span class="im">import</span> datetime</span>
+<span id="cb34-10"><a href="#cb34-10" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> geopandas <span class="im">as</span> gpd</span>
+<span id="cb34-11"><a href="#cb34-11" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> squarify</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="cell-36" class="cell" data-execution_count="183">
+<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.read_csv(<span class="st">'global_data.csv'</span>)</span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a>df.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="183">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">id</th>
+<th data-quarto-table-cell-role="th">nom</th>
+<th data-quarto-table-cell-role="th">genre</th>
+<th data-quarto-table-cell-role="th">date_naiss</th>
+<th data-quarto-table-cell-role="th">lieu_naiss</th>
+<th data-quarto-table-cell-role="th">profession</th>
+<th data-quarto-table-cell-role="th">circons</th>
+<th data-quarto-table-cell-role="th">partie</th>
+<th data-quarto-table-cell-role="th">nb_interv</th>
+<th data-quarto-table-cell-role="th">commission</th>
+<th data-quarto-table-cell-role="th">Twitter</th>
+<th data-quarto-table-cell-role="th">posts_nb</th>
+<th data-quarto-table-cell-role="th">retw_nb</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0</td>
+<td>PA267780</td>
+<td>Agnès Firmin Le Bodo</td>
+<td>F</td>
+<td>20 novembre 1968</td>
+<td>Le Havre (Seine-Maritime)</td>
+<td>Pharmacien</td>
+<td>Seine-Maritime (7e circonscription)</td>
+<td>Horizons &amp; Indépendants</td>
+<td>759</td>
+<td>affaires culturelles et de l'éducation</td>
+<td>@agnesfirmin</td>
+<td>4044.0</td>
+<td>881.0</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>PA793342</td>
+<td>Alexandra Martin</td>
+<td>F</td>
+<td>25 octobre 1968</td>
+<td>Nice (Alpes-Maritimes)</td>
+<td>Employé civil et agent de service de la foncti...</td>
+<td>Alpes-Maritimes (8e circonscription)</td>
+<td>Droite Républicaine</td>
+<td>45</td>
+<td>défense nationale et des forces armées</td>
+<td>@martinalex06</td>
+<td>2155.0</td>
+<td>1339.0</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2</td>
+<td>PA793944</td>
+<td>Alexandra Martin (Gironde)</td>
+<td>F</td>
+<td>28 juillet 1976</td>
+<td>Bordeaux (Gironde)</td>
+<td>RESPONSABLE CENTRE DE FORMATION</td>
+<td>Gironde (1re circonscription)</td>
+<td>Renaissance</td>
+<td>9</td>
+<td>finances, de l'économie générale et du contrôl...</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">3</td>
+<td>PA793314</td>
+<td>Alexandra Masson</td>
+<td>F</td>
+<td>2 juillet 1971</td>
+<td>Nice (Alpes-Maritimes)</td>
+<td>Profession libérale</td>
+<td>Alpes-Maritimes (4e circonscription)</td>
+<td>Rassemblement National</td>
+<td>54</td>
+<td>développement durable et de l'aménagement du t...</td>
+<td>@a_masson06</td>
+<td>2734.0</td>
+<td>1519.0</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">4</td>
+<td>PA795200</td>
+<td>Alma Dufour</td>
+<td>F</td>
+<td>6 mai 1990</td>
+<td>Auch (Gers)</td>
+<td>Responsable associative</td>
+<td>Seine-Maritime (4e circonscription)</td>
+<td>La France insoumise - Nouveau Front Populaire</td>
+<td>64</td>
+<td>finances, de l'économie générale et du contrôl...</td>
+<td>@alma_dufour</td>
+<td>5219.0</td>
+<td>2014.0</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+</section>
+<section id="analyse-démographique-des-députés" class="level1">
+<h1>Analyse démographique des députés</h1>
+<div id="cell-38" class="cell" data-execution_count="236">
+<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>part_proportions <span class="op">=</span> df[<span class="st">'partie'</span>].value_counts(normalize<span class="op">=</span><span class="va">True</span>).reset_index()</span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a>part_proportions.columns <span class="op">=</span> [<span class="st">'partie'</span>, <span class="st">'proportion'</span>]</span>
+<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a>plt.figure(figsize<span class="op">=</span>(<span class="dv">10</span>, <span class="dv">6</span>))</span>
+<span id="cb36-4"><a href="#cb36-4" aria-hidden="true" tabindex="-1"></a>sns.barplot(data<span class="op">=</span>part_proportions, x<span class="op">=</span><span class="st">'proportion'</span>, y<span class="op">=</span><span class="st">'partie'</span>, palette<span class="op">=</span><span class="st">'viridis'</span>)</span>
+<span id="cb36-5"><a href="#cb36-5" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">"Répartition des députés par parti"</span>)</span>
+<span id="cb36-6"><a href="#cb36-6" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">"Proportion"</span>)</span>
+<span id="cb36-7"><a href="#cb36-7" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">"Partis politiques"</span>)</span>
+<span id="cb36-8"><a href="#cb36-8" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>C:\Users\aurel\AppData\Local\Temp\ipykernel_9196\4076202001.py:4: FutureWarning: 
+
+Passing `palette` without assigning `hue` is deprecated and will be removed in v0.14.0. Assign the `y` variable to `hue` and set `legend=False` for the same effect.
+
+  sns.barplot(data=part_proportions, x='proportion', y='partie', palette='viridis')</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="assemble_files/figure-html/cell-32-output-2.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<section id="age-moyen-des-députés-et-répartition-par-groupe-politique" class="level4">
+<h4 class="anchored" data-anchor-id="age-moyen-des-députés-et-répartition-par-groupe-politique"><strong>Age moyen des députés et répartition par groupe politique</strong></h4>
+<div id="cell-40" class="cell" data-execution_count="228">
+<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>plt.figure(figsize<span class="op">=</span>(<span class="dv">10</span>, <span class="dv">6</span>))</span>
+<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a>sns.histplot(df[<span class="st">'age'</span>], color<span class="op">=</span><span class="st">'blue'</span>, alpha<span class="op">=</span><span class="fl">0.7</span>)</span>
+<span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">"Distribution des ages des députés"</span>)</span>
+<span id="cb38-4"><a href="#cb38-4" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">"Age"</span>)</span>
+<span id="cb38-5"><a href="#cb38-5" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">"Nombre de députés"</span>)</span>
+<span id="cb38-6"><a href="#cb38-6" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="assemble_files/figure-html/cell-33-output-1.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<div id="cell-41" class="cell" data-execution_count="218">
+<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a>year <span class="op">=</span> <span class="dv">2025</span></span>
+<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a>df[<span class="st">'year_naiss'</span>] <span class="op">=</span> df[<span class="st">'date_naiss'</span>].<span class="bu">str</span>[<span class="op">-</span><span class="dv">4</span>:].astype(<span class="bu">int</span>)</span>
+<span id="cb39-3"><a href="#cb39-3" aria-hidden="true" tabindex="-1"></a>df[<span class="st">'age'</span>] <span class="op">=</span> year <span class="op">-</span> df[<span class="st">'year_naiss'</span>]</span>
+<span id="cb39-4"><a href="#cb39-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb39-5"><a href="#cb39-5" aria-hidden="true" tabindex="-1"></a>fig1 <span class="op">=</span> df.groupby(<span class="st">'partie'</span>)[<span class="st">'age'</span>].mean().reset_index().sort_values(by<span class="op">=</span><span class="st">'age'</span>, ascending<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb39-6"><a href="#cb39-6" aria-hidden="true" tabindex="-1"></a>sns.set_theme(style<span class="op">=</span><span class="st">'whitegrid'</span>)</span>
+<span id="cb39-7"><a href="#cb39-7" aria-hidden="true" tabindex="-1"></a>plt.figure(figsize<span class="op">=</span>(<span class="dv">8</span>, <span class="dv">8</span>))</span>
+<span id="cb39-8"><a href="#cb39-8" aria-hidden="true" tabindex="-1"></a>sns.barplot(fig1, x<span class="op">=</span><span class="st">'age'</span>, y<span class="op">=</span><span class="st">'partie'</span>, palette<span class="op">=</span><span class="st">'tab10'</span>, alpha<span class="op">=</span><span class="fl">0.95</span>)</span>
+<span id="cb39-9"><a href="#cb39-9" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">'Age moyen'</span>)</span>
+<span id="cb39-10"><a href="#cb39-10" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">'Partis Politiques'</span>)</span>
+<span id="cb39-11"><a href="#cb39-11" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>C:\Users\aurel\AppData\Local\Temp\ipykernel_9196\2717653519.py:8: FutureWarning: 
+
+Passing `palette` without assigning `hue` is deprecated and will be removed in v0.14.0. Assign the `y` variable to `hue` and set `legend=False` for the same effect.
+
+  sns.barplot(fig1, x='age', y='partie', palette='tab10', alpha=0.95)</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="assemble_files/figure-html/cell-34-output-2.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<div id="cell-42" class="cell" data-execution_count="254">
+<div class="sourceCode cell-code" id="cb41"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> statsmodels.formula.api <span class="im">as</span> smf</span>
+<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-3"><a href="#cb41-3" aria-hidden="true" tabindex="-1"></a>poisson_model <span class="op">=</span> smf.poisson(<span class="st">'nb_interv ~ age'</span>, data<span class="op">=</span>df).fit()</span>
+<span id="cb41-4"><a href="#cb41-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-5"><a href="#cb41-5" aria-hidden="true" tabindex="-1"></a>x_vals <span class="op">=</span> np.linspace(df[<span class="st">'age'</span>].<span class="bu">min</span>(), df[<span class="st">'age'</span>].<span class="bu">max</span>(), <span class="dv">100</span>)</span>
+<span id="cb41-6"><a href="#cb41-6" aria-hidden="true" tabindex="-1"></a>predictions <span class="op">=</span> poisson_model.predict(pd.DataFrame({<span class="st">'age'</span>: x_vals}))</span>
+<span id="cb41-7"><a href="#cb41-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-8"><a href="#cb41-8" aria-hidden="true" tabindex="-1"></a>plt.figure(figsize<span class="op">=</span>(<span class="dv">18</span>, <span class="dv">10</span>))</span>
+<span id="cb41-9"><a href="#cb41-9" aria-hidden="true" tabindex="-1"></a>sns.scatterplot(data<span class="op">=</span>df, x<span class="op">=</span><span class="st">'age'</span>, y<span class="op">=</span><span class="st">'nb_interv'</span>, color<span class="op">=</span><span class="st">'blue'</span>, s<span class="op">=</span><span class="dv">40</span>, label<span class="op">=</span><span class="st">'data'</span>)</span>
+<span id="cb41-10"><a href="#cb41-10" aria-hidden="true" tabindex="-1"></a>plt.plot(x_vals, predictions, color<span class="op">=</span><span class="st">'red'</span>, label<span class="op">=</span><span class="st">'Poisson reg'</span>, linewidth<span class="op">=</span><span class="dv">2</span>)</span>
+<span id="cb41-11"><a href="#cb41-11" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">"Age vs nb d'interventions"</span>)</span>
+<span id="cb41-12"><a href="#cb41-12" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">"Age"</span>)</span>
+<span id="cb41-13"><a href="#cb41-13" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">"Nombre d'interventions"</span>)</span>
+<span id="cb41-14"><a href="#cb41-14" aria-hidden="true" tabindex="-1"></a>plt.legend()</span>
+<span id="cb41-15"><a href="#cb41-15" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Optimization terminated successfully.
+         Current function value: 113.761112
+         Iterations 5</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="assemble_files/figure-html/cell-35-output-2.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<div id="cell-43" class="cell" data-execution_count="231">
+<div class="sourceCode cell-code" id="cb43"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a>sns.lmplot(data<span class="op">=</span>df, x<span class="op">=</span><span class="st">'age'</span>, y<span class="op">=</span><span class="st">'nb_interv'</span>, hue<span class="op">=</span><span class="st">'partie'</span>, height<span class="op">=</span><span class="dv">6</span>, aspect<span class="op">=</span><span class="fl">1.5</span>, palette<span class="op">=</span><span class="st">'tab10'</span>)</span>
+<span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">"Corrélation entre l'âge et le nombre d'interventions"</span>)</span>
+<span id="cb43-3"><a href="#cb43-3" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">"Age"</span>)</span>
+<span id="cb43-4"><a href="#cb43-4" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">"Nombre d'interventions"</span>)</span>
+<span id="cb43-5"><a href="#cb43-5" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="assemble_files/figure-html/cell-36-output-1.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<div id="cell-44" class="cell" data-execution_count="311">
+<div class="sourceCode cell-code" id="cb44"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a>poisson_model <span class="op">=</span> smf.poisson(<span class="st">'posts_nb ~ age'</span>, data<span class="op">=</span>df).fit()</span>
+<span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb44-3"><a href="#cb44-3" aria-hidden="true" tabindex="-1"></a>x_vals <span class="op">=</span> np.linspace(df[<span class="st">'age'</span>].<span class="bu">min</span>(), df[<span class="st">'age'</span>].<span class="bu">max</span>(), <span class="dv">100</span>)</span>
+<span id="cb44-4"><a href="#cb44-4" aria-hidden="true" tabindex="-1"></a>predictions <span class="op">=</span> poisson_model.predict(pd.DataFrame({<span class="st">'age'</span>: x_vals}))</span>
+<span id="cb44-5"><a href="#cb44-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb44-6"><a href="#cb44-6" aria-hidden="true" tabindex="-1"></a>plt.figure(figsize<span class="op">=</span>(<span class="dv">18</span>, <span class="dv">10</span>))</span>
+<span id="cb44-7"><a href="#cb44-7" aria-hidden="true" tabindex="-1"></a>sns.scatterplot(data<span class="op">=</span>df, x<span class="op">=</span><span class="st">'age'</span>, y<span class="op">=</span><span class="st">'posts_nb'</span>, color<span class="op">=</span><span class="st">'blue'</span>, s<span class="op">=</span><span class="dv">40</span>, label<span class="op">=</span><span class="st">'data'</span>)</span>
+<span id="cb44-8"><a href="#cb44-8" aria-hidden="true" tabindex="-1"></a>plt.plot(x_vals, predictions, color<span class="op">=</span><span class="st">'red'</span>, label<span class="op">=</span><span class="st">'Poisson reg'</span>, linewidth<span class="op">=</span><span class="dv">2</span>)</span>
+<span id="cb44-9"><a href="#cb44-9" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">"Age vs Tw posts"</span>)</span>
+<span id="cb44-10"><a href="#cb44-10" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">"Age"</span>)</span>
+<span id="cb44-11"><a href="#cb44-11" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">"Nombre de publications tw"</span>)</span>
+<span id="cb44-12"><a href="#cb44-12" aria-hidden="true" tabindex="-1"></a>plt.legend()</span>
+<span id="cb44-13"><a href="#cb44-13" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Optimization terminated successfully.
+         Current function value: 516.239006
+         Iterations 4</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="assemble_files/figure-html/cell-37-output-2.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="origines-géographique-répartition-des-lieux-de-naissance-des-députés-par-région-ou-département" class="level4">
+<h4 class="anchored" data-anchor-id="origines-géographique-répartition-des-lieux-de-naissance-des-députés-par-région-ou-département"><strong>Origines géographique : Répartition des lieux de naissance des députés par région ou département</strong></h4>
+<div id="cell-46" class="cell" data-execution_count="277">
+<div class="sourceCode cell-code" id="cb46"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a>df[<span class="st">'region'</span>] <span class="op">=</span> df[<span class="st">'lieu_naiss'</span>].<span class="bu">str</span>.extract(<span class="vs">r'\((.*?)\)'</span>)</span>
+<span id="cb46-2"><a href="#cb46-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-3"><a href="#cb46-3" aria-hidden="true" tabindex="-1"></a>region_counts <span class="op">=</span> df[<span class="st">'region'</span>].value_counts().reset_index()</span>
+<span id="cb46-4"><a href="#cb46-4" aria-hidden="true" tabindex="-1"></a>region_counts.columns <span class="op">=</span> [<span class="st">'region'</span>, <span class="st">'nombre_dep'</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="cell-47" class="cell" data-execution_count="278">
+<div class="sourceCode cell-code" id="cb47"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a>plt.figure(figsize<span class="op">=</span>(<span class="dv">10</span>, <span class="dv">7</span>))</span>
+<span id="cb47-2"><a href="#cb47-2" aria-hidden="true" tabindex="-1"></a>sns.barplot(data<span class="op">=</span>region_counts[region_counts[<span class="st">'nombre_dep'</span>] <span class="op">&gt;</span> <span class="dv">5</span>], x<span class="op">=</span><span class="st">'nombre_dep'</span>, y<span class="op">=</span><span class="st">'region'</span>, palette<span class="op">=</span><span class="st">'viridis'</span>)</span>
+<span id="cb47-3"><a href="#cb47-3" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">"Répartition des députés par région (régions avec plus de 5 deputés)"</span>)</span>
+<span id="cb47-4"><a href="#cb47-4" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">"Nombre de députés"</span>)</span>
+<span id="cb47-5"><a href="#cb47-5" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">"Région"</span>)</span>
+<span id="cb47-6"><a href="#cb47-6" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
+<span id="cb47-7"><a href="#cb47-7" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>C:\Users\aurel\AppData\Local\Temp\ipykernel_9196\351417365.py:2: FutureWarning: 
+
+Passing `palette` without assigning `hue` is deprecated and will be removed in v0.14.0. Assign the `y` variable to `hue` and set `legend=False` for the same effect.
+
+  sns.barplot(data=region_counts[region_counts['nombre_dep'] &gt; 5], x='nombre_dep', y='region', palette='viridis')</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="assemble_files/figure-html/cell-39-output-2.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<div id="cell-48" class="cell">
+<div class="sourceCode cell-code" id="cb49"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a>rf <span class="op">=</span> region_counts[region_counts[<span class="st">'nombre_dep'</span>] <span class="op">&gt;</span> <span class="dv">3</span>]</span>
+<span id="cb49-2"><a href="#cb49-2" aria-hidden="true" tabindex="-1"></a>plt.figure(figsize<span class="op">=</span>(<span class="dv">18</span>, <span class="dv">12</span>))</span>
+<span id="cb49-3"><a href="#cb49-3" aria-hidden="true" tabindex="-1"></a>squarify.plot(</span>
+<span id="cb49-4"><a href="#cb49-4" aria-hidden="true" tabindex="-1"></a>    sizes<span class="op">=</span>rf[<span class="st">'nombre_dep'</span>],       <span class="co"># Tailles des rectangles</span></span>
+<span id="cb49-5"><a href="#cb49-5" aria-hidden="true" tabindex="-1"></a>    label<span class="op">=</span>rf[<span class="st">'region'</span>],  <span class="co"># Étiquettes</span></span>
+<span id="cb49-6"><a href="#cb49-6" aria-hidden="true" tabindex="-1"></a>    alpha<span class="op">=</span><span class="fl">0.8</span>                <span class="co"># Transparence des couleurs</span></span>
+<span id="cb49-7"><a href="#cb49-7" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb49-8"><a href="#cb49-8" aria-hidden="true" tabindex="-1"></a>plt.axis(<span class="st">'off'</span>)</span>
+<span id="cb49-9"><a href="#cb49-9" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">'Treemap des Départements'</span>, fontsize<span class="op">=</span><span class="dv">14</span>)</span>
+<span id="cb49-10"><a href="#cb49-10" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="assemble_files/figure-html/cell-40-output-1.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="genre-et-diversité" class="level4">
+<h4 class="anchored" data-anchor-id="genre-et-diversité"><strong>Genre et diversité</strong></h4>
+<div id="cell-50" class="cell" data-execution_count="287">
+<div class="sourceCode cell-code" id="cb50"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a>age_sex <span class="op">=</span> df.groupby([<span class="st">'genre'</span>]).size().reset_index()</span>
+<span id="cb50-2"><a href="#cb50-2" aria-hidden="true" tabindex="-1"></a>sns.barplot(data<span class="op">=</span>age_sex, x<span class="op">=</span><span class="st">'genre'</span>, y<span class="op">=</span><span class="dv">0</span>, palette<span class="op">=</span><span class="st">'tab10'</span>)</span>
+<span id="cb50-3"><a href="#cb50-3" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">"Distribution du genre"</span>)</span>
+<span id="cb50-4"><a href="#cb50-4" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">"Genre"</span>)</span>
+<span id="cb50-5"><a href="#cb50-5" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">"Nombre de députés"</span>)</span>
+<span id="cb50-6"><a href="#cb50-6" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i, ligne <span class="kw">in</span> age_sex.iterrows():</span>
+<span id="cb50-7"><a href="#cb50-7" aria-hidden="true" tabindex="-1"></a>    plt.text(x<span class="op">=</span> i, y<span class="op">=</span> ligne[<span class="dv">0</span>] <span class="op">+</span> <span class="dv">5</span>, s<span class="op">=</span> ligne[<span class="dv">0</span>], ha<span class="op">=</span> <span class="st">'center'</span>)</span>
+<span id="cb50-8"><a href="#cb50-8" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>C:\Users\aurel\AppData\Local\Temp\ipykernel_9196\1795266555.py:2: FutureWarning: 
+
+Passing `palette` without assigning `hue` is deprecated and will be removed in v0.14.0. Assign the `x` variable to `hue` and set `legend=False` for the same effect.
+
+  sns.barplot(data=age_sex, x='genre', y=0, palette='tab10')</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="assemble_files/figure-html/cell-41-output-2.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<div id="cell-51" class="cell">
+<div class="sourceCode cell-code" id="cb52"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a>age_sex <span class="op">=</span> df.groupby([<span class="st">'partie'</span>, <span class="st">'genre'</span>])[<span class="st">'age'</span>].mean().reset_index()</span>
+<span id="cb52-2"><a href="#cb52-2" aria-hidden="true" tabindex="-1"></a>sns.catplot(data<span class="op">=</span>age_sex, x<span class="op">=</span><span class="st">'age'</span>, y<span class="op">=</span><span class="st">'partie'</span>, hue<span class="op">=</span><span class="st">'genre'</span>, kind<span class="op">=</span><span class="st">'bar'</span>, height<span class="op">=</span><span class="dv">7</span>, aspect<span class="op">=</span><span class="dv">2</span>, palette<span class="op">=</span><span class="st">'muted'</span>)</span>
+<span id="cb52-3"><a href="#cb52-3" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">"Age moyen des députés par sexe et parti"</span>)</span>
+<span id="cb52-4"><a href="#cb52-4" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">"Age moyen"</span>)</span>
+<span id="cb52-5"><a href="#cb52-5" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">"Partis politiques"</span>)</span>
+<span id="cb52-6"><a href="#cb52-6" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="assemble_files/figure-html/cell-42-output-1.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<div id="cell-52" class="cell" data-execution_count="290">
+<div class="sourceCode cell-code" id="cb53"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb53-1"><a href="#cb53-1" aria-hidden="true" tabindex="-1"></a>interv_sex <span class="op">=</span> df.groupby([<span class="st">'partie'</span>, <span class="st">'genre'</span>])[<span class="st">'nb_interv'</span>].mean().reset_index()</span>
+<span id="cb53-2"><a href="#cb53-2" aria-hidden="true" tabindex="-1"></a>sns.catplot(data<span class="op">=</span>interv_sex, x<span class="op">=</span><span class="st">'nb_interv'</span>, y<span class="op">=</span><span class="st">'partie'</span>, hue<span class="op">=</span><span class="st">'genre'</span>, kind<span class="op">=</span><span class="st">'bar'</span>, height<span class="op">=</span><span class="dv">7</span>, aspect<span class="op">=</span><span class="dv">2</span>, palette<span class="op">=</span><span class="st">'muted'</span>)</span>
+<span id="cb53-3"><a href="#cb53-3" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">"Interventions par sexe et parti"</span>)</span>
+<span id="cb53-4"><a href="#cb53-4" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">"Nombre total d'interventions durant le mandat (16e legis)"</span>)</span>
+<span id="cb53-5"><a href="#cb53-5" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">"Partis politiques"</span>)</span>
+<span id="cb53-6"><a href="#cb53-6" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="assemble_files/figure-html/cell-43-output-1.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<div id="cell-53" class="cell" data-execution_count="291">
+<div class="sourceCode cell-code" id="cb54"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb54-1"><a href="#cb54-1" aria-hidden="true" tabindex="-1"></a>df.columns</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="291">
+<pre><code>Index(['id', 'nom', 'genre', 'date_naiss', 'lieu_naiss', 'profession',
+       'circons', 'partie', 'nb_interv', 'commission', 'Twitter', 'posts_nb',
+       'retw_nb', 'year_naiss', 'age', 'decennie_naissance', 'region'],
+      dtype='object')</code></pre>
+</div>
+</div>
+<div id="cell-54" class="cell" data-execution_count="299">
+<div class="sourceCode cell-code" id="cb56"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb56-1"><a href="#cb56-1" aria-hidden="true" tabindex="-1"></a>plt.figure(figsize<span class="op">=</span>(<span class="dv">12</span>, <span class="dv">7</span>))</span>
+<span id="cb56-2"><a href="#cb56-2" aria-hidden="true" tabindex="-1"></a>sns.scatterplot(df, x<span class="op">=</span><span class="st">'posts_nb'</span>, y<span class="op">=</span> <span class="st">'nb_interv'</span>, hue<span class="op">=</span><span class="st">'genre'</span>, alpha<span class="op">=</span><span class="fl">0.8</span>)</span>
+<span id="cb56-3"><a href="#cb56-3" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="assemble_files/figure-html/cell-45-output-1.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="analyse-professionnelle" class="level1">
+<h1>Analyse professionnelle</h1>
+<section id="professsions-antérieures-des-députés" class="level4">
+<h4 class="anchored" data-anchor-id="professsions-antérieures-des-députés"><strong>Professsions antérieures des députés</strong></h4>
+<div id="cell-57" class="cell" data-execution_count="305">
+<div class="sourceCode cell-code" id="cb57"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb57-1"><a href="#cb57-1" aria-hidden="true" tabindex="-1"></a>prof_count <span class="op">=</span> df[<span class="st">'profession'</span>].value_counts().reset_index()</span>
+<span id="cb57-2"><a href="#cb57-2" aria-hidden="true" tabindex="-1"></a>prof_count.columns <span class="op">=</span> [<span class="st">'profession'</span>, <span class="st">'nombre_dep'</span>]</span>
+<span id="cb57-3"><a href="#cb57-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb57-4"><a href="#cb57-4" aria-hidden="true" tabindex="-1"></a>plt.figure(figsize<span class="op">=</span>(<span class="dv">14</span>, <span class="dv">7</span>))</span>
+<span id="cb57-5"><a href="#cb57-5" aria-hidden="true" tabindex="-1"></a>sns.barplot(data<span class="op">=</span>prof_count[prof_count[<span class="st">'nombre_dep'</span>]<span class="op">&gt;</span><span class="dv">3</span>], x<span class="op">=</span><span class="st">'nombre_dep'</span>, y<span class="op">=</span><span class="st">'profession'</span>, palette<span class="op">=</span><span class="st">'viridis'</span>)</span>
+<span id="cb57-6"><a href="#cb57-6" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">"Répartition des députés par profession (régions avec plus de 3 deputés)"</span>)</span>
+<span id="cb57-7"><a href="#cb57-7" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">"Nombre de députés"</span>)</span>
+<span id="cb57-8"><a href="#cb57-8" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">"Profession"</span>)</span>
+<span id="cb57-9"><a href="#cb57-9" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
+<span id="cb57-10"><a href="#cb57-10" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>C:\Users\aurel\AppData\Local\Temp\ipykernel_9196\1642590271.py:5: FutureWarning: 
+
+Passing `palette` without assigning `hue` is deprecated and will be removed in v0.14.0. Assign the `y` variable to `hue` and set `legend=False` for the same effect.
+
+  sns.barplot(data=prof_count[prof_count['nombre_dep']&gt;3], x='nombre_dep', y='profession', palette='viridis')</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="assemble_files/figure-html/cell-46-output-2.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="corrélation-profession-nombre-dinterventions" class="level4">
+<h4 class="anchored" data-anchor-id="corrélation-profession-nombre-dinterventions"><strong>Corrélation profession-nombre d’interventions</strong></h4>
+<div id="cell-59" class="cell" data-execution_count="310">
+<div class="sourceCode cell-code" id="cb59"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb59-1"><a href="#cb59-1" aria-hidden="true" tabindex="-1"></a>prof_mean <span class="op">=</span> df.groupby(<span class="st">'profession'</span>)[<span class="st">'nb_interv'</span>].mean().reset_index()</span>
+<span id="cb59-2"><a href="#cb59-2" aria-hidden="true" tabindex="-1"></a>prof_mean.columns <span class="op">=</span> [<span class="st">'profession'</span>, <span class="st">'moy_interv'</span>]</span>
+<span id="cb59-3"><a href="#cb59-3" aria-hidden="true" tabindex="-1"></a>top_prof <span class="op">=</span> prof_mean.nlargest(<span class="dv">10</span>, <span class="st">'moy_interv'</span>)</span>
+<span id="cb59-4"><a href="#cb59-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb59-5"><a href="#cb59-5" aria-hidden="true" tabindex="-1"></a>plt.figure(figsize<span class="op">=</span>(<span class="dv">14</span>, <span class="dv">7</span>))</span>
+<span id="cb59-6"><a href="#cb59-6" aria-hidden="true" tabindex="-1"></a>sns.barplot(data<span class="op">=</span>top_prof, y<span class="op">=</span><span class="st">'moy_interv'</span>, x<span class="op">=</span><span class="st">'profession'</span>, palette<span class="op">=</span><span class="st">'viridis'</span>)</span>
+<span id="cb59-7"><a href="#cb59-7" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">"Interventions moyennes par profession (Top 10 des plus intervenants)"</span>)</span>
+<span id="cb59-8"><a href="#cb59-8" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">"Intervention moyenne"</span>)</span>
+<span id="cb59-9"><a href="#cb59-9" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">"Profession"</span>)</span>
+<span id="cb59-10"><a href="#cb59-10" aria-hidden="true" tabindex="-1"></a>plt.xticks(rotation<span class="op">=</span><span class="dv">30</span>, ha<span class="op">=</span><span class="st">'right'</span>)</span>
+<span id="cb59-11"><a href="#cb59-11" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
+<span id="cb59-12"><a href="#cb59-12" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>C:\Users\aurel\AppData\Local\Temp\ipykernel_9196\1360741882.py:6: FutureWarning: 
+
+Passing `palette` without assigning `hue` is deprecated and will be removed in v0.14.0. Assign the `x` variable to `hue` and set `legend=False` for the same effect.
+
+  sns.barplot(data=top_prof, y='moy_interv', x='profession', palette='viridis')</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="assemble_files/figure-html/cell-47-output-2.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="activité-parlementaire" class="level1">
+<h1>Activité parlementaire</h1>
+<section id="nombre-dinterventions-par-groupe-politique" class="level4">
+<h4 class="anchored" data-anchor-id="nombre-dinterventions-par-groupe-politique"><strong>Nombre d’interventions par groupe politique</strong></h4>
+<div id="cell-62" class="cell" data-execution_count="322">
+<div class="sourceCode cell-code" id="cb61"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb61-1"><a href="#cb61-1" aria-hidden="true" tabindex="-1"></a>group <span class="op">=</span> df.groupby(<span class="st">'partie'</span>)[<span class="st">'nb_interv'</span>].<span class="bu">sum</span>().reset_index()</span>
+<span id="cb61-2"><a href="#cb61-2" aria-hidden="true" tabindex="-1"></a>group1 <span class="op">=</span> group.sort_values(<span class="st">'nb_interv'</span>, ascending<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb61-3"><a href="#cb61-3" aria-hidden="true" tabindex="-1"></a>group <span class="op">=</span> df.groupby(<span class="st">'partie'</span>)[<span class="st">'nb_interv'</span>].mean().reset_index()</span>
+<span id="cb61-4"><a href="#cb61-4" aria-hidden="true" tabindex="-1"></a>group2 <span class="op">=</span> group.sort_values(by<span class="op">=</span><span class="st">'nb_interv'</span>, ascending<span class="op">=</span><span class="va">False</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="cell-63" class="cell" data-execution_count="339">
+<div class="sourceCode cell-code" id="cb62"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb62-1"><a href="#cb62-1" aria-hidden="true" tabindex="-1"></a>group1[<span class="st">'metric'</span>] <span class="op">=</span> <span class="st">'Sum'</span></span>
+<span id="cb62-2"><a href="#cb62-2" aria-hidden="true" tabindex="-1"></a>group2[<span class="st">'metric'</span>] <span class="op">=</span> <span class="st">'Mean'</span></span>
+<span id="cb62-3"><a href="#cb62-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb62-4"><a href="#cb62-4" aria-hidden="true" tabindex="-1"></a>fig, ax1 <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">14</span>, <span class="dv">10</span>))</span>
+<span id="cb62-5"><a href="#cb62-5" aria-hidden="true" tabindex="-1"></a>sns.barplot(data<span class="op">=</span>group1, x<span class="op">=</span><span class="st">'partie'</span>, y<span class="op">=</span><span class="st">'nb_interv'</span>, ax<span class="op">=</span>ax1, palette<span class="op">=</span><span class="st">'viridis'</span>, label<span class="op">=</span><span class="st">'Somme'</span>)</span>
+<span id="cb62-6"><a href="#cb62-6" aria-hidden="true" tabindex="-1"></a>ax1.set_ylabel(<span class="st">'Interventions totales'</span>, color<span class="op">=</span><span class="st">'blue'</span>)</span>
+<span id="cb62-7"><a href="#cb62-7" aria-hidden="true" tabindex="-1"></a>ax1.set_xlabel(<span class="st">''</span>)</span>
+<span id="cb62-8"><a href="#cb62-8" aria-hidden="true" tabindex="-1"></a>ax1.set_title(<span class="st">'Comparaison des interventions (Somme et Moyenne)'</span>)</span>
+<span id="cb62-9"><a href="#cb62-9" aria-hidden="true" tabindex="-1"></a>ax1.set_xticklabels(ax1.get_xticklabels(), rotation<span class="op">=</span><span class="dv">60</span>, ha<span class="op">=</span><span class="st">'right'</span>) <span class="co">#label des pp</span></span>
+<span id="cb62-10"><a href="#cb62-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb62-11"><a href="#cb62-11" aria-hidden="true" tabindex="-1"></a>ax2 <span class="op">=</span> ax1.twinx()</span>
+<span id="cb62-12"><a href="#cb62-12" aria-hidden="true" tabindex="-1"></a>sns.scatterplot(data<span class="op">=</span>group2, x<span class="op">=</span><span class="st">'partie'</span>, y<span class="op">=</span><span class="st">'nb_interv'</span>, ax<span class="op">=</span>ax2, color<span class="op">=</span><span class="st">'red'</span>, marker<span class="op">=</span><span class="st">'o'</span>, label<span class="op">=</span><span class="st">'Moyenne'</span>)</span>
+<span id="cb62-13"><a href="#cb62-13" aria-hidden="true" tabindex="-1"></a>ax2.set_ylabel(<span class="st">'Moyenne des interventions'</span>, color<span class="op">=</span><span class="st">'red'</span>)</span>
+<span id="cb62-14"><a href="#cb62-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb62-15"><a href="#cb62-15" aria-hidden="true" tabindex="-1"></a><span class="co"># legnd</span></span>
+<span id="cb62-16"><a href="#cb62-16" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
+<span id="cb62-17"><a href="#cb62-17" aria-hidden="true" tabindex="-1"></a>ax1.grid(<span class="va">False</span>) <span class="co"># no drill</span></span>
+<span id="cb62-18"><a href="#cb62-18" aria-hidden="true" tabindex="-1"></a>ax2.grid(<span class="va">False</span>)</span>
+<span id="cb62-19"><a href="#cb62-19" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>C:\Users\aurel\AppData\Local\Temp\ipykernel_9196\1947991989.py:5: FutureWarning: 
+
+Passing `palette` without assigning `hue` is deprecated and will be removed in v0.14.0. Assign the `x` variable to `hue` and set `legend=False` for the same effect.
+
+  sns.barplot(data=group1, x='partie', y='nb_interv', ax=ax1, palette='viridis', label='Somme')
+C:\Users\aurel\AppData\Local\Temp\ipykernel_9196\1947991989.py:9: UserWarning: set_ticklabels() should only be used with a fixed number of ticks, i.e. after set_ticks() or using a FixedLocator.
+  ax1.set_xticklabels(ax1.get_xticklabels(), rotation=60, ha='right') #label des pp</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="assemble_files/figure-html/cell-49-output-2.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="analyse-des-tweets-des-députés" class="level1">
+<h1>Analyse des tweets des députés</h1>
+<p><span style="color:red">a completer…</span></p>
+</section>
+<section id="corrélations-entre-les-données" class="level1">
+<h1>Corrélations entre les données</h1>
+</section>
+<section id="cluster" class="level1">
+<h1>Cluster</h1>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const onCopySuccess = function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
+  });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    // For code content inside modals, clipBoardJS needs to be initialized with a container option
+    // TODO: Check when it could be a function (https://github.com/zenorocha/clipboard.js/issues/860)
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
