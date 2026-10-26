@@ -87,19 +87,20 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <ul class="collapse">
   <li><a href="#what-each-model-uses" id="toc-what-each-model-uses" class="nav-link" data-scroll-target="#what-each-model-uses">What each model uses</a></li>
   </ul></li>
-  <li><a href="#inspect-the-data-before-fitting" id="toc-inspect-the-data-before-fitting" class="nav-link" data-scroll-target="#inspect-the-data-before-fitting">2. Inspect the data before fitting</a>
+  <li><a href="#spatial-neighbourhoods-and-weight-matrices" id="toc-spatial-neighbourhoods-and-weight-matrices" class="nav-link" data-scroll-target="#spatial-neighbourhoods-and-weight-matrices">2. Spatial neighbourhoods and weight matrices</a></li>
+  <li><a href="#inspect-the-data-before-fitting" id="toc-inspect-the-data-before-fitting" class="nav-link" data-scroll-target="#inspect-the-data-before-fitting">3. Inspect the data before fitting</a>
   <ul class="collapse">
   <li><a href="#what-one-observation-looks-like" id="toc-what-one-observation-looks-like" class="nav-link" data-scroll-target="#what-one-observation-looks-like">What one observation looks like</a></li>
   <li><a href="#sample-coverage-and-descriptive-statistics" id="toc-sample-coverage-and-descriptive-statistics" class="nav-link" data-scroll-target="#sample-coverage-and-descriptive-statistics">Sample coverage and descriptive statistics</a></li>
   </ul></li>
-  <li><a href="#research-question-1-forest-account-indicators-and-baseline-controls" id="toc-research-question-1-forest-account-indicators-and-baseline-controls" class="nav-link" data-scroll-target="#research-question-1-forest-account-indicators-and-baseline-controls">3. Research question 1: forest-account indicators and baseline controls</a></li>
-  <li><a href="#research-question-2-add-2024-emissions-as-a-predictor" id="toc-research-question-2-add-2024-emissions-as-a-predictor" class="nav-link" data-scroll-target="#research-question-2-add-2024-emissions-as-a-predictor">4. Research question 2: add 2024 emissions as a predictor</a></li>
-  <li><a href="#research-question-3-2024-emissions-as-the-outcome" id="toc-research-question-3-2024-emissions-as-the-outcome" class="nav-link" data-scroll-target="#research-question-3-2024-emissions-as-the-outcome">5. Research question 3: 2024 emissions as the outcome</a>
+  <li><a href="#research-question-1-forest-account-indicators-and-baseline-controls" id="toc-research-question-1-forest-account-indicators-and-baseline-controls" class="nav-link" data-scroll-target="#research-question-1-forest-account-indicators-and-baseline-controls">4. Research question 1: forest-account indicators and baseline controls</a></li>
+  <li><a href="#research-question-2-add-2024-emissions-as-a-predictor" id="toc-research-question-2-add-2024-emissions-as-a-predictor" class="nav-link" data-scroll-target="#research-question-2-add-2024-emissions-as-a-predictor">5. Research question 2: add 2024 emissions as a predictor</a></li>
+  <li><a href="#research-question-3-2024-emissions-as-the-outcome" id="toc-research-question-3-2024-emissions-as-the-outcome" class="nav-link" data-scroll-target="#research-question-3-2024-emissions-as-the-outcome">6. Research question 3: 2024 emissions as the outcome</a>
   <ul class="collapse">
   <li><a href="#descriptive-views-emissions-and-the-three-focal-indicators" id="toc-descriptive-views-emissions-and-the-three-focal-indicators" class="nav-link" data-scroll-target="#descriptive-views-emissions-and-the-three-focal-indicators">Descriptive views: emissions and the three focal indicators</a></li>
   </ul></li>
-  <li><a href="#compare-the-two-matrices-and-read-the-coefficients" id="toc-compare-the-two-matrices-and-read-the-coefficients" class="nav-link" data-scroll-target="#compare-the-two-matrices-and-read-the-coefficients">6. Compare the two matrices and read the coefficients</a></li>
-  <li><a href="#reproduction-and-limits" id="toc-reproduction-and-limits" class="nav-link" data-scroll-target="#reproduction-and-limits">7. Reproduction and limits</a></li>
+  <li><a href="#compare-the-two-matrices-and-read-the-coefficients" id="toc-compare-the-two-matrices-and-read-the-coefficients" class="nav-link" data-scroll-target="#compare-the-two-matrices-and-read-the-coefficients">7. Compare the two matrices and read the coefficients</a></li>
+  <li><a href="#reproduction-and-limits" id="toc-reproduction-and-limits" class="nav-link" data-scroll-target="#reproduction-and-limits">8. Reproduction and limits</a></li>
   </ul>
 </nav>
 </div>
@@ -142,66 +143,78 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="how-to-use-this-notebook" class="level1">
 <h1>1. How to use this notebook</h1>
-<p>By default, the notebook reads the current prepared analysis outputs. The analysis has already been run: it contains nine primary relationships, two spatial-weights matrices, and six candidate model families for each relationship and matrix. To rerun the upstream analysis before rendering, set <code>rerun_spatial_models: true</code> in the YAML parameters at the top. That runs <code>code/scripts/run_spatial_emissions_extension.py</code> from the repository root and refreshes the spatial result files. A full render with the default <code>false</code> setting only reads and presents the stored outputs.</p>
-<p>The rendered notebook is therefore useful in two modes: <strong>review mode</strong> reproduces tables and plots from stored outputs without refitting; <strong>rerun mode</strong> runs the estimation sequence first, then reads and displays its refreshed outputs.</p>
+<p>The notebook has two modes. With <code>rerun_spatial_models: false</code> (the default), Quarto reads the prepared model outputs and rebuilds the tables, descriptive plots, and weight maps. It does not refit the spatial models. With <code>true</code>, the first setup cell runs the upstream Python estimation script, then the rest of the notebook reads the refreshed files.</p>
+<p>To rerun the estimates and rebuild the website files, follow these steps in order. Do not run the code cells one by one.</p>
+<ol type="1">
+<li>Open this QMD file and, in the YAML block at the very top, change <code>rerun_spatial_models: false</code> to <code>rerun_spatial_models: true</code>. Save the file.</li>
+<li>Open a terminal in the BNC2 repository root, the folder containing <code>pyproject.toml</code>.</li>
+<li>Run the full Quarto command below. Quarto executes the whole document from top to bottom. The first setup cell runs the Python spatial-analysis script; after it finishes, the remaining cells read the refreshed CSV outputs and rebuild the tables, plots, and HTML.</li>
+</ol>
+<div class="sourceCode" id="cb1"><pre class="sourceCode powershell code-with-copy"><code class="sourceCode powershell"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>quarto render code<span class="op">/</span>notebooks<span class="op">/</span>07_spatial_econometrics<span class="op">.</span><span class="fu">qmd</span> <span class="op">--</span>output-dir <span class="st">"../../../../NotebookSites/gcw-spatial-econometrics"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Wait until Quarto finishes and reports that the HTML was created. Changing <code>true</code> alone does not run anything, and opening the public HTML page cannot run the analysis: the estimates run on your computer when you render this QMD. The command above assumes the <code>NotebookSites</code> repository is next to <code>BNC2 paper</code> in the same parent folder. Quarto resolves the output path relative to this QMD’s folder and writes the HTML and supporting files into <code>NotebookSites/gcw-spatial-econometrics</code>.</p>
+<ol start="4" type="1">
+<li>When the first render succeeds, change the parameter back to <code>false</code> and save. This prevents future renders from rerunning the estimation.</li>
+<li>Run the same Quarto command a second time. This second render does <strong>not</strong> refit the models: it rebuilds the final HTML from the freshly updated result files while leaving the notebook in its normal review mode.</li>
+<li>Rendering only changes local files. To update the public GitHub Pages website, commit and push the updated QMD, HTML, and supporting files from the separate <code>NotebookSites</code> repository.</li>
+</ol>
+<p>The rerun uses the Python executable named by the <code>PYTHON</code> environment variable, if set, or <code>python</code> on <code>PATH</code>; the repository’s Python spatial-analysis dependencies must be available in that environment. This switch reruns the spatial-analysis sequence only, not the full carbon-wealth accounting pipeline.</p>
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>root <span class="ot">&lt;-</span> <span class="fu">normalizePath</span>(<span class="fu">getwd</span>(), <span class="at">winslash =</span> <span class="st">"/"</span>, <span class="at">mustWork =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="cf">while</span> (<span class="sc">!</span><span class="fu">file.exists</span>(<span class="fu">file.path</span>(root, <span class="st">"pyproject.toml"</span>))) {</span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>  parent <span class="ot">&lt;-</span> <span class="fu">dirname</span>(root)</span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="fu">identical</span>(parent, root)) <span class="fu">stop</span>(<span class="st">"Render from the repository or one of its subfolders"</span>)</span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>  root <span class="ot">&lt;-</span> parent</span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="fu">isTRUE</span>(params<span class="sc">$</span>rerun_spatial_models)) {</span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>  run_output <span class="ot">&lt;-</span> <span class="fu">system2</span>(</span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>    <span class="fu">Sys.getenv</span>(<span class="st">"PYTHON"</span>, <span class="st">"python"</span>),</span>
-<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>    <span class="fu">shQuote</span>(<span class="fu">file.path</span>(root, <span class="st">"code"</span>, <span class="st">"scripts"</span>, <span class="st">"run_spatial_emissions_extension.py"</span>)),</span>
-<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">stdout =</span> <span class="cn">TRUE</span>, <span class="at">stderr =</span> <span class="cn">TRUE</span>, <span class="at">wait =</span> <span class="cn">TRUE</span>,</span>
-<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">env =</span> <span class="fu">paste0</span>(<span class="st">"PYTHONPATH="</span>, root)</span>
-<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>  )</span>
-<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>  run_status <span class="ot">&lt;-</span> <span class="fu">attr</span>(run_output, <span class="st">"status"</span>)</span>
-<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="fu">paste</span>(run_output, <span class="at">collapse =</span> <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>), <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span>
-<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(run_status) <span class="sc">&amp;&amp;</span> run_status <span class="sc">!=</span> <span class="dv">0</span>) <span class="fu">stop</span>(<span class="st">"Upstream spatial estimation failed"</span>)</span>
-<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>validation_dir <span class="ot">&lt;-</span> <span class="fu">file.path</span>(root, <span class="st">"results"</span>, <span class="st">"validation"</span>)</span>
-<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>master_path <span class="ot">&lt;-</span> <span class="fu">file.path</span>(validation_dir, <span class="st">"country_level_results_master.csv"</span>)</span>
-<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>output_files <span class="ot">&lt;-</span> <span class="fu">c</span>(</span>
-<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>  <span class="at">moran =</span> <span class="st">"spatial_emissions_2024_step1_moran.csv"</span>,</span>
-<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>  <span class="at">lm =</span> <span class="st">"spatial_emissions_2024_step2_lm_tests.csv"</span>,</span>
-<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>  <span class="at">nested =</span> <span class="st">"spatial_emissions_2024_step3_nested_tests.csv"</span>,</span>
-<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>  <span class="at">fit =</span> <span class="st">"spatial_emissions_2024_model_fit.csv"</span>,</span>
-<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>  <span class="at">coefficients =</span> <span class="st">"spatial_emissions_2024_model_coefficients.csv"</span>,</span>
-<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>  <span class="at">sample_audit =</span> <span class="st">"spatial_emissions_2024_sample_audit.csv"</span>,</span>
-<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>  <span class="at">decisions =</span> <span class="st">"spatial_model_decision_template.csv"</span></span>
-<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>output_paths <span class="ot">&lt;-</span> <span class="fu">file.path</span>(validation_dir, output_files)</span>
-<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(output_paths) <span class="ot">&lt;-</span> <span class="fu">names</span>(output_files)</span>
-<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a>missing_paths <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="cf">if</span> (<span class="sc">!</span><span class="fu">file.exists</span>(master_path)) master_path, output_paths[<span class="sc">!</span><span class="fu">file.exists</span>(output_paths)])</span>
-<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="fu">length</span>(missing_paths)) <span class="fu">stop</span>(<span class="st">"Required input(s) missing: "</span>, <span class="fu">paste</span>(missing_paths, <span class="at">collapse =</span> <span class="st">", "</span>))</span>
-<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a>master <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(master_path, <span class="at">check.names =</span> <span class="cn">FALSE</span>, <span class="at">stringsAsFactors =</span> <span class="cn">FALSE</span>)</span>
-<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a>tables <span class="ot">&lt;-</span> <span class="fu">lapply</span>(output_paths, read.csv, <span class="at">check.names =</span> <span class="cn">FALSE</span>, <span class="at">stringsAsFactors =</span> <span class="cn">FALSE</span>)</span>
-<span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(tables) <span class="ot">&lt;-</span> <span class="fu">names</span>(output_paths)</span>
-<span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a>moran <span class="ot">&lt;-</span> tables<span class="sc">$</span>moran</span>
-<span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a>lm <span class="ot">&lt;-</span> tables<span class="sc">$</span>lm</span>
-<span id="cb1-41"><a href="#cb1-41" aria-hidden="true" tabindex="-1"></a>nested <span class="ot">&lt;-</span> tables<span class="sc">$</span>nested</span>
-<span id="cb1-42"><a href="#cb1-42" aria-hidden="true" tabindex="-1"></a>fit <span class="ot">&lt;-</span> tables<span class="sc">$</span>fit</span>
-<span id="cb1-43"><a href="#cb1-43" aria-hidden="true" tabindex="-1"></a>coefficients <span class="ot">&lt;-</span> tables<span class="sc">$</span>coefficients</span>
-<span id="cb1-44"><a href="#cb1-44" aria-hidden="true" tabindex="-1"></a>sample_audit <span class="ot">&lt;-</span> tables<span class="sc">$</span>sample_audit</span>
-<span id="cb1-45"><a href="#cb1-45" aria-hidden="true" tabindex="-1"></a>decisions <span class="ot">&lt;-</span> tables<span class="sc">$</span>decisions</span>
-<span id="cb1-46"><a href="#cb1-46" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="sc">!</span><span class="st">"UNIT_CODE"</span> <span class="sc">%in%</span> <span class="fu">names</span>(master)) <span class="fu">stop</span>(<span class="st">"The current master table has no UNIT_CODE column"</span>)</span>
-<span id="cb1-47"><a href="#cb1-47" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="fu">anyDuplicated</span>(master<span class="sc">$</span>UNIT_CODE)) <span class="fu">stop</span>(<span class="st">"UNIT_CODE must uniquely identify each accounting unit"</span>)</span>
-<span id="cb1-48"><a href="#cb1-48" aria-hidden="true" tabindex="-1"></a>show_table <span class="ot">&lt;-</span> <span class="cf">function</span>(x, <span class="at">cols =</span> <span class="fu">names</span>(x), <span class="at">digits =</span> <span class="dv">3</span>, <span class="at">caption =</span> <span class="cn">NULL</span>) {</span>
-<span id="cb1-49"><a href="#cb1-49" aria-hidden="true" tabindex="-1"></a>  knitr<span class="sc">::</span><span class="fu">kable</span>(x[, <span class="fu">intersect</span>(cols, <span class="fu">names</span>(x)), <span class="at">drop =</span> <span class="cn">FALSE</span>], <span class="at">digits =</span> digits,</span>
-<span id="cb1-50"><a href="#cb1-50" aria-hidden="true" tabindex="-1"></a>               <span class="at">caption =</span> caption, <span class="at">row.names =</span> <span class="cn">FALSE</span>)</span>
-<span id="cb1-51"><a href="#cb1-51" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb1-52"><a href="#cb1-52" aria-hidden="true" tabindex="-1"></a><span class="fu">data.frame</span>(<span class="at">input =</span> <span class="fu">c</span>(<span class="st">"National analysis table"</span>, <span class="fu">names</span>(tables)),</span>
-<span id="cb1-53"><a href="#cb1-53" aria-hidden="true" tabindex="-1"></a>           <span class="at">rows =</span> <span class="fu">c</span>(<span class="fu">nrow</span>(master), <span class="fu">vapply</span>(tables, nrow, <span class="fu">integer</span>(<span class="dv">1</span>))),</span>
-<span id="cb1-54"><a href="#cb1-54" aria-hidden="true" tabindex="-1"></a>           <span class="at">file =</span> <span class="fu">c</span>(<span class="fu">basename</span>(master_path), <span class="fu">basename</span>(output_paths)), <span class="at">row.names =</span> <span class="cn">NULL</span>) <span class="sc">|&gt;</span></span>
-<span id="cb1-55"><a href="#cb1-55" aria-hidden="true" tabindex="-1"></a>  <span class="fu">show_table</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>root <span class="ot">&lt;-</span> <span class="fu">normalizePath</span>(<span class="fu">getwd</span>(), <span class="at">winslash =</span> <span class="st">"/"</span>, <span class="at">mustWork =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="cf">while</span> (<span class="sc">!</span><span class="fu">file.exists</span>(<span class="fu">file.path</span>(root, <span class="st">"pyproject.toml"</span>))) {</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  parent <span class="ot">&lt;-</span> <span class="fu">dirname</span>(root)</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="fu">identical</span>(parent, root)) <span class="fu">stop</span>(<span class="st">"Render from the repository or one of its subfolders"</span>)</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>  root <span class="ot">&lt;-</span> parent</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="fu">isTRUE</span>(params<span class="sc">$</span>rerun_spatial_models)) {</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>  run_output <span class="ot">&lt;-</span> <span class="fu">system2</span>(</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>    <span class="fu">Sys.getenv</span>(<span class="st">"PYTHON"</span>, <span class="st">"python"</span>),</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>    <span class="fu">shQuote</span>(<span class="fu">file.path</span>(root, <span class="st">"code"</span>, <span class="st">"scripts"</span>, <span class="st">"run_spatial_emissions_extension.py"</span>), <span class="at">type =</span> <span class="st">"cmd"</span>),</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">stdout =</span> <span class="cn">TRUE</span>, <span class="at">stderr =</span> <span class="cn">TRUE</span>, <span class="at">wait =</span> <span class="cn">TRUE</span></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>  run_status <span class="ot">&lt;-</span> <span class="fu">attr</span>(run_output, <span class="st">"status"</span>)</span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="fu">paste</span>(run_output, <span class="at">collapse =</span> <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>), <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(run_status) <span class="sc">&amp;&amp;</span> run_status <span class="sc">!=</span> <span class="dv">0</span>) <span class="fu">stop</span>(<span class="st">"Upstream spatial estimation failed"</span>)</span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>validation_dir <span class="ot">&lt;-</span> <span class="fu">file.path</span>(root, <span class="st">"results"</span>, <span class="st">"validation"</span>)</span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>master_path <span class="ot">&lt;-</span> <span class="fu">file.path</span>(validation_dir, <span class="st">"country_level_results_master.csv"</span>)</span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>output_files <span class="ot">&lt;-</span> <span class="fu">c</span>(</span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>  <span class="at">moran =</span> <span class="st">"spatial_emissions_2024_step1_moran.csv"</span>,</span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>  <span class="at">lm =</span> <span class="st">"spatial_emissions_2024_step2_lm_tests.csv"</span>,</span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>  <span class="at">nested =</span> <span class="st">"spatial_emissions_2024_step3_nested_tests.csv"</span>,</span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a>  <span class="at">fit =</span> <span class="st">"spatial_emissions_2024_model_fit.csv"</span>,</span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a>  <span class="at">coefficients =</span> <span class="st">"spatial_emissions_2024_model_coefficients.csv"</span>,</span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a>  <span class="at">sample_audit =</span> <span class="st">"spatial_emissions_2024_sample_audit.csv"</span>,</span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a>  <span class="at">decisions =</span> <span class="st">"spatial_model_decision_template.csv"</span></span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a>output_paths <span class="ot">&lt;-</span> <span class="fu">file.path</span>(validation_dir, output_files)</span>
+<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(output_paths) <span class="ot">&lt;-</span> <span class="fu">names</span>(output_files)</span>
+<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a>missing_paths <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="cf">if</span> (<span class="sc">!</span><span class="fu">file.exists</span>(master_path)) master_path, output_paths[<span class="sc">!</span><span class="fu">file.exists</span>(output_paths)])</span>
+<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="fu">length</span>(missing_paths)) <span class="fu">stop</span>(<span class="st">"Required input(s) missing: "</span>, <span class="fu">paste</span>(missing_paths, <span class="at">collapse =</span> <span class="st">", "</span>))</span>
+<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a>master <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(master_path, <span class="at">check.names =</span> <span class="cn">FALSE</span>, <span class="at">stringsAsFactors =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb2-36"><a href="#cb2-36" aria-hidden="true" tabindex="-1"></a>tables <span class="ot">&lt;-</span> <span class="fu">lapply</span>(output_paths, read.csv, <span class="at">check.names =</span> <span class="cn">FALSE</span>, <span class="at">stringsAsFactors =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb2-37"><a href="#cb2-37" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(tables) <span class="ot">&lt;-</span> <span class="fu">names</span>(output_paths)</span>
+<span id="cb2-38"><a href="#cb2-38" aria-hidden="true" tabindex="-1"></a>moran <span class="ot">&lt;-</span> tables<span class="sc">$</span>moran</span>
+<span id="cb2-39"><a href="#cb2-39" aria-hidden="true" tabindex="-1"></a>lm <span class="ot">&lt;-</span> tables<span class="sc">$</span>lm</span>
+<span id="cb2-40"><a href="#cb2-40" aria-hidden="true" tabindex="-1"></a>nested <span class="ot">&lt;-</span> tables<span class="sc">$</span>nested</span>
+<span id="cb2-41"><a href="#cb2-41" aria-hidden="true" tabindex="-1"></a>fit <span class="ot">&lt;-</span> tables<span class="sc">$</span>fit</span>
+<span id="cb2-42"><a href="#cb2-42" aria-hidden="true" tabindex="-1"></a>coefficients <span class="ot">&lt;-</span> tables<span class="sc">$</span>coefficients</span>
+<span id="cb2-43"><a href="#cb2-43" aria-hidden="true" tabindex="-1"></a>sample_audit <span class="ot">&lt;-</span> tables<span class="sc">$</span>sample_audit</span>
+<span id="cb2-44"><a href="#cb2-44" aria-hidden="true" tabindex="-1"></a>decisions <span class="ot">&lt;-</span> tables<span class="sc">$</span>decisions</span>
+<span id="cb2-45"><a href="#cb2-45" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="sc">!</span><span class="st">"UNIT_CODE"</span> <span class="sc">%in%</span> <span class="fu">names</span>(master)) <span class="fu">stop</span>(<span class="st">"The current master table has no UNIT_CODE column"</span>)</span>
+<span id="cb2-46"><a href="#cb2-46" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="fu">anyDuplicated</span>(master<span class="sc">$</span>UNIT_CODE)) <span class="fu">stop</span>(<span class="st">"UNIT_CODE must uniquely identify each accounting unit"</span>)</span>
+<span id="cb2-47"><a href="#cb2-47" aria-hidden="true" tabindex="-1"></a>show_table <span class="ot">&lt;-</span> <span class="cf">function</span>(x, <span class="at">cols =</span> <span class="fu">names</span>(x), <span class="at">digits =</span> <span class="dv">3</span>, <span class="at">caption =</span> <span class="cn">NULL</span>) {</span>
+<span id="cb2-48"><a href="#cb2-48" aria-hidden="true" tabindex="-1"></a>  knitr<span class="sc">::</span><span class="fu">kable</span>(x[, <span class="fu">intersect</span>(cols, <span class="fu">names</span>(x)), <span class="at">drop =</span> <span class="cn">FALSE</span>], <span class="at">digits =</span> digits,</span>
+<span id="cb2-49"><a href="#cb2-49" aria-hidden="true" tabindex="-1"></a>               <span class="at">caption =</span> caption, <span class="at">row.names =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb2-50"><a href="#cb2-50" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb2-51"><a href="#cb2-51" aria-hidden="true" tabindex="-1"></a><span class="fu">data.frame</span>(<span class="at">input =</span> <span class="fu">c</span>(<span class="st">"National analysis table"</span>, <span class="fu">names</span>(tables)),</span>
+<span id="cb2-52"><a href="#cb2-52" aria-hidden="true" tabindex="-1"></a>           <span class="at">rows =</span> <span class="fu">c</span>(<span class="fu">nrow</span>(master), <span class="fu">vapply</span>(tables, nrow, <span class="fu">integer</span>(<span class="dv">1</span>))),</span>
+<span id="cb2-53"><a href="#cb2-53" aria-hidden="true" tabindex="-1"></a>           <span class="at">file =</span> <span class="fu">c</span>(<span class="fu">basename</span>(master_path), <span class="fu">basename</span>(output_paths)), <span class="at">row.names =</span> <span class="cn">NULL</span>) <span class="sc">|&gt;</span></span>
+<span id="cb2-54"><a href="#cb2-54" aria-hidden="true" tabindex="-1"></a>  <span class="fu">show_table</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
 <table class="caption-top table table-sm table-striped small">
@@ -266,29 +279,220 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <h2 class="anchored" data-anchor-id="what-each-model-uses">What each model uses</h2>
 <p>The outcomes are (1) annual forest-capacity loss in MtCO₂/year, (2) reported annual loss as a percentage of GCW, and (3) GCW as a percentage of 2024 GDP. In the emissions-as-outcome models, the dependent variable is 2024 CO₂ emissions in MtCO₂/year. The 2024 emissions series comes from the current GCB 2025-derived country table.</p>
 <p>The common baseline controls are log GDP per capita, log forest area in million hectares, and the share of forest area in warm biomes. For forest-capacity loss and erosion, only units reporting deforestation enter the sample; unreported loss is missing, not zero. Every model uses <code>log1p</code> for its dependent variable. GDP per capita and forest area use natural-log transforms; the added emissions predictor uses <code>log1p</code> of MtCO₂/year. When a forest-account indicator is added to an emissions-as-outcome model, that predictor is also <code>log1p</code> transformed.</p>
-<p>The two neighbourhood definitions are row-standardised Queen contiguity and row-standardised symmetrised k-nearest neighbours with k = 5, constructed from representative points in an equal-area projection. Queen isolates are retained with no neighbours; kNN can connect territories across water. The two matrices answer spatial-model questions under different definitions of “neighbour”.</p>
+<p>The two neighbourhood definitions are row-standardised Queen contiguity and row-standardised symmetrised k-nearest neighbours with k = 5, constructed from representative points in an equal-area projection. Queen isolates are retained with no neighbours; kNN can connect territories across water. The next section maps what those non-zero relationships look like.</p>
 </section>
+</section>
+<section id="spatial-neighbourhoods-and-weight-matrices" class="level1">
+<h1>2. Spatial neighbourhoods and weight matrices</h1>
+<p>For a given analysis, each row and column of a spatial-weights matrix refers to one country or territory in that model’s sample. A non-zero entry means that two units are defined as neighbours; zero means they are not direct neighbours. Before fitting, the full neighbour graph is restricted to the complete-case sample for that outcome and the remaining rows are standardised. Each non-isolated row therefore sums to 1; an isolated Queen row sums to 0.</p>
+<p>The maps below use one concrete example: the 120-unit complete-case sample for the baseline annual forest-capacity-loss outcome. They are not a claim that all nine relationships use the same sample. Queen links join polygons that share an edge or a corner. The kNN-5 graph starts with each unit’s five nearest representative points in EPSG:6933, then symmetrises the links: if either unit selects the other, the pair is connected. After symmetrising, a unit can have more than five neighbours.</p>
+<p>Both matrices start with a binary link: a neighbour has weight 1 and a non-neighbour has weight 0. Row standardisation divides each row’s non-zero weights by that unit’s neighbour count. So, for example, if a unit has four neighbours, each receives weight 1/4 and the row sums to 1. An isolate has no links and its row sums to 0. The map fill shows neighbour count; line width shows the average of the two directed row-standardised weights for that pair.</p>
+<p>The fill shows each unit’s neighbour count. A line shows a non-zero neighbour relation; line width is the average of the two directed row-standardised weights for display. The maps are built by calling the same Python geometry and weights functions used by the estimation script. Rendering this section reconstructs the graph but does not fit models. Links crossing the map’s antimeridian seam are omitted from the drawn lines only; they remain in the matrices and models.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>weight_case <span class="ot">&lt;-</span> sample_audit[</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  sample_audit<span class="sc">$</span>specification <span class="sc">==</span> <span class="st">"baseline_2024_same_sample"</span> <span class="sc">&amp;</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    sample_audit<span class="sc">$</span>outcome <span class="sc">==</span> <span class="st">"lost_capacity_mtco2_yr"</span>, , drop <span class="ot">=</span> <span class="cn">FALSE</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>]</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="fu">nrow</span>(weight_case) <span class="sc">!=</span> <span class="dv">1</span>L) <span class="fu">stop</span>(<span class="st">"The baseline capacity-loss sample is missing or ambiguous"</span>)</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>weight_map_ids <span class="ot">&lt;-</span> <span class="fu">strsplit</span>(<span class="fu">as.character</span>(weight_case<span class="sc">$</span>matched_sample_hash_codes[<span class="dv">1</span>]), <span class="st">";"</span>, <span class="at">fixed =</span> <span class="cn">TRUE</span>)[[<span class="dv">1</span>]]</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="fu">length</span>(weight_map_ids) <span class="sc">!=</span> <span class="fu">as.integer</span>(weight_case<span class="sc">$</span>n[<span class="dv">1</span>])) <span class="fu">stop</span>(<span class="st">"Weight-map sample IDs do not match the saved sample size"</span>)</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>weight_map_dir <span class="ot">&lt;-</span> <span class="fu">tempfile</span>(<span class="st">"nb07-spatial-weights-"</span>)</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="fu">dir.create</span>(weight_map_dir)</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>python_root <span class="ot">&lt;-</span> <span class="fu">normalizePath</span>(root, <span class="at">winslash =</span> <span class="st">"/"</span>, <span class="at">mustWork =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>python_out <span class="ot">&lt;-</span> <span class="fu">normalizePath</span>(weight_map_dir, <span class="at">winslash =</span> <span class="st">"/"</span>, <span class="at">mustWork =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>python_ids <span class="ot">&lt;-</span> <span class="fu">paste0</span>(<span class="st">"ids = ["</span>, <span class="fu">paste0</span>(<span class="st">"'"</span>, weight_map_ids, <span class="st">"'"</span>, <span class="at">collapse =</span> <span class="st">", "</span>), <span class="st">"]"</span>)</span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>python_map_source <span class="ot">&lt;-</span> <span class="fu">c</span>(</span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>  <span class="st">"from pathlib import Path"</span>,</span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>  <span class="st">"import sys"</span>,</span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>  <span class="st">"import pandas as pd"</span>,</span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">paste0</span>(<span class="st">"root = Path(r'"</span>, python_root, <span class="st">"')"</span>),</span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">paste0</span>(<span class="st">"out_dir = Path(r'"</span>, python_out, <span class="st">"')"</span>),</span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>  <span class="st">"sys.path.insert(0, str(root / 'code' / 'scripts'))"</span>,</span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>  <span class="st">"import run_spatial_full_sequence as spatial"</span>,</span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a>  python_ids,</span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a>  <span class="st">"units, missing_geometry = spatial._unit_geometries()"</span>,</span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a>  <span class="st">"full_weights = spatial._build_weights(units)"</span>,</span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a>  <span class="st">"sample_units = units.set_index('iso3').loc[ids].reset_index()"</span>,</span>
+<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a>  <span class="st">"sample_units.to_file(out_dir / 'units.geojson', driver='GeoJSON')"</span>,</span>
+<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a>  <span class="st">"rows = []"</span>,</span>
+<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a>  <span class="st">"for matrix_name, full_weight in full_weights.items():"</span>,</span>
+<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a>  <span class="st">"    subset = spatial._weight_subsample(full_weight, ids)"</span>,</span>
+<span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a>  <span class="st">"    for focal in subset.id_order:"</span>,</span>
+<span id="cb3-31"><a href="#cb3-31" aria-hidden="true" tabindex="-1"></a>  <span class="st">"        for neighbour, value in zip(subset.neighbors[focal], subset.weights[focal]):"</span>,</span>
+<span id="cb3-32"><a href="#cb3-32" aria-hidden="true" tabindex="-1"></a>  <span class="st">"            rows.append({'matrix': matrix_name, 'from': focal, 'to': neighbour, 'weight': float(value)})"</span>,</span>
+<span id="cb3-33"><a href="#cb3-33" aria-hidden="true" tabindex="-1"></a>  <span class="st">"pd.DataFrame(rows).to_csv(out_dir / 'edges.csv', index=False)"</span></span>
+<span id="cb3-34"><a href="#cb3-34" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb3-35"><a href="#cb3-35" aria-hidden="true" tabindex="-1"></a>python_map_script <span class="ot">&lt;-</span> <span class="fu">file.path</span>(weight_map_dir, <span class="st">"export_spatial_weights.py"</span>)</span>
+<span id="cb3-36"><a href="#cb3-36" aria-hidden="true" tabindex="-1"></a><span class="fu">writeLines</span>(python_map_source, python_map_script, <span class="at">useBytes =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb3-37"><a href="#cb3-37" aria-hidden="true" tabindex="-1"></a>python_map_output <span class="ot">&lt;-</span> <span class="fu">system2</span>(</span>
+<span id="cb3-38"><a href="#cb3-38" aria-hidden="true" tabindex="-1"></a>  <span class="fu">Sys.getenv</span>(<span class="st">"PYTHON"</span>, <span class="st">"python"</span>), <span class="fu">shQuote</span>(python_map_script, <span class="at">type =</span> <span class="st">"cmd"</span>),</span>
+<span id="cb3-39"><a href="#cb3-39" aria-hidden="true" tabindex="-1"></a>  <span class="at">stdout =</span> <span class="cn">TRUE</span>, <span class="at">stderr =</span> <span class="cn">TRUE</span>, <span class="at">wait =</span> <span class="cn">TRUE</span></span>
+<span id="cb3-40"><a href="#cb3-40" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb3-41"><a href="#cb3-41" aria-hidden="true" tabindex="-1"></a>python_map_status <span class="ot">&lt;-</span> <span class="fu">attr</span>(python_map_output, <span class="st">"status"</span>)</span>
+<span id="cb3-42"><a href="#cb3-42" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(python_map_status) <span class="sc">&amp;&amp;</span> python_map_status <span class="sc">!=</span> <span class="dv">0</span>) {</span>
+<span id="cb3-43"><a href="#cb3-43" aria-hidden="true" tabindex="-1"></a>  <span class="fu">stop</span>(<span class="st">"Could not reconstruct the spatial-weight maps: "</span>, <span class="fu">paste</span>(<span class="fu">tail</span>(python_map_output, <span class="dv">12</span>), <span class="at">collapse =</span> <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>))</span>
+<span id="cb3-44"><a href="#cb3-44" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb3-45"><a href="#cb3-45" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="sc">!</span><span class="fu">file.exists</span>(<span class="fu">file.path</span>(weight_map_dir, <span class="st">"units.geojson"</span>)) <span class="sc">||</span> <span class="sc">!</span><span class="fu">file.exists</span>(<span class="fu">file.path</span>(weight_map_dir, <span class="st">"edges.csv"</span>))) {</span>
+<span id="cb3-46"><a href="#cb3-46" aria-hidden="true" tabindex="-1"></a>  <span class="fu">stop</span>(<span class="st">"The spatial-weight map data were not created"</span>)</span>
+<span id="cb3-47"><a href="#cb3-47" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb3-48"><a href="#cb3-48" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-49"><a href="#cb3-49" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(sf)</span>
+<span id="cb3-50"><a href="#cb3-50" aria-hidden="true" tabindex="-1"></a>weight_map_units <span class="ot">&lt;-</span> sf<span class="sc">::</span><span class="fu">st_read</span>(<span class="fu">file.path</span>(weight_map_dir, <span class="st">"units.geojson"</span>), <span class="at">quiet =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb3-51"><a href="#cb3-51" aria-hidden="true" tabindex="-1"></a>weight_edges <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="fu">file.path</span>(weight_map_dir, <span class="st">"edges.csv"</span>), <span class="at">stringsAsFactors =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb3-52"><a href="#cb3-52" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="fu">nrow</span>(weight_map_units) <span class="sc">!=</span> <span class="fu">length</span>(weight_map_ids)) <span class="fu">stop</span>(<span class="st">"Weight-map geometry does not match the saved sample"</span>)</span>
+<span id="cb3-53"><a href="#cb3-53" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-54"><a href="#cb3-54" aria-hidden="true" tabindex="-1"></a>matrix_labels <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="at">queen_contiguity =</span> <span class="st">"Queen contiguity"</span>, <span class="at">symmetric_knn5 =</span> <span class="st">"Symmetrised kNN-5"</span>)</span>
+<span id="cb3-55"><a href="#cb3-55" aria-hidden="true" tabindex="-1"></a>weight_summary <span class="ot">&lt;-</span> <span class="fu">do.call</span>(rbind, <span class="fu">lapply</span>(<span class="fu">names</span>(matrix_labels), <span class="cf">function</span>(matrix_name) {</span>
+<span id="cb3-56"><a href="#cb3-56" aria-hidden="true" tabindex="-1"></a>  x <span class="ot">&lt;-</span> weight_edges[weight_edges<span class="sc">$</span>matrix <span class="sc">==</span> matrix_name, , drop <span class="ot">=</span> <span class="cn">FALSE</span>]</span>
+<span id="cb3-57"><a href="#cb3-57" aria-hidden="true" tabindex="-1"></a>  degree <span class="ot">&lt;-</span> <span class="fu">table</span>(<span class="fu">factor</span>(x<span class="sc">$</span>from, <span class="at">levels =</span> weight_map_units<span class="sc">$</span>iso3))</span>
+<span id="cb3-58"><a href="#cb3-58" aria-hidden="true" tabindex="-1"></a>  pairs <span class="ot">&lt;-</span> <span class="fu">paste</span>(<span class="fu">pmin</span>(x<span class="sc">$</span>from, x<span class="sc">$</span>to), <span class="fu">pmax</span>(x<span class="sc">$</span>from, x<span class="sc">$</span>to), <span class="at">sep =</span> <span class="st">"|"</span>)</span>
+<span id="cb3-59"><a href="#cb3-59" aria-hidden="true" tabindex="-1"></a>  <span class="fu">data.frame</span>(</span>
+<span id="cb3-60"><a href="#cb3-60" aria-hidden="true" tabindex="-1"></a>    <span class="at">matrix =</span> <span class="fu">unname</span>(matrix_labels[matrix_name]),</span>
+<span id="cb3-61"><a href="#cb3-61" aria-hidden="true" tabindex="-1"></a>    <span class="at">units =</span> <span class="fu">nrow</span>(weight_map_units),</span>
+<span id="cb3-62"><a href="#cb3-62" aria-hidden="true" tabindex="-1"></a>    <span class="at">isolates =</span> <span class="fu">sum</span>(degree <span class="sc">==</span> <span class="dv">0</span>),</span>
+<span id="cb3-63"><a href="#cb3-63" aria-hidden="true" tabindex="-1"></a>    <span class="at">mean_neighbours =</span> <span class="fu">mean</span>(<span class="fu">as.numeric</span>(degree)),</span>
+<span id="cb3-64"><a href="#cb3-64" aria-hidden="true" tabindex="-1"></a>    <span class="at">undirected_links =</span> <span class="fu">length</span>(<span class="fu">unique</span>(pairs)),</span>
+<span id="cb3-65"><a href="#cb3-65" aria-hidden="true" tabindex="-1"></a>    <span class="at">minimum_nonzero_weight =</span> <span class="fu">min</span>(x<span class="sc">$</span>weight),</span>
+<span id="cb3-66"><a href="#cb3-66" aria-hidden="true" tabindex="-1"></a>    <span class="at">maximum_nonzero_weight =</span> <span class="fu">max</span>(x<span class="sc">$</span>weight)</span>
+<span id="cb3-67"><a href="#cb3-67" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb3-68"><a href="#cb3-68" aria-hidden="true" tabindex="-1"></a>}))</span>
+<span id="cb3-69"><a href="#cb3-69" aria-hidden="true" tabindex="-1"></a><span class="fu">show_table</span>(weight_summary, <span class="at">digits =</span> <span class="dv">3</span>,</span>
+<span id="cb3-70"><a href="#cb3-70" aria-hidden="true" tabindex="-1"></a>           <span class="at">caption =</span> <span class="st">"Graph structure and non-zero row-standardised weights for the mapped sample"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<caption>Graph structure and non-zero row-standardised weights for the mapped sample</caption>
+<colgroup>
+<col style="width: 16%">
+<col style="width: 5%">
+<col style="width: 8%">
+<col style="width: 14%">
+<col style="width: 15%">
+<col style="width: 20%">
+<col style="width: 20%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">matrix</th>
+<th style="text-align: right;">units</th>
+<th style="text-align: right;">isolates</th>
+<th style="text-align: right;">mean_neighbours</th>
+<th style="text-align: right;">undirected_links</th>
+<th style="text-align: right;">minimum_nonzero_weight</th>
+<th style="text-align: right;">maximum_nonzero_weight</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Queen contiguity</td>
+<td style="text-align: right;">120</td>
+<td style="text-align: right;">19</td>
+<td style="text-align: right;">2.667</td>
+<td style="text-align: right;">160</td>
+<td style="text-align: right;">0.083</td>
+<td style="text-align: right;">1</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Symmetrised kNN-5</td>
+<td style="text-align: right;">120</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">3.683</td>
+<td style="text-align: right;">221</td>
+<td style="text-align: right;">0.143</td>
+<td style="text-align: right;">1</td>
+</tr>
+</tbody>
+</table>
+</div>
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>points_6933 <span class="ot">&lt;-</span> sf<span class="sc">::</span><span class="fu">st_point_on_surface</span>(sf<span class="sc">::</span><span class="fu">st_transform</span>(weight_map_units, <span class="dv">6933</span>))</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>points_geo <span class="ot">&lt;-</span> sf<span class="sc">::</span><span class="fu">st_transform</span>(points_6933, <span class="dv">4326</span>)</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>xy <span class="ot">&lt;-</span> sf<span class="sc">::</span><span class="fu">st_coordinates</span>(points_geo)</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>weight_points <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">iso3 =</span> weight_map_units<span class="sc">$</span>iso3, <span class="at">lon =</span> xy[, <span class="dv">1</span>], <span class="at">lat =</span> xy[, <span class="dv">2</span>])</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>weight_edges<span class="sc">$</span>node_a <span class="ot">&lt;-</span> <span class="fu">pmin</span>(weight_edges<span class="sc">$</span>from, weight_edges<span class="sc">$</span>to)</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>weight_edges<span class="sc">$</span>node_b <span class="ot">&lt;-</span> <span class="fu">pmax</span>(weight_edges<span class="sc">$</span>from, weight_edges<span class="sc">$</span>to)</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>map_edges <span class="ot">&lt;-</span> <span class="fu">aggregate</span>(weight <span class="sc">~</span> matrix <span class="sc">+</span> node_a <span class="sc">+</span> node_b, <span class="at">data =</span> weight_edges, <span class="at">FUN =</span> mean)</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>map_edges <span class="ot">&lt;-</span> <span class="fu">merge</span>(map_edges, weight_points, <span class="at">by.x =</span> <span class="st">"node_a"</span>, <span class="at">by.y =</span> <span class="st">"iso3"</span>)</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(map_edges)[<span class="fu">names</span>(map_edges) <span class="sc">==</span> <span class="st">"lon"</span>] <span class="ot">&lt;-</span> <span class="st">"lon_a"</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(map_edges)[<span class="fu">names</span>(map_edges) <span class="sc">==</span> <span class="st">"lat"</span>] <span class="ot">&lt;-</span> <span class="st">"lat_a"</span></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>map_edges <span class="ot">&lt;-</span> <span class="fu">merge</span>(map_edges, weight_points, <span class="at">by.x =</span> <span class="st">"node_b"</span>, <span class="at">by.y =</span> <span class="st">"iso3"</span>)</span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(map_edges)[<span class="fu">names</span>(map_edges) <span class="sc">==</span> <span class="st">"lon"</span>] <span class="ot">&lt;-</span> <span class="st">"lon_b"</span></span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(map_edges)[<span class="fu">names</span>(map_edges) <span class="sc">==</span> <span class="st">"lat"</span>] <span class="ot">&lt;-</span> <span class="st">"lat_b"</span></span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>map_edges<span class="sc">$</span>crosses_seam <span class="ot">&lt;-</span> <span class="fu">abs</span>(map_edges<span class="sc">$</span>lon_a <span class="sc">-</span> map_edges<span class="sc">$</span>lon_b) <span class="sc">&gt;</span> <span class="dv">180</span></span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>seam_link_count <span class="ot">&lt;-</span> <span class="fu">sum</span>(map_edges<span class="sc">$</span>crosses_seam)</span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>map_edges <span class="ot">&lt;-</span> map_edges[<span class="sc">!</span>map_edges<span class="sc">$</span>crosses_seam, , drop <span class="ot">=</span> <span class="cn">FALSE</span>]</span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>map_edges<span class="sc">$</span>matrix_label <span class="ot">&lt;-</span> <span class="fu">factor</span>(<span class="fu">unname</span>(matrix_labels[map_edges<span class="sc">$</span>matrix]), <span class="at">levels =</span> <span class="fu">unname</span>(matrix_labels))</span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>make_weight_map_panel <span class="ot">&lt;-</span> <span class="cf">function</span>(matrix_name) {</span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a>  x <span class="ot">&lt;-</span> weight_map_units</span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a>  degree <span class="ot">&lt;-</span> <span class="fu">table</span>(<span class="fu">factor</span>(weight_edges<span class="sc">$</span>from[weight_edges<span class="sc">$</span>matrix <span class="sc">==</span> matrix_name], <span class="at">levels =</span> x<span class="sc">$</span>iso3))</span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a>  x<span class="sc">$</span>neighbour_count <span class="ot">&lt;-</span> <span class="fu">as.integer</span>(degree)</span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a>  x<span class="sc">$</span>matrix_label <span class="ot">&lt;-</span> <span class="fu">unname</span>(matrix_labels[matrix_name])</span>
+<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a>  x</span>
+<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a>weight_map_sf <span class="ot">&lt;-</span> <span class="fu">rbind</span>(<span class="fu">make_weight_map_panel</span>(<span class="st">"queen_contiguity"</span>), <span class="fu">make_weight_map_panel</span>(<span class="st">"symmetric_knn5"</span>))</span>
+<span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-29"><a href="#cb4-29" aria-hidden="true" tabindex="-1"></a>ggplot2<span class="sc">::</span><span class="fu">ggplot</span>() <span class="sc">+</span></span>
+<span id="cb4-30"><a href="#cb4-30" aria-hidden="true" tabindex="-1"></a>  ggplot2<span class="sc">::</span><span class="fu">geom_sf</span>(<span class="at">data =</span> weight_map_sf, ggplot2<span class="sc">::</span><span class="fu">aes</span>(<span class="at">fill =</span> neighbour_count), <span class="at">colour =</span> <span class="st">"grey55"</span>, <span class="at">linewidth =</span> <span class="fl">0.12</span>) <span class="sc">+</span></span>
+<span id="cb4-31"><a href="#cb4-31" aria-hidden="true" tabindex="-1"></a>  ggplot2<span class="sc">::</span><span class="fu">geom_segment</span>(</span>
+<span id="cb4-32"><a href="#cb4-32" aria-hidden="true" tabindex="-1"></a>    <span class="at">data =</span> map_edges,</span>
+<span id="cb4-33"><a href="#cb4-33" aria-hidden="true" tabindex="-1"></a>    ggplot2<span class="sc">::</span><span class="fu">aes</span>(<span class="at">x =</span> lon_a, <span class="at">y =</span> lat_a, <span class="at">xend =</span> lon_b, <span class="at">yend =</span> lat_b, <span class="at">linewidth =</span> weight),</span>
+<span id="cb4-34"><a href="#cb4-34" aria-hidden="true" tabindex="-1"></a>    <span class="at">colour =</span> <span class="st">"#263238"</span>, <span class="at">alpha =</span> <span class="fl">0.28</span>, <span class="at">inherit.aes =</span> <span class="cn">FALSE</span></span>
+<span id="cb4-35"><a href="#cb4-35" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb4-36"><a href="#cb4-36" aria-hidden="true" tabindex="-1"></a>  ggplot2<span class="sc">::</span><span class="fu">geom_point</span>(</span>
+<span id="cb4-37"><a href="#cb4-37" aria-hidden="true" tabindex="-1"></a>    <span class="at">data =</span> weight_points, ggplot2<span class="sc">::</span><span class="fu">aes</span>(<span class="at">x =</span> lon, <span class="at">y =</span> lat),</span>
+<span id="cb4-38"><a href="#cb4-38" aria-hidden="true" tabindex="-1"></a>    <span class="at">shape =</span> <span class="dv">21</span>, <span class="at">fill =</span> <span class="st">"white"</span>, <span class="at">colour =</span> <span class="st">"#263238"</span>, <span class="at">size =</span> <span class="fl">0.55</span>, <span class="at">stroke =</span> <span class="fl">0.12</span></span>
+<span id="cb4-39"><a href="#cb4-39" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb4-40"><a href="#cb4-40" aria-hidden="true" tabindex="-1"></a>  ggplot2<span class="sc">::</span><span class="fu">facet_wrap</span>(<span class="sc">~</span>matrix_label, <span class="at">ncol =</span> <span class="dv">2</span>) <span class="sc">+</span></span>
+<span id="cb4-41"><a href="#cb4-41" aria-hidden="true" tabindex="-1"></a>  ggplot2<span class="sc">::</span><span class="fu">scale_fill_viridis_c</span>(<span class="at">option =</span> <span class="st">"C"</span>, <span class="at">name =</span> <span class="st">"Neighbours"</span>) <span class="sc">+</span></span>
+<span id="cb4-42"><a href="#cb4-42" aria-hidden="true" tabindex="-1"></a>  ggplot2<span class="sc">::</span><span class="fu">scale_linewidth</span>(<span class="at">range =</span> <span class="fu">c</span>(<span class="fl">0.08</span>, <span class="fl">0.35</span>), <span class="at">guide =</span> <span class="st">"none"</span>) <span class="sc">+</span></span>
+<span id="cb4-43"><a href="#cb4-43" aria-hidden="true" tabindex="-1"></a>  ggplot2<span class="sc">::</span><span class="fu">coord_sf</span>(</span>
+<span id="cb4-44"><a href="#cb4-44" aria-hidden="true" tabindex="-1"></a>    <span class="at">crs =</span> sf<span class="sc">::</span><span class="fu">st_crs</span>(<span class="st">"ESRI:54030"</span>), <span class="at">default_crs =</span> sf<span class="sc">::</span><span class="fu">st_crs</span>(<span class="dv">4326</span>), <span class="at">datum =</span> <span class="cn">NA</span>, <span class="at">expand =</span> <span class="cn">FALSE</span></span>
+<span id="cb4-45"><a href="#cb4-45" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb4-46"><a href="#cb4-46" aria-hidden="true" tabindex="-1"></a>  ggplot2<span class="sc">::</span><span class="fu">labs</span>(</span>
+<span id="cb4-47"><a href="#cb4-47" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"Two spatial-weight structures for the same 120-unit sample"</span>,</span>
+<span id="cb4-48"><a href="#cb4-48" aria-hidden="true" tabindex="-1"></a>    <span class="at">subtitle =</span> <span class="st">"Fill = neighbour count; line = non-zero relation in W; width = mean of reciprocal row weights"</span>,</span>
+<span id="cb4-49"><a href="#cb4-49" aria-hidden="true" tabindex="-1"></a>    <span class="at">caption =</span> <span class="fu">paste0</span>(<span class="st">"The map uses the baseline capacity-loss sample. "</span>, seam_link_count,</span>
+<span id="cb4-50"><a href="#cb4-50" aria-hidden="true" tabindex="-1"></a>                     <span class="st">" links crossing the map seam are hidden in the drawing only; all links remain in W."</span>),</span>
+<span id="cb4-51"><a href="#cb4-51" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="cn">NULL</span>, <span class="at">y =</span> <span class="cn">NULL</span></span>
+<span id="cb4-52"><a href="#cb4-52" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb4-53"><a href="#cb4-53" aria-hidden="true" tabindex="-1"></a>  ggplot2<span class="sc">::</span><span class="fu">theme_minimal</span>(<span class="at">base_size =</span> <span class="dv">10</span>) <span class="sc">+</span></span>
+<span id="cb4-54"><a href="#cb4-54" aria-hidden="true" tabindex="-1"></a>  ggplot2<span class="sc">::</span><span class="fu">theme</span>(<span class="at">panel.grid =</span> ggplot2<span class="sc">::</span><span class="fu">element_blank</span>(), <span class="at">strip.text =</span> ggplot2<span class="sc">::</span><span class="fu">element_text</span>(<span class="at">face =</span> <span class="st">"bold"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="07_spatial_econometrics_files/figure-html/unnamed-chunk-2-1.png" class="img-fluid figure-img" width="1152"></p>
+</figure>
+</div>
+</div>
+</div>
 </section>
 <section id="inspect-the-data-before-fitting" class="level1">
-<h1>2. Inspect the data before fitting</h1>
+<h1>3. Inspect the data before fitting</h1>
 <section id="what-one-observation-looks-like" class="level2">
 <h2 class="anchored" data-anchor-id="what-one-observation-looks-like">What one observation looks like</h2>
 <p><code>UNIT_CODE</code> is the study’s accounting-unit identifier. The table below shows real rows from the current master table, narrowed to the fields used in this spatial analysis, so the unit identifiers and measurement scales are visible before estimates are discussed.</p>
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>preview_cols <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"UNIT_CODE"</span>, <span class="st">"name"</span>, <span class="st">"spatial_outcome_lost_capacity_mtco2_yr"</span>,</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>                  <span class="st">"spatial_outcome_erosion_pct_of_gcw"</span>, <span class="st">"spatial_outcome_gcw_gdp_pct_2024"</span>,</span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>                  <span class="st">"co2_emissions_tco2_2024"</span>, <span class="st">"gdp_per_capita_2024"</span>,</span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>                  <span class="st">"forest_area_allocated_total_ha"</span>, <span class="st">"forest_warm_biome_share"</span>)</span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>missing_preview <span class="ot">&lt;-</span> <span class="fu">setdiff</span>(preview_cols, <span class="fu">names</span>(master))</span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="fu">length</span>(missing_preview)) <span class="fu">stop</span>(<span class="st">"Missing master fields: "</span>, <span class="fu">paste</span>(missing_preview, <span class="at">collapse =</span> <span class="st">", "</span>))</span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>head_preview <span class="ot">&lt;-</span> utils<span class="sc">::</span><span class="fu">head</span>(master[, preview_cols], <span class="dv">8</span>)</span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(head_preview) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"UNIT_CODE"</span>, <span class="st">"Unit"</span>, <span class="st">"Capacity loss (MtCO2/yr)"</span>, <span class="st">"Loss / GCW (%)"</span>,</span>
-<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>                         <span class="st">"GCW / GDP 2024 (%)"</span>, <span class="st">"CO2 emissions 2024 (tCO2/yr)"</span>,</span>
-<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>                         <span class="st">"GDP per capita 2024 (US$2015)"</span>, <span class="st">"Forest area (ha)"</span>, <span class="st">"Warm-biome share"</span>)</span>
-<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a><span class="fu">show_table</span>(head_preview, <span class="at">digits =</span> <span class="dv">3</span>,</span>
-<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>           <span class="at">caption =</span> <span class="st">"First eight study units and the variables used in the spatial analysis"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>preview_cols <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"UNIT_CODE"</span>, <span class="st">"name"</span>, <span class="st">"spatial_outcome_lost_capacity_mtco2_yr"</span>,</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>                  <span class="st">"spatial_outcome_erosion_pct_of_gcw"</span>, <span class="st">"spatial_outcome_gcw_gdp_pct_2024"</span>,</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>                  <span class="st">"co2_emissions_tco2_2024"</span>, <span class="st">"gdp_per_capita_2024"</span>,</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>                  <span class="st">"forest_area_allocated_total_ha"</span>, <span class="st">"forest_warm_biome_share"</span>)</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>missing_preview <span class="ot">&lt;-</span> <span class="fu">setdiff</span>(preview_cols, <span class="fu">names</span>(master))</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="fu">length</span>(missing_preview)) <span class="fu">stop</span>(<span class="st">"Missing master fields: "</span>, <span class="fu">paste</span>(missing_preview, <span class="at">collapse =</span> <span class="st">", "</span>))</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>head_preview <span class="ot">&lt;-</span> utils<span class="sc">::</span><span class="fu">head</span>(master[, preview_cols], <span class="dv">8</span>)</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(head_preview) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"UNIT_CODE"</span>, <span class="st">"Unit"</span>, <span class="st">"Capacity loss (MtCO2/yr)"</span>, <span class="st">"Loss / GCW (%)"</span>,</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>                         <span class="st">"GCW / GDP 2024 (%)"</span>, <span class="st">"CO2 emissions 2024 (tCO2/yr)"</span>,</span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>                         <span class="st">"GDP per capita 2024 (US$2015)"</span>, <span class="st">"Forest area (ha)"</span>, <span class="st">"Warm-biome share"</span>)</span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a><span class="fu">show_table</span>(head_preview, <span class="at">digits =</span> <span class="dv">3</span>,</span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>           <span class="at">caption =</span> <span class="st">"First eight study units and the variables used in the spatial analysis"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
 <table class="caption-top table table-sm table-striped small">
@@ -417,18 +621,18 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>primary <span class="ot">&lt;-</span> decisions[decisions<span class="sc">$</span>role <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"Primary"</span>, <span class="st">"Extended"</span>), , drop <span class="ot">=</span> <span class="cn">FALSE</span>]</span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>key <span class="ot">&lt;-</span> <span class="cf">function</span>(d) <span class="fu">paste</span>(d<span class="sc">$</span>specification, d<span class="sc">$</span>outcome, <span class="at">sep =</span> <span class="st">"::"</span>)</span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>primary_keys <span class="ot">&lt;-</span> <span class="fu">key</span>(primary)</span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="fu">stopifnot</span>(<span class="fu">nrow</span>(primary) <span class="sc">==</span> <span class="dv">9</span>L, <span class="sc">!</span><span class="fu">anyDuplicated</span>(primary_keys))</span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>filter_primary <span class="ot">&lt;-</span> <span class="cf">function</span>(d) d[<span class="fu">key</span>(d) <span class="sc">%in%</span> primary_keys, , drop <span class="ot">=</span> <span class="cn">FALSE</span>]</span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>moran_primary <span class="ot">&lt;-</span> <span class="fu">filter_primary</span>(moran)</span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>lm_primary <span class="ot">&lt;-</span> <span class="fu">filter_primary</span>(lm)</span>
-<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>nested_primary <span class="ot">&lt;-</span> <span class="fu">filter_primary</span>(nested)</span>
-<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>fit_primary <span class="ot">&lt;-</span> <span class="fu">filter_primary</span>(fit)</span>
-<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>coef_primary <span class="ot">&lt;-</span> <span class="fu">filter_primary</span>(coefficients)</span>
-<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a><span class="fu">show_table</span>(primary, <span class="fu">c</span>(<span class="st">"relationship_order"</span>, <span class="st">"relationship"</span>, <span class="st">"specification"</span>, <span class="st">"outcome"</span>, <span class="st">"sample_n"</span>),</span>
-<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>           <span class="at">caption =</span> <span class="st">"Nine prespecified relationships and their complete-case sample sizes"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>primary <span class="ot">&lt;-</span> decisions[decisions<span class="sc">$</span>role <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"Primary"</span>, <span class="st">"Extended"</span>), , drop <span class="ot">=</span> <span class="cn">FALSE</span>]</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>key <span class="ot">&lt;-</span> <span class="cf">function</span>(d) <span class="fu">paste</span>(d<span class="sc">$</span>specification, d<span class="sc">$</span>outcome, <span class="at">sep =</span> <span class="st">"::"</span>)</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>primary_keys <span class="ot">&lt;-</span> <span class="fu">key</span>(primary)</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="fu">stopifnot</span>(<span class="fu">nrow</span>(primary) <span class="sc">==</span> <span class="dv">9</span>L, <span class="sc">!</span><span class="fu">anyDuplicated</span>(primary_keys))</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>filter_primary <span class="ot">&lt;-</span> <span class="cf">function</span>(d) d[<span class="fu">key</span>(d) <span class="sc">%in%</span> primary_keys, , drop <span class="ot">=</span> <span class="cn">FALSE</span>]</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>moran_primary <span class="ot">&lt;-</span> <span class="fu">filter_primary</span>(moran)</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>lm_primary <span class="ot">&lt;-</span> <span class="fu">filter_primary</span>(lm)</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>nested_primary <span class="ot">&lt;-</span> <span class="fu">filter_primary</span>(nested)</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>fit_primary <span class="ot">&lt;-</span> <span class="fu">filter_primary</span>(fit)</span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>coef_primary <span class="ot">&lt;-</span> <span class="fu">filter_primary</span>(coefficients)</span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a><span class="fu">show_table</span>(primary, <span class="fu">c</span>(<span class="st">"relationship_order"</span>, <span class="st">"relationship"</span>, <span class="st">"specification"</span>, <span class="st">"outcome"</span>, <span class="st">"sample_n"</span>),</span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>           <span class="at">caption =</span> <span class="st">"Nine prespecified relationships and their complete-case sample sizes"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
 <table class="caption-top table table-sm table-striped small">
@@ -518,34 +722,34 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(primary, <span class="fu">aes</span>(<span class="at">x =</span> <span class="fu">reorder</span>(relationship, sample_n), <span class="at">y =</span> sample_n)) <span class="sc">+</span></span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_col</span>(<span class="at">fill =</span> <span class="st">"#58758A"</span>) <span class="sc">+</span> <span class="fu">coord_flip</span>() <span class="sc">+</span></span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="cn">NULL</span>, <span class="at">y =</span> <span class="st">"Complete-case units"</span>, <span class="at">title =</span> <span class="st">"Sample size by relationship"</span>) <span class="sc">+</span></span>
-<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>(<span class="at">base_size =</span> <span class="dv">11</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(primary, <span class="fu">aes</span>(<span class="at">x =</span> <span class="fu">reorder</span>(relationship, sample_n), <span class="at">y =</span> sample_n)) <span class="sc">+</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_col</span>(<span class="at">fill =</span> <span class="st">"#58758A"</span>) <span class="sc">+</span> <span class="fu">coord_flip</span>() <span class="sc">+</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="cn">NULL</span>, <span class="at">y =</span> <span class="st">"Complete-case units"</span>, <span class="at">title =</span> <span class="st">"Sample size by relationship"</span>) <span class="sc">+</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>(<span class="at">base_size =</span> <span class="dv">11</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="07_spatial_econometrics_files/figure-html/unnamed-chunk-3-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="07_spatial_econometrics_files/figure-html/unnamed-chunk-4-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>measure_cols <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"spatial_outcome_lost_capacity_mtco2_yr"</span>, <span class="st">"spatial_outcome_erosion_pct_of_gcw"</span>,</span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>                  <span class="st">"spatial_outcome_gcw_gdp_pct_2024"</span>, <span class="st">"co2_emissions_tco2_2024"</span>,</span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>                  <span class="st">"spatial_predictor_log_gdp_per_capita_2024"</span>, <span class="st">"spatial_predictor_log_forest_area_mha"</span>,</span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>                  <span class="st">"spatial_predictor_log_emissions_mtco2_2024"</span>,</span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>                  <span class="st">"spatial_predictor_log1p_lost_capacity_mtco2_yr"</span>,</span>
-<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>                  <span class="st">"spatial_predictor_log1p_erosion_pct_of_gcw"</span>,</span>
-<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>                  <span class="st">"spatial_predictor_log1p_gcw_gdp_pct_2024"</span>)</span>
-<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>desc <span class="ot">&lt;-</span> <span class="fu">do.call</span>(rbind, <span class="fu">lapply</span>(measure_cols, <span class="cf">function</span>(nm) {</span>
-<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>  x <span class="ot">&lt;-</span> master[[nm]]; x <span class="ot">&lt;-</span> x[<span class="fu">is.finite</span>(x)]</span>
-<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">data.frame</span>(<span class="at">variable =</span> nm, <span class="at">n =</span> <span class="fu">length</span>(x), <span class="at">mean =</span> <span class="fu">mean</span>(x), <span class="at">sd =</span> <span class="fu">sd</span>(x), <span class="at">median =</span> <span class="fu">median</span>(x),</span>
-<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>             <span class="at">p25 =</span> <span class="fu">unname</span>(<span class="fu">quantile</span>(x, .<span class="dv">25</span>)), <span class="at">p75 =</span> <span class="fu">unname</span>(<span class="fu">quantile</span>(x, .<span class="dv">75</span>)))</span>
-<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>}))</span>
-<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a><span class="fu">show_table</span>(desc, <span class="at">digits =</span> <span class="dv">3</span>, <span class="at">caption =</span> <span class="st">"Descriptive statistics for observed outcomes and transformed predictors"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>measure_cols <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"spatial_outcome_lost_capacity_mtco2_yr"</span>, <span class="st">"spatial_outcome_erosion_pct_of_gcw"</span>,</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>                  <span class="st">"spatial_outcome_gcw_gdp_pct_2024"</span>, <span class="st">"co2_emissions_tco2_2024"</span>,</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>                  <span class="st">"spatial_predictor_log_gdp_per_capita_2024"</span>, <span class="st">"spatial_predictor_log_forest_area_mha"</span>,</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>                  <span class="st">"spatial_predictor_log_emissions_mtco2_2024"</span>,</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>                  <span class="st">"spatial_predictor_log1p_lost_capacity_mtco2_yr"</span>,</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>                  <span class="st">"spatial_predictor_log1p_erosion_pct_of_gcw"</span>,</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>                  <span class="st">"spatial_predictor_log1p_gcw_gdp_pct_2024"</span>)</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>desc <span class="ot">&lt;-</span> <span class="fu">do.call</span>(rbind, <span class="fu">lapply</span>(measure_cols, <span class="cf">function</span>(nm) {</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>  x <span class="ot">&lt;-</span> master[[nm]]; x <span class="ot">&lt;-</span> x[<span class="fu">is.finite</span>(x)]</span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">data.frame</span>(<span class="at">variable =</span> nm, <span class="at">n =</span> <span class="fu">length</span>(x), <span class="at">mean =</span> <span class="fu">mean</span>(x), <span class="at">sd =</span> <span class="fu">sd</span>(x), <span class="at">median =</span> <span class="fu">median</span>(x),</span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>             <span class="at">p25 =</span> <span class="fu">unname</span>(<span class="fu">quantile</span>(x, .<span class="dv">25</span>)), <span class="at">p75 =</span> <span class="fu">unname</span>(<span class="fu">quantile</span>(x, .<span class="dv">75</span>)))</span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>}))</span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a><span class="fu">show_table</span>(desc, <span class="at">digits =</span> <span class="dv">3</span>, <span class="at">caption =</span> <span class="st">"Descriptive statistics for observed outcomes and transformed predictors"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
 <table class="caption-top table table-sm table-striped small">
@@ -666,22 +870,22 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>plot_data <span class="ot">&lt;-</span> <span class="fu">rbind</span>(</span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">data.frame</span>(<span class="at">measure =</span> <span class="st">"Annual forest-capacity loss"</span>, <span class="at">value =</span> <span class="fu">log1p</span>(master<span class="sc">$</span>spatial_outcome_lost_capacity_mtco2_yr)),</span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">data.frame</span>(<span class="at">measure =</span> <span class="st">"Relative GCW erosion"</span>, <span class="at">value =</span> <span class="fu">log1p</span>(master<span class="sc">$</span>spatial_outcome_erosion_pct_of_gcw)),</span>
-<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">data.frame</span>(<span class="at">measure =</span> <span class="st">"GCW / GDP"</span>, <span class="at">value =</span> <span class="fu">log1p</span>(master<span class="sc">$</span>spatial_outcome_gcw_gdp_pct_2024)),</span>
-<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">data.frame</span>(<span class="at">measure =</span> <span class="st">"2024 CO2 emissions"</span>, <span class="at">value =</span> <span class="fu">log1p</span>(master<span class="sc">$</span>co2_emissions_tco2_2024 <span class="sc">/</span> <span class="fl">1e6</span>))</span>
-<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>plot_data <span class="ot">&lt;-</span> plot_data[<span class="fu">is.finite</span>(plot_data<span class="sc">$</span>value), ]</span>
-<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(plot_data, <span class="fu">aes</span>(<span class="at">x =</span> value)) <span class="sc">+</span> <span class="fu">geom_histogram</span>(<span class="at">bins =</span> <span class="dv">25</span>, <span class="at">fill =</span> <span class="st">"#58758A"</span>, <span class="at">colour =</span> <span class="st">"white"</span>) <span class="sc">+</span></span>
-<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span> measure, <span class="at">scales =</span> <span class="st">"free"</span>, <span class="at">ncol =</span> <span class="dv">2</span>) <span class="sc">+</span></span>
-<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"log1p-transformed value"</span>, <span class="at">y =</span> <span class="st">"Study units"</span>, <span class="at">title =</span> <span class="st">"Outcome distributions on the model scale"</span>) <span class="sc">+</span></span>
-<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>(<span class="at">base_size =</span> <span class="dv">11</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>plot_data <span class="ot">&lt;-</span> <span class="fu">rbind</span>(</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">data.frame</span>(<span class="at">measure =</span> <span class="st">"Annual forest-capacity loss"</span>, <span class="at">value =</span> <span class="fu">log1p</span>(master<span class="sc">$</span>spatial_outcome_lost_capacity_mtco2_yr)),</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">data.frame</span>(<span class="at">measure =</span> <span class="st">"Relative GCW erosion"</span>, <span class="at">value =</span> <span class="fu">log1p</span>(master<span class="sc">$</span>spatial_outcome_erosion_pct_of_gcw)),</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">data.frame</span>(<span class="at">measure =</span> <span class="st">"GCW / GDP"</span>, <span class="at">value =</span> <span class="fu">log1p</span>(master<span class="sc">$</span>spatial_outcome_gcw_gdp_pct_2024)),</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">data.frame</span>(<span class="at">measure =</span> <span class="st">"2024 CO2 emissions"</span>, <span class="at">value =</span> <span class="fu">log1p</span>(master<span class="sc">$</span>co2_emissions_tco2_2024 <span class="sc">/</span> <span class="fl">1e6</span>))</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>plot_data <span class="ot">&lt;-</span> plot_data[<span class="fu">is.finite</span>(plot_data<span class="sc">$</span>value), ]</span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(plot_data, <span class="fu">aes</span>(<span class="at">x =</span> value)) <span class="sc">+</span> <span class="fu">geom_histogram</span>(<span class="at">bins =</span> <span class="dv">25</span>, <span class="at">fill =</span> <span class="st">"#58758A"</span>, <span class="at">colour =</span> <span class="st">"white"</span>) <span class="sc">+</span></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span> measure, <span class="at">scales =</span> <span class="st">"free"</span>, <span class="at">ncol =</span> <span class="dv">2</span>) <span class="sc">+</span></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"log1p-transformed value"</span>, <span class="at">y =</span> <span class="st">"Study units"</span>, <span class="at">title =</span> <span class="st">"Outcome distributions on the model scale"</span>) <span class="sc">+</span></span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>(<span class="at">base_size =</span> <span class="dv">11</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="07_spatial_econometrics_files/figure-html/unnamed-chunk-3-2.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="07_spatial_econometrics_files/figure-html/unnamed-chunk-4-2.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
@@ -689,19 +893,19 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 </section>
 <section id="research-question-1-forest-account-indicators-and-baseline-controls" class="level1">
-<h1>3. Research question 1: forest-account indicators and baseline controls</h1>
+<h1>4. Research question 1: forest-account indicators and baseline controls</h1>
 <p><strong>Question:</strong> How are annual capacity loss, relative GCW erosion, and GCW/GDP associated with GDP per capita, forest area, and warm-biome share?</p>
 <p>The sequence begins with OLS using heteroskedasticity-robust standard errors as a non-spatial reference. Moran’s I then describes spatial autocorrelation in the outcome and OLS residuals. Lagrange-multiplier tests evaluate specified forms of spatial dependence relative to OLS. These diagnostics do not automatically choose a spatial estimator.</p>
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>q1 <span class="ot">&lt;-</span> primary[primary<span class="sc">$</span>specification <span class="sc">==</span> <span class="st">"baseline_2024_same_sample"</span>, ]</span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>q1_moran <span class="ot">&lt;-</span> moran_primary[moran_primary<span class="sc">$</span>specification <span class="sc">==</span> <span class="st">"baseline_2024_same_sample"</span>, ]</span>
-<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>q1_lm <span class="ot">&lt;-</span> lm_primary[lm_primary<span class="sc">$</span>specification <span class="sc">==</span> <span class="st">"baseline_2024_same_sample"</span>, ]</span>
-<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>q1_fits <span class="ot">&lt;-</span> fit_primary[fit_primary<span class="sc">$</span>specification <span class="sc">==</span> <span class="st">"baseline_2024_same_sample"</span>, ]</span>
-<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>q1_nested <span class="ot">&lt;-</span> nested_primary[nested_primary<span class="sc">$</span>specification <span class="sc">==</span> <span class="st">"baseline_2024_same_sample"</span>, ]</span>
-<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="fu">show_table</span>(q1, <span class="fu">c</span>(<span class="st">"relationship_order"</span>, <span class="st">"relationship"</span>, <span class="st">"outcome"</span>, <span class="st">"sample_n"</span>),</span>
-<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>           <span class="at">caption =</span> <span class="st">"Question 1: three baseline outcome models"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>q1 <span class="ot">&lt;-</span> primary[primary<span class="sc">$</span>specification <span class="sc">==</span> <span class="st">"baseline_2024_same_sample"</span>, ]</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>q1_moran <span class="ot">&lt;-</span> moran_primary[moran_primary<span class="sc">$</span>specification <span class="sc">==</span> <span class="st">"baseline_2024_same_sample"</span>, ]</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>q1_lm <span class="ot">&lt;-</span> lm_primary[lm_primary<span class="sc">$</span>specification <span class="sc">==</span> <span class="st">"baseline_2024_same_sample"</span>, ]</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>q1_fits <span class="ot">&lt;-</span> fit_primary[fit_primary<span class="sc">$</span>specification <span class="sc">==</span> <span class="st">"baseline_2024_same_sample"</span>, ]</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>q1_nested <span class="ot">&lt;-</span> nested_primary[nested_primary<span class="sc">$</span>specification <span class="sc">==</span> <span class="st">"baseline_2024_same_sample"</span>, ]</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a><span class="fu">show_table</span>(q1, <span class="fu">c</span>(<span class="st">"relationship_order"</span>, <span class="st">"relationship"</span>, <span class="st">"outcome"</span>, <span class="st">"sample_n"</span>),</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>           <span class="at">caption =</span> <span class="st">"Question 1: three baseline outcome models"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
 <table class="caption-top table table-sm table-striped small">
@@ -744,9 +948,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">show_table</span>(q1_moran, <span class="fu">c</span>(<span class="st">"outcome"</span>, <span class="st">"weight"</span>, <span class="st">"measure"</span>, <span class="st">"n"</span>, <span class="st">"moran_i"</span>, <span class="st">"p_permutation_two_sided"</span>,</span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>                       <span class="st">"p_holm_within_specification_measure"</span>), <span class="at">digits =</span> <span class="dv">4</span>,</span>
-<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>           <span class="at">caption =</span> <span class="st">"Question 1: Moran diagnostics"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">show_table</span>(q1_moran, <span class="fu">c</span>(<span class="st">"outcome"</span>, <span class="st">"weight"</span>, <span class="st">"measure"</span>, <span class="st">"n"</span>, <span class="st">"moran_i"</span>, <span class="st">"p_permutation_two_sided"</span>,</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>                       <span class="st">"p_holm_within_specification_measure"</span>), <span class="at">digits =</span> <span class="dv">4</span>,</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>           <span class="at">caption =</span> <span class="st">"Question 1: Moran diagnostics"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
 <table class="caption-top table table-sm table-striped small">
@@ -885,9 +1089,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">show_table</span>(q1_lm, <span class="fu">c</span>(<span class="st">"outcome"</span>, <span class="st">"weight"</span>, <span class="st">"test"</span>, <span class="st">"statistic"</span>, <span class="st">"df"</span>, <span class="st">"p_value"</span>,</span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>                    <span class="st">"p_holm_within_specification_test"</span>), <span class="at">digits =</span> <span class="dv">4</span>,</span>
-<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>           <span class="at">caption =</span> <span class="st">"Question 1: OLS Lagrange-multiplier diagnostics"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">show_table</span>(q1_lm, <span class="fu">c</span>(<span class="st">"outcome"</span>, <span class="st">"weight"</span>, <span class="st">"test"</span>, <span class="st">"statistic"</span>, <span class="st">"df"</span>, <span class="st">"p_value"</span>,</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>                    <span class="st">"p_holm_within_specification_test"</span>), <span class="at">digits =</span> <span class="dv">4</span>,</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>           <span class="at">caption =</span> <span class="st">"Question 1: OLS Lagrange-multiplier diagnostics"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
 <table class="caption-top table table-sm table-striped small">
@@ -1242,10 +1446,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">show_table</span>(q1_fits[<span class="fu">order</span>(q1_fits<span class="sc">$</span>outcome, q1_fits<span class="sc">$</span>weight, q1_fits<span class="sc">$</span>bic_rank), ],</span>
-<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>           <span class="fu">c</span>(<span class="st">"outcome"</span>, <span class="st">"weight"</span>, <span class="st">"model"</span>, <span class="st">"n"</span>, <span class="st">"aic"</span>, <span class="st">"bic"</span>, <span class="st">"aic_rank"</span>, <span class="st">"bic_rank"</span>, <span class="st">"rho"</span>, <span class="st">"lambda"</span>,</span>
-<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>             <span class="st">"optimizer_success"</span>, <span class="st">"covariance_status"</span>), <span class="at">digits =</span> <span class="dv">3</span>,</span>
-<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>           <span class="at">caption =</span> <span class="st">"Question 1: all six model candidates under both weights matrices"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">show_table</span>(q1_fits[<span class="fu">order</span>(q1_fits<span class="sc">$</span>outcome, q1_fits<span class="sc">$</span>weight, q1_fits<span class="sc">$</span>bic_rank), ],</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>           <span class="fu">c</span>(<span class="st">"outcome"</span>, <span class="st">"weight"</span>, <span class="st">"model"</span>, <span class="st">"n"</span>, <span class="st">"aic"</span>, <span class="st">"bic"</span>, <span class="st">"aic_rank"</span>, <span class="st">"bic_rank"</span>, <span class="st">"rho"</span>, <span class="st">"lambda"</span>,</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>             <span class="st">"optimizer_success"</span>, <span class="st">"covariance_status"</span>), <span class="at">digits =</span> <span class="dv">3</span>,</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>           <span class="at">caption =</span> <span class="st">"Question 1: all six model candidates under both weights matrices"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
 <table class="caption-top table table-sm table-striped small">
@@ -1790,9 +1994,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">show_table</span>(q1_nested, <span class="fu">c</span>(<span class="st">"outcome"</span>, <span class="st">"weight"</span>, <span class="st">"comparison"</span>, <span class="st">"restricted_model"</span>, <span class="st">"unrestricted_model"</span>,</span>
-<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>                        <span class="st">"lr_statistic"</span>, <span class="st">"df"</span>, <span class="st">"p_value"</span>, <span class="st">"test_status"</span>), <span class="at">digits =</span> <span class="dv">4</span>,</span>
-<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>           <span class="at">caption =</span> <span class="st">"Question 1: nested likelihood-ratio comparisons"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">show_table</span>(q1_nested, <span class="fu">c</span>(<span class="st">"outcome"</span>, <span class="st">"weight"</span>, <span class="st">"comparison"</span>, <span class="st">"restricted_model"</span>, <span class="st">"unrestricted_model"</span>,</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>                        <span class="st">"lr_statistic"</span>, <span class="st">"df"</span>, <span class="st">"p_value"</span>, <span class="st">"test_status"</span>), <span class="at">digits =</span> <span class="dv">4</span>,</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>           <span class="at">caption =</span> <span class="st">"Question 1: nested likelihood-ratio comparisons"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
 <table class="caption-top table table-sm table-striped small">
@@ -2025,16 +2229,16 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>q1_shortlist <span class="ot">&lt;-</span> q1_fits[<span class="fu">order</span>(q1_fits<span class="sc">$</span>outcome, q1_fits<span class="sc">$</span>weight, q1_fits<span class="sc">$</span>bic), ]</span>
-<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>q1_shortlist <span class="ot">&lt;-</span> q1_shortlist[<span class="sc">!</span><span class="fu">duplicated</span>(q1_shortlist[<span class="fu">c</span>(<span class="st">"outcome"</span>, <span class="st">"weight"</span>)]), ]</span>
-<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>q1_shortlist <span class="ot">&lt;-</span> <span class="fu">merge</span>(q1_shortlist, primary[<span class="fu">c</span>(<span class="st">"specification"</span>, <span class="st">"outcome"</span>, <span class="st">"relationship_order"</span>, <span class="st">"relationship"</span>)],</span>
-<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>                      <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"specification"</span>, <span class="st">"outcome"</span>), <span class="at">all.x =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>q1_terms <span class="ot">&lt;-</span> <span class="fu">merge</span>(q1_shortlist[<span class="fu">c</span>(<span class="st">"outcome"</span>, <span class="st">"weight"</span>, <span class="st">"model"</span>, <span class="st">"n"</span>, <span class="st">"bic"</span>)], coef_primary,</span>
-<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>                  <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"outcome"</span>, <span class="st">"weight"</span>, <span class="st">"model"</span>, <span class="st">"n"</span>), <span class="at">all.x =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a><span class="fu">show_table</span>(q1_terms[<span class="fu">order</span>(q1_terms<span class="sc">$</span>outcome, q1_terms<span class="sc">$</span>weight, q1_terms<span class="sc">$</span>term), ],</span>
-<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>           <span class="fu">c</span>(<span class="st">"outcome"</span>, <span class="st">"weight"</span>, <span class="st">"model"</span>, <span class="st">"term"</span>, <span class="st">"coefficient"</span>, <span class="st">"std_error_ml"</span>, <span class="st">"z_wald_ml"</span>,</span>
-<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>             <span class="st">"p_wald_ml"</span>, <span class="st">"bic"</span>, <span class="st">"covariance_status"</span>), <span class="at">digits =</span> <span class="dv">4</span>,</span>
-<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>           <span class="at">caption =</span> <span class="st">"Question 1: coefficients of each matrix's provisional minimum-BIC candidate"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>q1_shortlist <span class="ot">&lt;-</span> q1_fits[<span class="fu">order</span>(q1_fits<span class="sc">$</span>outcome, q1_fits<span class="sc">$</span>weight, q1_fits<span class="sc">$</span>bic), ]</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>q1_shortlist <span class="ot">&lt;-</span> q1_shortlist[<span class="sc">!</span><span class="fu">duplicated</span>(q1_shortlist[<span class="fu">c</span>(<span class="st">"outcome"</span>, <span class="st">"weight"</span>)]), ]</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>q1_shortlist <span class="ot">&lt;-</span> <span class="fu">merge</span>(q1_shortlist, primary[<span class="fu">c</span>(<span class="st">"specification"</span>, <span class="st">"outcome"</span>, <span class="st">"relationship_order"</span>, <span class="st">"relationship"</span>)],</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>                      <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"specification"</span>, <span class="st">"outcome"</span>), <span class="at">all.x =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>q1_terms <span class="ot">&lt;-</span> <span class="fu">merge</span>(q1_shortlist[<span class="fu">c</span>(<span class="st">"outcome"</span>, <span class="st">"weight"</span>, <span class="st">"model"</span>, <span class="st">"n"</span>, <span class="st">"bic"</span>)], coef_primary,</span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>                  <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"outcome"</span>, <span class="st">"weight"</span>, <span class="st">"model"</span>, <span class="st">"n"</span>), <span class="at">all.x =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a><span class="fu">show_table</span>(q1_terms[<span class="fu">order</span>(q1_terms<span class="sc">$</span>outcome, q1_terms<span class="sc">$</span>weight, q1_terms<span class="sc">$</span>term), ],</span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>           <span class="fu">c</span>(<span class="st">"outcome"</span>, <span class="st">"weight"</span>, <span class="st">"model"</span>, <span class="st">"term"</span>, <span class="st">"coefficient"</span>, <span class="st">"std_error_ml"</span>, <span class="st">"z_wald_ml"</span>,</span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>             <span class="st">"p_wald_ml"</span>, <span class="st">"bic"</span>, <span class="st">"covariance_status"</span>), <span class="at">digits =</span> <span class="dv">4</span>,</span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>           <span class="at">caption =</span> <span class="st">"Question 1: coefficients of each matrix's provisional minimum-BIC candidate"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
 <table class="caption-top table table-sm table-striped small">
@@ -2853,19 +3057,19 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>The coefficient table reports fitted parameters; it does not interpret their scientific meaning. For spatial models, raw parameters may not equal direct, indirect, or total marginal effects. Consult the model parameterisation before interpreting them.</p>
 </section>
 <section id="research-question-2-add-2024-emissions-as-a-predictor" class="level1">
-<h1>4. Research question 2: add 2024 emissions as a predictor</h1>
+<h1>5. Research question 2: add 2024 emissions as a predictor</h1>
 <p><strong>Question:</strong> When 2024 emissions are added to the baseline controls, how do the three forest-account relationships and their model diagnostics compare with the matched baseline?</p>
 <p>Baseline and emissions-augmented models use the same complete-case units for each outcome. The compared models therefore differ by the added predictor rather than by the sample. Likelihood-ratio tests and fit summaries are shown as evidence for author review, not as automatic selection rules.</p>
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>q2 <span class="ot">&lt;-</span> primary[primary<span class="sc">$</span>specification <span class="sc">==</span> <span class="st">"add_emissions_2024_as_x"</span>, ]</span>
-<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>q2_moran <span class="ot">&lt;-</span> moran_primary[moran_primary<span class="sc">$</span>specification <span class="sc">==</span> <span class="st">"add_emissions_2024_as_x"</span>, ]</span>
-<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>q2_lm <span class="ot">&lt;-</span> lm_primary[lm_primary<span class="sc">$</span>specification <span class="sc">==</span> <span class="st">"add_emissions_2024_as_x"</span>, ]</span>
-<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>q2_fits <span class="ot">&lt;-</span> fit_primary[fit_primary<span class="sc">$</span>specification <span class="sc">==</span> <span class="st">"add_emissions_2024_as_x"</span>, ]</span>
-<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>q2_nested <span class="ot">&lt;-</span> nested_primary[nested_primary<span class="sc">$</span>specification <span class="sc">==</span> <span class="st">"add_emissions_2024_as_x"</span>, ]</span>
-<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a><span class="fu">show_table</span>(q2, <span class="fu">c</span>(<span class="st">"relationship_order"</span>, <span class="st">"relationship"</span>, <span class="st">"outcome"</span>, <span class="st">"sample_n"</span>),</span>
-<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>           <span class="at">caption =</span> <span class="st">"Question 2: three models adding emissions as a predictor"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>q2 <span class="ot">&lt;-</span> primary[primary<span class="sc">$</span>specification <span class="sc">==</span> <span class="st">"add_emissions_2024_as_x"</span>, ]</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>q2_moran <span class="ot">&lt;-</span> moran_primary[moran_primary<span class="sc">$</span>specification <span class="sc">==</span> <span class="st">"add_emissions_2024_as_x"</span>, ]</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>q2_lm <span class="ot">&lt;-</span> lm_primary[lm_primary<span class="sc">$</span>specification <span class="sc">==</span> <span class="st">"add_emissions_2024_as_x"</span>, ]</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>q2_fits <span class="ot">&lt;-</span> fit_primary[fit_primary<span class="sc">$</span>specification <span class="sc">==</span> <span class="st">"add_emissions_2024_as_x"</span>, ]</span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>q2_nested <span class="ot">&lt;-</span> nested_primary[nested_primary<span class="sc">$</span>specification <span class="sc">==</span> <span class="st">"add_emissions_2024_as_x"</span>, ]</span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a><span class="fu">show_table</span>(q2, <span class="fu">c</span>(<span class="st">"relationship_order"</span>, <span class="st">"relationship"</span>, <span class="st">"outcome"</span>, <span class="st">"sample_n"</span>),</span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>           <span class="at">caption =</span> <span class="st">"Question 2: three models adding emissions as a predictor"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
 <table class="caption-top table table-sm table-striped small">
@@ -2908,9 +3112,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">show_table</span>(q2_moran, <span class="fu">c</span>(<span class="st">"outcome"</span>, <span class="st">"weight"</span>, <span class="st">"measure"</span>, <span class="st">"n"</span>, <span class="st">"moran_i"</span>, <span class="st">"p_permutation_two_sided"</span>,</span>
-<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>                       <span class="st">"p_holm_within_specification_measure"</span>), <span class="at">digits =</span> <span class="dv">4</span>,</span>
-<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>           <span class="at">caption =</span> <span class="st">"Question 2: Moran diagnostics"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">show_table</span>(q2_moran, <span class="fu">c</span>(<span class="st">"outcome"</span>, <span class="st">"weight"</span>, <span class="st">"measure"</span>, <span class="st">"n"</span>, <span class="st">"moran_i"</span>, <span class="st">"p_permutation_two_sided"</span>,</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>                       <span class="st">"p_holm_within_specification_measure"</span>), <span class="at">digits =</span> <span class="dv">4</span>,</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>           <span class="at">caption =</span> <span class="st">"Question 2: Moran diagnostics"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
 <table class="caption-top table table-sm table-striped small">
@@ -3049,9 +3253,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">show_table</span>(q2_lm, <span class="fu">c</span>(<span class="st">"outcome"</span>, <span class="st">"weight"</span>, <span class="st">"test"</span>, <span class="st">"statistic"</span>, <span class="st">"df"</span>, <span class="st">"p_value"</span>,</span>
-<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>                    <span class="st">"p_holm_within_specification_test"</span>), <span class="at">digits =</span> <span class="dv">4</span>,</span>
-<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>           <span class="at">caption =</span> <span class="st">"Question 2: OLS Lagrange-multiplier diagnostics"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">show_table</span>(q2_lm, <span class="fu">c</span>(<span class="st">"outcome"</span>, <span class="st">"weight"</span>, <span class="st">"test"</span>, <span class="st">"statistic"</span>, <span class="st">"df"</span>, <span class="st">"p_value"</span>,</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>                    <span class="st">"p_holm_within_specification_test"</span>), <span class="at">digits =</span> <span class="dv">4</span>,</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>           <span class="at">caption =</span> <span class="st">"Question 2: OLS Lagrange-multiplier diagnostics"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
 <table class="caption-top table table-sm table-striped small">
@@ -3406,10 +3610,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">show_table</span>(q2_fits[<span class="fu">order</span>(q2_fits<span class="sc">$</span>outcome, q2_fits<span class="sc">$</span>weight, q2_fits<span class="sc">$</span>bic_rank), ],</span>
-<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>           <span class="fu">c</span>(<span class="st">"outcome"</span>, <span class="st">"weight"</span>, <span class="st">"model"</span>, <span class="st">"n"</span>, <span class="st">"aic"</span>, <span class="st">"bic"</span>, <span class="st">"aic_rank"</span>, <span class="st">"bic_rank"</span>, <span class="st">"rho"</span>, <span class="st">"lambda"</span>,</span>
-<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>             <span class="st">"optimizer_success"</span>, <span class="st">"covariance_status"</span>), <span class="at">digits =</span> <span class="dv">3</span>,</span>
-<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>           <span class="at">caption =</span> <span class="st">"Question 2: all six model candidates under both weights matrices"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="fu">show_table</span>(q2_fits[<span class="fu">order</span>(q2_fits<span class="sc">$</span>outcome, q2_fits<span class="sc">$</span>weight, q2_fits<span class="sc">$</span>bic_rank), ],</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>           <span class="fu">c</span>(<span class="st">"outcome"</span>, <span class="st">"weight"</span>, <span class="st">"model"</span>, <span class="st">"n"</span>, <span class="st">"aic"</span>, <span class="st">"bic"</span>, <span class="st">"aic_rank"</span>, <span class="st">"bic_rank"</span>, <span class="st">"rho"</span>, <span class="st">"lambda"</span>,</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>             <span class="st">"optimizer_success"</span>, <span class="st">"covariance_status"</span>), <span class="at">digits =</span> <span class="dv">3</span>,</span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>           <span class="at">caption =</span> <span class="st">"Question 2: all six model candidates under both weights matrices"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
 <table class="caption-top table table-sm table-striped small">
@@ -3954,9 +4158,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">show_table</span>(q2_nested, <span class="fu">c</span>(<span class="st">"outcome"</span>, <span class="st">"weight"</span>, <span class="st">"comparison"</span>, <span class="st">"restricted_model"</span>, <span class="st">"unrestricted_model"</span>,</span>
-<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>                        <span class="st">"lr_statistic"</span>, <span class="st">"df"</span>, <span class="st">"p_value"</span>, <span class="st">"test_status"</span>), <span class="at">digits =</span> <span class="dv">4</span>,</span>
-<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>           <span class="at">caption =</span> <span class="st">"Question 2: nested spatial-model comparisons"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="fu">show_table</span>(q2_nested, <span class="fu">c</span>(<span class="st">"outcome"</span>, <span class="st">"weight"</span>, <span class="st">"comparison"</span>, <span class="st">"restricted_model"</span>, <span class="st">"unrestricted_model"</span>,</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>                        <span class="st">"lr_statistic"</span>, <span class="st">"df"</span>, <span class="st">"p_value"</span>, <span class="st">"test_status"</span>), <span class="at">digits =</span> <span class="dv">4</span>,</span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>           <span class="at">caption =</span> <span class="st">"Question 2: nested spatial-model comparisons"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
 <table class="caption-top table table-sm table-striped small">
@@ -4189,16 +4393,16 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>q2_shortlist <span class="ot">&lt;-</span> q2_fits[<span class="fu">order</span>(q2_fits<span class="sc">$</span>outcome, q2_fits<span class="sc">$</span>weight, q2_fits<span class="sc">$</span>bic), ]</span>
-<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>q2_shortlist <span class="ot">&lt;-</span> q2_shortlist[<span class="sc">!</span><span class="fu">duplicated</span>(q2_shortlist[<span class="fu">c</span>(<span class="st">"outcome"</span>, <span class="st">"weight"</span>)]), ]</span>
-<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>q2_shortlist <span class="ot">&lt;-</span> <span class="fu">merge</span>(q2_shortlist, primary[<span class="fu">c</span>(<span class="st">"specification"</span>, <span class="st">"outcome"</span>, <span class="st">"relationship_order"</span>, <span class="st">"relationship"</span>)],</span>
-<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>                      <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"specification"</span>, <span class="st">"outcome"</span>), <span class="at">all.x =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>q2_terms <span class="ot">&lt;-</span> <span class="fu">merge</span>(q2_shortlist[<span class="fu">c</span>(<span class="st">"outcome"</span>, <span class="st">"weight"</span>, <span class="st">"model"</span>, <span class="st">"n"</span>, <span class="st">"bic"</span>)], coef_primary,</span>
-<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>                  <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"outcome"</span>, <span class="st">"weight"</span>, <span class="st">"model"</span>, <span class="st">"n"</span>), <span class="at">all.x =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a><span class="fu">show_table</span>(q2_terms[<span class="fu">order</span>(q2_terms<span class="sc">$</span>outcome, q2_terms<span class="sc">$</span>weight, q2_terms<span class="sc">$</span>term), ],</span>
-<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a>           <span class="fu">c</span>(<span class="st">"outcome"</span>, <span class="st">"weight"</span>, <span class="st">"model"</span>, <span class="st">"term"</span>, <span class="st">"coefficient"</span>, <span class="st">"std_error_ml"</span>, <span class="st">"z_wald_ml"</span>,</span>
-<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a>             <span class="st">"p_wald_ml"</span>, <span class="st">"bic"</span>, <span class="st">"covariance_status"</span>), <span class="at">digits =</span> <span class="dv">4</span>,</span>
-<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a>           <span class="at">caption =</span> <span class="st">"Question 2: coefficients of each matrix's provisional minimum-BIC candidate"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>q2_shortlist <span class="ot">&lt;-</span> q2_fits[<span class="fu">order</span>(q2_fits<span class="sc">$</span>outcome, q2_fits<span class="sc">$</span>weight, q2_fits<span class="sc">$</span>bic), ]</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>q2_shortlist <span class="ot">&lt;-</span> q2_shortlist[<span class="sc">!</span><span class="fu">duplicated</span>(q2_shortlist[<span class="fu">c</span>(<span class="st">"outcome"</span>, <span class="st">"weight"</span>)]), ]</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>q2_shortlist <span class="ot">&lt;-</span> <span class="fu">merge</span>(q2_shortlist, primary[<span class="fu">c</span>(<span class="st">"specification"</span>, <span class="st">"outcome"</span>, <span class="st">"relationship_order"</span>, <span class="st">"relationship"</span>)],</span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>                      <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"specification"</span>, <span class="st">"outcome"</span>), <span class="at">all.x =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>q2_terms <span class="ot">&lt;-</span> <span class="fu">merge</span>(q2_shortlist[<span class="fu">c</span>(<span class="st">"outcome"</span>, <span class="st">"weight"</span>, <span class="st">"model"</span>, <span class="st">"n"</span>, <span class="st">"bic"</span>)], coef_primary,</span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>                  <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"outcome"</span>, <span class="st">"weight"</span>, <span class="st">"model"</span>, <span class="st">"n"</span>), <span class="at">all.x =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a><span class="fu">show_table</span>(q2_terms[<span class="fu">order</span>(q2_terms<span class="sc">$</span>outcome, q2_terms<span class="sc">$</span>weight, q2_terms<span class="sc">$</span>term), ],</span>
+<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a>           <span class="fu">c</span>(<span class="st">"outcome"</span>, <span class="st">"weight"</span>, <span class="st">"model"</span>, <span class="st">"term"</span>, <span class="st">"coefficient"</span>, <span class="st">"std_error_ml"</span>, <span class="st">"z_wald_ml"</span>,</span>
+<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a>             <span class="st">"p_wald_ml"</span>, <span class="st">"bic"</span>, <span class="st">"covariance_status"</span>), <span class="at">digits =</span> <span class="dv">4</span>,</span>
+<span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a>           <span class="at">caption =</span> <span class="st">"Question 2: coefficients of each matrix's provisional minimum-BIC candidate"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
 <table class="caption-top table table-sm table-striped small">
@@ -4932,19 +5136,19 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </section>
 <section id="research-question-3-2024-emissions-as-the-outcome" class="level1">
-<h1>5. Research question 3: 2024 emissions as the outcome</h1>
+<h1>6. Research question 3: 2024 emissions as the outcome</h1>
 <p><strong>Question:</strong> How are 2024 emissions associated with each forest-account indicator, conditional on the same baseline national controls?</p>
 <p>This question contains three separate emissions-outcome models, each adding one focal predictor. For each, the prepared analysis also estimates a reduced emissions model on exactly the same units for the predictor-block comparison.</p>
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>q3 <span class="ot">&lt;-</span> primary[<span class="fu">grepl</span>(<span class="st">"emissions_2024_as_y_plus_"</span>, primary<span class="sc">$</span>specification), ]</span>
-<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>q3_moran <span class="ot">&lt;-</span> moran_primary[moran_primary<span class="sc">$</span>specification <span class="sc">%in%</span> q3<span class="sc">$</span>specification, ]</span>
-<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>q3_lm <span class="ot">&lt;-</span> lm_primary[lm_primary<span class="sc">$</span>specification <span class="sc">%in%</span> q3<span class="sc">$</span>specification, ]</span>
-<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>q3_fits <span class="ot">&lt;-</span> fit_primary[fit_primary<span class="sc">$</span>specification <span class="sc">%in%</span> q3<span class="sc">$</span>specification, ]</span>
-<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>q3_nested <span class="ot">&lt;-</span> nested_primary[nested_primary<span class="sc">$</span>specification <span class="sc">%in%</span> q3<span class="sc">$</span>specification, ]</span>
-<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a><span class="fu">show_table</span>(q3, <span class="fu">c</span>(<span class="st">"relationship_order"</span>, <span class="st">"relationship"</span>, <span class="st">"outcome"</span>, <span class="st">"sample_n"</span>),</span>
-<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>           <span class="at">caption =</span> <span class="st">"Question 3: emissions models with one forest-account predictor at a time"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>q3 <span class="ot">&lt;-</span> primary[<span class="fu">grepl</span>(<span class="st">"emissions_2024_as_y_plus_"</span>, primary<span class="sc">$</span>specification), ]</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>q3_moran <span class="ot">&lt;-</span> moran_primary[moran_primary<span class="sc">$</span>specification <span class="sc">%in%</span> q3<span class="sc">$</span>specification, ]</span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>q3_lm <span class="ot">&lt;-</span> lm_primary[lm_primary<span class="sc">$</span>specification <span class="sc">%in%</span> q3<span class="sc">$</span>specification, ]</span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>q3_fits <span class="ot">&lt;-</span> fit_primary[fit_primary<span class="sc">$</span>specification <span class="sc">%in%</span> q3<span class="sc">$</span>specification, ]</span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>q3_nested <span class="ot">&lt;-</span> nested_primary[nested_primary<span class="sc">$</span>specification <span class="sc">%in%</span> q3<span class="sc">$</span>specification, ]</span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a><span class="fu">show_table</span>(q3, <span class="fu">c</span>(<span class="st">"relationship_order"</span>, <span class="st">"relationship"</span>, <span class="st">"outcome"</span>, <span class="st">"sample_n"</span>),</span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a>           <span class="at">caption =</span> <span class="st">"Question 3: emissions models with one forest-account predictor at a time"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
 <table class="caption-top table table-sm table-striped small">
@@ -4987,9 +5191,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="fu">show_table</span>(q3_moran, <span class="fu">c</span>(<span class="st">"specification"</span>, <span class="st">"weight"</span>, <span class="st">"measure"</span>, <span class="st">"n"</span>, <span class="st">"moran_i"</span>, <span class="st">"p_permutation_two_sided"</span>,</span>
-<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>                       <span class="st">"p_holm_within_specification_measure"</span>), <span class="at">digits =</span> <span class="dv">4</span>,</span>
-<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>           <span class="at">caption =</span> <span class="st">"Question 3: Moran diagnostics"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="fu">show_table</span>(q3_moran, <span class="fu">c</span>(<span class="st">"specification"</span>, <span class="st">"weight"</span>, <span class="st">"measure"</span>, <span class="st">"n"</span>, <span class="st">"moran_i"</span>, <span class="st">"p_permutation_two_sided"</span>,</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>                       <span class="st">"p_holm_within_specification_measure"</span>), <span class="at">digits =</span> <span class="dv">4</span>,</span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>           <span class="at">caption =</span> <span class="st">"Question 3: Moran diagnostics"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
 <table class="caption-top table table-sm table-striped small">
@@ -5128,9 +5332,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="fu">show_table</span>(q3_lm, <span class="fu">c</span>(<span class="st">"specification"</span>, <span class="st">"weight"</span>, <span class="st">"test"</span>, <span class="st">"statistic"</span>, <span class="st">"df"</span>, <span class="st">"p_value"</span>,</span>
-<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>                    <span class="st">"p_holm_within_specification_test"</span>), <span class="at">digits =</span> <span class="dv">4</span>,</span>
-<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>           <span class="at">caption =</span> <span class="st">"Question 3: OLS Lagrange-multiplier diagnostics"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="fu">show_table</span>(q3_lm, <span class="fu">c</span>(<span class="st">"specification"</span>, <span class="st">"weight"</span>, <span class="st">"test"</span>, <span class="st">"statistic"</span>, <span class="st">"df"</span>, <span class="st">"p_value"</span>,</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>                    <span class="st">"p_holm_within_specification_test"</span>), <span class="at">digits =</span> <span class="dv">4</span>,</span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>           <span class="at">caption =</span> <span class="st">"Question 3: OLS Lagrange-multiplier diagnostics"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
 <table class="caption-top table table-sm table-striped small">
@@ -5485,10 +5689,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="fu">show_table</span>(q3_fits[<span class="fu">order</span>(q3_fits<span class="sc">$</span>specification, q3_fits<span class="sc">$</span>weight, q3_fits<span class="sc">$</span>bic_rank), ],</span>
-<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>           <span class="fu">c</span>(<span class="st">"specification"</span>, <span class="st">"weight"</span>, <span class="st">"model"</span>, <span class="st">"n"</span>, <span class="st">"aic"</span>, <span class="st">"bic"</span>, <span class="st">"aic_rank"</span>, <span class="st">"bic_rank"</span>, <span class="st">"rho"</span>, <span class="st">"lambda"</span>,</span>
-<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>             <span class="st">"optimizer_success"</span>, <span class="st">"covariance_status"</span>), <span class="at">digits =</span> <span class="dv">3</span>,</span>
-<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>           <span class="at">caption =</span> <span class="st">"Question 3: all six model candidates under both weights matrices"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="fu">show_table</span>(q3_fits[<span class="fu">order</span>(q3_fits<span class="sc">$</span>specification, q3_fits<span class="sc">$</span>weight, q3_fits<span class="sc">$</span>bic_rank), ],</span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>           <span class="fu">c</span>(<span class="st">"specification"</span>, <span class="st">"weight"</span>, <span class="st">"model"</span>, <span class="st">"n"</span>, <span class="st">"aic"</span>, <span class="st">"bic"</span>, <span class="st">"aic_rank"</span>, <span class="st">"bic_rank"</span>, <span class="st">"rho"</span>, <span class="st">"lambda"</span>,</span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>             <span class="st">"optimizer_success"</span>, <span class="st">"covariance_status"</span>), <span class="at">digits =</span> <span class="dv">3</span>,</span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>           <span class="at">caption =</span> <span class="st">"Question 3: all six model candidates under both weights matrices"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
 <table class="caption-top table table-sm table-striped small">
@@ -6033,9 +6237,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="fu">show_table</span>(q3_nested, <span class="fu">c</span>(<span class="st">"specification"</span>, <span class="st">"weight"</span>, <span class="st">"comparison"</span>, <span class="st">"restricted_model"</span>, <span class="st">"unrestricted_model"</span>,</span>
-<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>                        <span class="st">"lr_statistic"</span>, <span class="st">"df"</span>, <span class="st">"p_value"</span>, <span class="st">"test_status"</span>), <span class="at">digits =</span> <span class="dv">4</span>,</span>
-<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>           <span class="at">caption =</span> <span class="st">"Question 3: same-sample nested comparisons for the added focal predictors"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="fu">show_table</span>(q3_nested, <span class="fu">c</span>(<span class="st">"specification"</span>, <span class="st">"weight"</span>, <span class="st">"comparison"</span>, <span class="st">"restricted_model"</span>, <span class="st">"unrestricted_model"</span>,</span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>                        <span class="st">"lr_statistic"</span>, <span class="st">"df"</span>, <span class="st">"p_value"</span>, <span class="st">"test_status"</span>), <span class="at">digits =</span> <span class="dv">4</span>,</span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>           <span class="at">caption =</span> <span class="st">"Question 3: same-sample nested comparisons for the added focal predictors"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
 <table class="caption-top table table-sm table-striped small">
@@ -6268,16 +6472,16 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>q3_shortlist <span class="ot">&lt;-</span> q3_fits[<span class="fu">order</span>(q3_fits<span class="sc">$</span>specification, q3_fits<span class="sc">$</span>weight, q3_fits<span class="sc">$</span>bic), ]</span>
-<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>q3_shortlist <span class="ot">&lt;-</span> q3_shortlist[<span class="sc">!</span><span class="fu">duplicated</span>(q3_shortlist[<span class="fu">c</span>(<span class="st">"specification"</span>, <span class="st">"weight"</span>)]), ]</span>
-<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>q3_shortlist <span class="ot">&lt;-</span> <span class="fu">merge</span>(q3_shortlist, primary[<span class="fu">c</span>(<span class="st">"specification"</span>, <span class="st">"outcome"</span>, <span class="st">"relationship_order"</span>, <span class="st">"relationship"</span>)],</span>
-<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>                      <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"specification"</span>, <span class="st">"outcome"</span>), <span class="at">all.x =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>q3_terms <span class="ot">&lt;-</span> <span class="fu">merge</span>(q3_shortlist[<span class="fu">c</span>(<span class="st">"specification"</span>, <span class="st">"outcome"</span>, <span class="st">"weight"</span>, <span class="st">"model"</span>, <span class="st">"n"</span>, <span class="st">"bic"</span>)],</span>
-<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a>                  coef_primary, <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"specification"</span>, <span class="st">"outcome"</span>, <span class="st">"weight"</span>, <span class="st">"model"</span>, <span class="st">"n"</span>), <span class="at">all.x =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a><span class="fu">show_table</span>(q3_terms[<span class="fu">order</span>(q3_terms<span class="sc">$</span>specification, q3_terms<span class="sc">$</span>weight, q3_terms<span class="sc">$</span>term), ],</span>
-<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a>           <span class="fu">c</span>(<span class="st">"specification"</span>, <span class="st">"weight"</span>, <span class="st">"model"</span>, <span class="st">"term"</span>, <span class="st">"coefficient"</span>, <span class="st">"std_error_ml"</span>, <span class="st">"z_wald_ml"</span>,</span>
-<span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a>             <span class="st">"p_wald_ml"</span>, <span class="st">"bic"</span>, <span class="st">"covariance_status"</span>), <span class="at">digits =</span> <span class="dv">4</span>,</span>
-<span id="cb24-10"><a href="#cb24-10" aria-hidden="true" tabindex="-1"></a>           <span class="at">caption =</span> <span class="st">"Question 3: coefficients of each matrix's provisional minimum-BIC candidate"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>q3_shortlist <span class="ot">&lt;-</span> q3_fits[<span class="fu">order</span>(q3_fits<span class="sc">$</span>specification, q3_fits<span class="sc">$</span>weight, q3_fits<span class="sc">$</span>bic), ]</span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>q3_shortlist <span class="ot">&lt;-</span> q3_shortlist[<span class="sc">!</span><span class="fu">duplicated</span>(q3_shortlist[<span class="fu">c</span>(<span class="st">"specification"</span>, <span class="st">"weight"</span>)]), ]</span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>q3_shortlist <span class="ot">&lt;-</span> <span class="fu">merge</span>(q3_shortlist, primary[<span class="fu">c</span>(<span class="st">"specification"</span>, <span class="st">"outcome"</span>, <span class="st">"relationship_order"</span>, <span class="st">"relationship"</span>)],</span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>                      <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"specification"</span>, <span class="st">"outcome"</span>), <span class="at">all.x =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a>q3_terms <span class="ot">&lt;-</span> <span class="fu">merge</span>(q3_shortlist[<span class="fu">c</span>(<span class="st">"specification"</span>, <span class="st">"outcome"</span>, <span class="st">"weight"</span>, <span class="st">"model"</span>, <span class="st">"n"</span>, <span class="st">"bic"</span>)],</span>
+<span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a>                  coef_primary, <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"specification"</span>, <span class="st">"outcome"</span>, <span class="st">"weight"</span>, <span class="st">"model"</span>, <span class="st">"n"</span>), <span class="at">all.x =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb27-7"><a href="#cb27-7" aria-hidden="true" tabindex="-1"></a><span class="fu">show_table</span>(q3_terms[<span class="fu">order</span>(q3_terms<span class="sc">$</span>specification, q3_terms<span class="sc">$</span>weight, q3_terms<span class="sc">$</span>term), ],</span>
+<span id="cb27-8"><a href="#cb27-8" aria-hidden="true" tabindex="-1"></a>           <span class="fu">c</span>(<span class="st">"specification"</span>, <span class="st">"weight"</span>, <span class="st">"model"</span>, <span class="st">"term"</span>, <span class="st">"coefficient"</span>, <span class="st">"std_error_ml"</span>, <span class="st">"z_wald_ml"</span>,</span>
+<span id="cb27-9"><a href="#cb27-9" aria-hidden="true" tabindex="-1"></a>             <span class="st">"p_wald_ml"</span>, <span class="st">"bic"</span>, <span class="st">"covariance_status"</span>), <span class="at">digits =</span> <span class="dv">4</span>,</span>
+<span id="cb27-10"><a href="#cb27-10" aria-hidden="true" tabindex="-1"></a>           <span class="at">caption =</span> <span class="st">"Question 3: coefficients of each matrix's provisional minimum-BIC candidate"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
 <table class="caption-top table table-sm table-striped small">
@@ -6751,28 +6955,28 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>q3_plot_data <span class="ot">&lt;-</span> <span class="fu">rbind</span>(</span>
-<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">data.frame</span>(<span class="at">relationship =</span> <span class="st">"Capacity loss"</span>, <span class="at">focal =</span> <span class="fu">log1p</span>(master<span class="sc">$</span>spatial_outcome_lost_capacity_mtco2_yr),</span>
-<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>             <span class="at">emissions =</span> master<span class="sc">$</span>co2_emissions_tco2_2024 <span class="sc">/</span> <span class="fl">1e6</span>),</span>
-<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">data.frame</span>(<span class="at">relationship =</span> <span class="st">"Relative GCW erosion"</span>, <span class="at">focal =</span> <span class="fu">log1p</span>(master<span class="sc">$</span>spatial_outcome_erosion_pct_of_gcw),</span>
-<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>             <span class="at">emissions =</span> master<span class="sc">$</span>co2_emissions_tco2_2024 <span class="sc">/</span> <span class="fl">1e6</span>),</span>
-<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">data.frame</span>(<span class="at">relationship =</span> <span class="st">"GCW / GDP"</span>, <span class="at">focal =</span> <span class="fu">log1p</span>(master<span class="sc">$</span>spatial_outcome_gcw_gdp_pct_2024),</span>
-<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a>             <span class="at">emissions =</span> master<span class="sc">$</span>co2_emissions_tco2_2024 <span class="sc">/</span> <span class="fl">1e6</span>)</span>
-<span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb25-9"><a href="#cb25-9" aria-hidden="true" tabindex="-1"></a>q3_plot_data <span class="ot">&lt;-</span> q3_plot_data[<span class="fu">is.finite</span>(q3_plot_data<span class="sc">$</span>focal) <span class="sc">&amp;</span> <span class="fu">is.finite</span>(q3_plot_data<span class="sc">$</span>emissions) <span class="sc">&amp;</span></span>
-<span id="cb25-10"><a href="#cb25-10" aria-hidden="true" tabindex="-1"></a>                               q3_plot_data<span class="sc">$</span>emissions <span class="sc">&gt;=</span> <span class="dv">0</span>, ]</span>
-<span id="cb25-11"><a href="#cb25-11" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(q3_plot_data, <span class="fu">aes</span>(<span class="at">x =</span> focal, <span class="at">y =</span> <span class="fu">log1p</span>(emissions))) <span class="sc">+</span></span>
-<span id="cb25-12"><a href="#cb25-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">alpha =</span> .<span class="dv">65</span>, <span class="at">colour =</span> <span class="st">"#315A70"</span>) <span class="sc">+</span></span>
-<span id="cb25-13"><a href="#cb25-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_smooth</span>(<span class="at">method =</span> <span class="st">"lm"</span>, <span class="at">se =</span> <span class="cn">TRUE</span>, <span class="at">colour =</span> <span class="st">"#B65D3A"</span>, <span class="at">linewidth =</span> .<span class="dv">7</span>) <span class="sc">+</span></span>
-<span id="cb25-14"><a href="#cb25-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span> relationship, <span class="at">scales =</span> <span class="st">"free_x"</span>) <span class="sc">+</span></span>
-<span id="cb25-15"><a href="#cb25-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"log1p-transformed focal indicator"</span>, <span class="at">y =</span> <span class="st">"log1p(2024 CO2 emissions, MtCO2/yr)"</span>,</span>
-<span id="cb25-16"><a href="#cb25-16" aria-hidden="true" tabindex="-1"></a>       <span class="at">title =</span> <span class="st">"Emissions and forest-account indicators: descriptive relationships"</span>) <span class="sc">+</span></span>
-<span id="cb25-17"><a href="#cb25-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>(<span class="at">base_size =</span> <span class="dv">11</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>q3_plot_data <span class="ot">&lt;-</span> <span class="fu">rbind</span>(</span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">data.frame</span>(<span class="at">relationship =</span> <span class="st">"Capacity loss"</span>, <span class="at">focal =</span> <span class="fu">log1p</span>(master<span class="sc">$</span>spatial_outcome_lost_capacity_mtco2_yr),</span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>             <span class="at">emissions =</span> master<span class="sc">$</span>co2_emissions_tco2_2024 <span class="sc">/</span> <span class="fl">1e6</span>),</span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">data.frame</span>(<span class="at">relationship =</span> <span class="st">"Relative GCW erosion"</span>, <span class="at">focal =</span> <span class="fu">log1p</span>(master<span class="sc">$</span>spatial_outcome_erosion_pct_of_gcw),</span>
+<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a>             <span class="at">emissions =</span> master<span class="sc">$</span>co2_emissions_tco2_2024 <span class="sc">/</span> <span class="fl">1e6</span>),</span>
+<span id="cb28-6"><a href="#cb28-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">data.frame</span>(<span class="at">relationship =</span> <span class="st">"GCW / GDP"</span>, <span class="at">focal =</span> <span class="fu">log1p</span>(master<span class="sc">$</span>spatial_outcome_gcw_gdp_pct_2024),</span>
+<span id="cb28-7"><a href="#cb28-7" aria-hidden="true" tabindex="-1"></a>             <span class="at">emissions =</span> master<span class="sc">$</span>co2_emissions_tco2_2024 <span class="sc">/</span> <span class="fl">1e6</span>)</span>
+<span id="cb28-8"><a href="#cb28-8" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb28-9"><a href="#cb28-9" aria-hidden="true" tabindex="-1"></a>q3_plot_data <span class="ot">&lt;-</span> q3_plot_data[<span class="fu">is.finite</span>(q3_plot_data<span class="sc">$</span>focal) <span class="sc">&amp;</span> <span class="fu">is.finite</span>(q3_plot_data<span class="sc">$</span>emissions) <span class="sc">&amp;</span></span>
+<span id="cb28-10"><a href="#cb28-10" aria-hidden="true" tabindex="-1"></a>                               q3_plot_data<span class="sc">$</span>emissions <span class="sc">&gt;=</span> <span class="dv">0</span>, ]</span>
+<span id="cb28-11"><a href="#cb28-11" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(q3_plot_data, <span class="fu">aes</span>(<span class="at">x =</span> focal, <span class="at">y =</span> <span class="fu">log1p</span>(emissions))) <span class="sc">+</span></span>
+<span id="cb28-12"><a href="#cb28-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">alpha =</span> .<span class="dv">65</span>, <span class="at">colour =</span> <span class="st">"#315A70"</span>) <span class="sc">+</span></span>
+<span id="cb28-13"><a href="#cb28-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_smooth</span>(<span class="at">method =</span> <span class="st">"lm"</span>, <span class="at">se =</span> <span class="cn">TRUE</span>, <span class="at">colour =</span> <span class="st">"#B65D3A"</span>, <span class="at">linewidth =</span> .<span class="dv">7</span>) <span class="sc">+</span></span>
+<span id="cb28-14"><a href="#cb28-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span> relationship, <span class="at">scales =</span> <span class="st">"free_x"</span>) <span class="sc">+</span></span>
+<span id="cb28-15"><a href="#cb28-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"log1p-transformed focal indicator"</span>, <span class="at">y =</span> <span class="st">"log1p(2024 CO2 emissions, MtCO2/yr)"</span>,</span>
+<span id="cb28-16"><a href="#cb28-16" aria-hidden="true" tabindex="-1"></a>       <span class="at">title =</span> <span class="st">"Emissions and forest-account indicators: descriptive relationships"</span>) <span class="sc">+</span></span>
+<span id="cb28-17"><a href="#cb28-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>(<span class="at">base_size =</span> <span class="dv">11</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="07_spatial_econometrics_files/figure-html/unnamed-chunk-7-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="07_spatial_econometrics_files/figure-html/unnamed-chunk-8-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
@@ -6780,17 +6984,17 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 </section>
 <section id="compare-the-two-matrices-and-read-the-coefficients" class="level1">
-<h1>6. Compare the two matrices and read the coefficients</h1>
+<h1>7. Compare the two matrices and read the coefficients</h1>
 <p>The tables show all candidate fits and coefficient tables for the smallest-BIC candidate within each matrix as a <strong>diagnostic shortlist</strong>. It is not the final model selection. In some cases, both matrices can display the same OLS candidate because OLS does not use a spatial weights matrix. Neither AIC/BIC nor a diagnostic p-value alone decides which estimator or matrix is substantively appropriate.</p>
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>shortlist_all <span class="ot">&lt;-</span> <span class="fu">rbind</span>(<span class="fu">transform</span>(q1_shortlist, <span class="at">question =</span> <span class="st">"Q1: baseline controls"</span>),</span>
-<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>                      <span class="fu">transform</span>(q2_shortlist, <span class="at">question =</span> <span class="st">"Q2: add emissions predictor"</span>),</span>
-<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>                      <span class="fu">transform</span>(q3_shortlist, <span class="at">question =</span> <span class="st">"Q3: emissions outcome"</span>))</span>
-<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a><span class="fu">show_table</span>(shortlist_all[<span class="fu">order</span>(shortlist_all<span class="sc">$</span>relationship_order, shortlist_all<span class="sc">$</span>weight), ],</span>
-<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>           <span class="fu">c</span>(<span class="st">"question"</span>, <span class="st">"relationship"</span>, <span class="st">"outcome"</span>, <span class="st">"weight"</span>, <span class="st">"model"</span>, <span class="st">"n"</span>, <span class="st">"bic"</span>), <span class="at">digits =</span> <span class="dv">3</span>,</span>
-<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a>           <span class="at">caption =</span> <span class="st">"Provisional minimum-BIC candidate for every relationship and weights matrix"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>shortlist_all <span class="ot">&lt;-</span> <span class="fu">rbind</span>(<span class="fu">transform</span>(q1_shortlist, <span class="at">question =</span> <span class="st">"Q1: baseline controls"</span>),</span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>                      <span class="fu">transform</span>(q2_shortlist, <span class="at">question =</span> <span class="st">"Q2: add emissions predictor"</span>),</span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>                      <span class="fu">transform</span>(q3_shortlist, <span class="at">question =</span> <span class="st">"Q3: emissions outcome"</span>))</span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a><span class="fu">show_table</span>(shortlist_all[<span class="fu">order</span>(shortlist_all<span class="sc">$</span>relationship_order, shortlist_all<span class="sc">$</span>weight), ],</span>
+<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a>           <span class="fu">c</span>(<span class="st">"question"</span>, <span class="st">"relationship"</span>, <span class="st">"outcome"</span>, <span class="st">"weight"</span>, <span class="st">"model"</span>, <span class="st">"n"</span>, <span class="st">"bic"</span>), <span class="at">digits =</span> <span class="dv">3</span>,</span>
+<span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a>           <span class="at">caption =</span> <span class="st">"Provisional minimum-BIC candidate for every relationship and weights matrix"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
 <table class="caption-top table table-sm table-striped small">
@@ -6983,10 +7187,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>residual_moran <span class="ot">&lt;-</span> moran_primary[moran_primary<span class="sc">$</span>measure <span class="sc">==</span> <span class="st">"ols_residual"</span>,</span>
-<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>                                <span class="fu">c</span>(<span class="st">"specification"</span>, <span class="st">"outcome"</span>, <span class="st">"weight"</span>, <span class="st">"moran_i"</span>, <span class="st">"p_permutation_two_sided"</span>)]</span>
-<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>robust_lm <span class="ot">&lt;-</span> lm_primary[lm_primary<span class="sc">$</span>test <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"robust_LM_lag"</span>, <span class="st">"robust_LM_error"</span>), ]</span>
-<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a><span class="fu">show_table</span>(residual_moran, <span class="at">digits =</span> <span class="dv">4</span>, <span class="at">caption =</span> <span class="st">"OLS residual Moran statistics"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>residual_moran <span class="ot">&lt;-</span> moran_primary[moran_primary<span class="sc">$</span>measure <span class="sc">==</span> <span class="st">"ols_residual"</span>,</span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>                                <span class="fu">c</span>(<span class="st">"specification"</span>, <span class="st">"outcome"</span>, <span class="st">"weight"</span>, <span class="st">"moran_i"</span>, <span class="st">"p_permutation_two_sided"</span>)]</span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>robust_lm <span class="ot">&lt;-</span> lm_primary[lm_primary<span class="sc">$</span>test <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"robust_LM_lag"</span>, <span class="st">"robust_LM_error"</span>), ]</span>
+<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a><span class="fu">show_table</span>(residual_moran, <span class="at">digits =</span> <span class="dv">4</span>, <span class="at">caption =</span> <span class="st">"OLS residual Moran statistics"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
 <table class="caption-top table table-sm table-striped small">
@@ -7139,9 +7343,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="fu">show_table</span>(robust_lm, <span class="fu">c</span>(<span class="st">"specification"</span>, <span class="st">"outcome"</span>, <span class="st">"weight"</span>, <span class="st">"test"</span>, <span class="st">"statistic"</span>, <span class="st">"p_value"</span>,</span>
-<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>                        <span class="st">"p_holm_within_specification_test"</span>), <span class="at">digits =</span> <span class="dv">4</span>,</span>
-<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>           <span class="at">caption =</span> <span class="st">"Robust LM test results"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="fu">show_table</span>(robust_lm, <span class="fu">c</span>(<span class="st">"specification"</span>, <span class="st">"outcome"</span>, <span class="st">"weight"</span>, <span class="st">"test"</span>, <span class="st">"statistic"</span>, <span class="st">"p_value"</span>,</span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>                        <span class="st">"p_holm_within_specification_test"</span>), <span class="at">digits =</span> <span class="dv">4</span>,</span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a>           <span class="at">caption =</span> <span class="st">"Robust LM test results"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
 <table class="caption-top table table-sm table-striped small">
@@ -7499,10 +7703,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>decision_cols <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"relationship_order"</span>, <span class="st">"relationship"</span>, <span class="st">"specification"</span>, <span class="st">"outcome"</span>, <span class="st">"sample_n"</span>,</span>
-<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>                   <span class="st">"minimum_bic_candidate_by_weight"</span>, <span class="st">"final_model_decision"</span>, <span class="st">"final_weight_decision"</span>,</span>
-<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>                   <span class="st">"researcher_rationale"</span>, <span class="st">"status"</span>)</span>
-<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a><span class="fu">show_table</span>(decisions, decision_cols, <span class="at">caption =</span> <span class="st">"Model and interpretation decisions remain researcher-led"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>decision_cols <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"relationship_order"</span>, <span class="st">"relationship"</span>, <span class="st">"specification"</span>, <span class="st">"outcome"</span>, <span class="st">"sample_n"</span>,</span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>                   <span class="st">"minimum_bic_candidate_by_weight"</span>, <span class="st">"final_model_decision"</span>, <span class="st">"final_weight_decision"</span>,</span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>                   <span class="st">"researcher_rationale"</span>, <span class="st">"status"</span>)</span>
+<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a><span class="fu">show_table</span>(decisions, decision_cols, <span class="at">caption =</span> <span class="st">"Model and interpretation decisions remain researcher-led"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
 <table class="caption-top table table-sm table-striped small">
@@ -7648,7 +7852,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </section>
 <section id="reproduction-and-limits" class="level1">
-<h1>7. Reproduction and limits</h1>
+<h1>8. Reproduction and limits</h1>
 <ul>
 <li>Current national inputs: <code>results/validation/country_level_results_master.csv</code>.</li>
 <li>Prepared model results: <code>results/validation/spatial_emissions_2024_*</code>.</li>

@@ -33,9 +33,25 @@ For example, the third question includes the relationship between GCW/GDP and em
 
 # 1. How to use this notebook
 
-By default, the notebook reads the current prepared analysis outputs. The analysis has already been run: it contains nine primary relationships, two spatial-weights matrices, and six candidate model families for each relationship and matrix. To rerun the upstream analysis before rendering, set `rerun_spatial_models: true` in the YAML parameters at the top. That runs `code/scripts/run_spatial_emissions_extension.py` from the repository root and refreshes the spatial result files. A full render with the default `false` setting only reads and presents the stored outputs.
+The notebook has two modes. With `rerun_spatial_models: false` (the default), Quarto reads the prepared model outputs and rebuilds the tables, descriptive plots, and weight maps. It does not refit the spatial models. With `true`, the first setup cell runs the upstream Python estimation script, then the rest of the notebook reads the refreshed files.
 
-The rendered notebook is therefore useful in two modes: **review mode** reproduces tables and plots from stored outputs without refitting; **rerun mode** runs the estimation sequence first, then reads and displays its refreshed outputs.
+To rerun the estimates and rebuild the website files, follow these steps in order. Do not run the code cells one by one.
+
+1. Open this QMD file and, in the YAML block at the very top, change `rerun_spatial_models: false` to `rerun_spatial_models: true`. Save the file.
+2. Open a terminal in the BNC2 repository root, the folder containing `pyproject.toml`.
+3. Run the full Quarto command below. Quarto executes the whole document from top to bottom. The first setup cell runs the Python spatial-analysis script; after it finishes, the remaining cells read the refreshed CSV outputs and rebuild the tables, plots, and HTML.
+
+```powershell
+quarto render code/notebooks/07_spatial_econometrics.qmd --output-dir "../../../../NotebookSites/gcw-spatial-econometrics"
+```
+
+Wait until Quarto finishes and reports that the HTML was created. Changing `true` alone does not run anything, and opening the public HTML page cannot run the analysis: the estimates run on your computer when you render this QMD. The command above assumes the `NotebookSites` repository is next to `BNC2 paper` in the same parent folder. Quarto resolves the output path relative to this QMD's folder and writes the HTML and supporting files into `NotebookSites/gcw-spatial-econometrics`.
+
+4. When the first render succeeds, change the parameter back to `false` and save. This prevents future renders from rerunning the estimation.
+5. Run the same Quarto command a second time. This second render does **not** refit the models: it rebuilds the final HTML from the freshly updated result files while leaving the notebook in its normal review mode.
+6. Rendering only changes local files. To update the public GitHub Pages website, commit and push the updated QMD, HTML, and supporting files from the separate `NotebookSites` repository.
+
+The rerun uses the Python executable named by the `PYTHON` environment variable, if set, or `python` on `PATH`; the repository's Python spatial-analysis dependencies must be available in that environment. This switch reruns the spatial-analysis sequence only, not the full carbon-wealth accounting pipeline.
 
 ```{r}
 root <- normalizePath(getwd(), winslash = "/", mustWork = TRUE)
@@ -48,9 +64,8 @@ while (!file.exists(file.path(root, "pyproject.toml"))) {
 if (isTRUE(params$rerun_spatial_models)) {
   run_output <- system2(
     Sys.getenv("PYTHON", "python"),
-    shQuote(file.path(root, "code", "scripts", "run_spatial_emissions_extension.py")),
-    stdout = TRUE, stderr = TRUE, wait = TRUE,
-    env = paste0("PYTHONPATH=", root)
+    shQuote(file.path(root, "code", "scripts", "run_spatial_emissions_extension.py"), type = "cmd"),
+    stdout = TRUE, stderr = TRUE, wait = TRUE
   )
   run_status <- attr(run_output, "status")
   cat(paste(run_output, collapse = "\n"), "\n")
@@ -101,9 +116,147 @@ The outcomes are (1) annual forest-capacity loss in MtCO₂/year, (2) reported a
 
 The common baseline controls are log GDP per capita, log forest area in million hectares, and the share of forest area in warm biomes. For forest-capacity loss and erosion, only units reporting deforestation enter the sample; unreported loss is missing, not zero. Every model uses `log1p` for its dependent variable. GDP per capita and forest area use natural-log transforms; the added emissions predictor uses `log1p` of MtCO₂/year. When a forest-account indicator is added to an emissions-as-outcome model, that predictor is also `log1p` transformed.
 
-The two neighbourhood definitions are row-standardised Queen contiguity and row-standardised symmetrised k-nearest neighbours with k = 5, constructed from representative points in an equal-area projection. Queen isolates are retained with no neighbours; kNN can connect territories across water. The two matrices answer spatial-model questions under different definitions of “neighbour”.
+The two neighbourhood definitions are row-standardised Queen contiguity and row-standardised symmetrised k-nearest neighbours with k = 5, constructed from representative points in an equal-area projection. Queen isolates are retained with no neighbours; kNN can connect territories across water. The next section maps what those non-zero relationships look like.
 
-# 2. Inspect the data before fitting
+# 2. Spatial neighbourhoods and weight matrices
+
+For a given analysis, each row and column of a spatial-weights matrix refers to one country or territory in that model's sample. A non-zero entry means that two units are defined as neighbours; zero means they are not direct neighbours. Before fitting, the full neighbour graph is restricted to the complete-case sample for that outcome and the remaining rows are standardised. Each non-isolated row therefore sums to 1; an isolated Queen row sums to 0.
+
+The maps below use one concrete example: the 120-unit complete-case sample for the baseline annual forest-capacity-loss outcome. They are not a claim that all nine relationships use the same sample. Queen links join polygons that share an edge or a corner. The kNN-5 graph starts with each unit's five nearest representative points in EPSG:6933, then symmetrises the links: if either unit selects the other, the pair is connected. After symmetrising, a unit can have more than five neighbours.
+
+Both matrices start with a binary link: a neighbour has weight 1 and a non-neighbour has weight 0. Row standardisation divides each row's non-zero weights by that unit's neighbour count. So, for example, if a unit has four neighbours, each receives weight 1/4 and the row sums to 1. An isolate has no links and its row sums to 0. The map fill shows neighbour count; line width shows the average of the two directed row-standardised weights for that pair.
+
+The fill shows each unit's neighbour count. A line shows a non-zero neighbour relation; line width is the average of the two directed row-standardised weights for display. The maps are built by calling the same Python geometry and weights functions used by the estimation script. Rendering this section reconstructs the graph but does not fit models. Links crossing the map's antimeridian seam are omitted from the drawn lines only; they remain in the matrices and models.
+
+```{r, fig.width=12, fig.height=6}
+weight_case <- sample_audit[
+  sample_audit$specification == "baseline_2024_same_sample" &
+    sample_audit$outcome == "lost_capacity_mtco2_yr", , drop = FALSE
+]
+if (nrow(weight_case) != 1L) stop("The baseline capacity-loss sample is missing or ambiguous")
+weight_map_ids <- strsplit(as.character(weight_case$matched_sample_hash_codes[1]), ";", fixed = TRUE)[[1]]
+if (length(weight_map_ids) != as.integer(weight_case$n[1])) stop("Weight-map sample IDs do not match the saved sample size")
+
+weight_map_dir <- tempfile("nb07-spatial-weights-")
+dir.create(weight_map_dir)
+python_root <- normalizePath(root, winslash = "/", mustWork = TRUE)
+python_out <- normalizePath(weight_map_dir, winslash = "/", mustWork = TRUE)
+python_ids <- paste0("ids = [", paste0("'", weight_map_ids, "'", collapse = ", "), "]")
+python_map_source <- c(
+  "from pathlib import Path",
+  "import sys",
+  "import pandas as pd",
+  paste0("root = Path(r'", python_root, "')"),
+  paste0("out_dir = Path(r'", python_out, "')"),
+  "sys.path.insert(0, str(root / 'code' / 'scripts'))",
+  "import run_spatial_full_sequence as spatial",
+  python_ids,
+  "units, missing_geometry = spatial._unit_geometries()",
+  "full_weights = spatial._build_weights(units)",
+  "sample_units = units.set_index('iso3').loc[ids].reset_index()",
+  "sample_units.to_file(out_dir / 'units.geojson', driver='GeoJSON')",
+  "rows = []",
+  "for matrix_name, full_weight in full_weights.items():",
+  "    subset = spatial._weight_subsample(full_weight, ids)",
+  "    for focal in subset.id_order:",
+  "        for neighbour, value in zip(subset.neighbors[focal], subset.weights[focal]):",
+  "            rows.append({'matrix': matrix_name, 'from': focal, 'to': neighbour, 'weight': float(value)})",
+  "pd.DataFrame(rows).to_csv(out_dir / 'edges.csv', index=False)"
+)
+python_map_script <- file.path(weight_map_dir, "export_spatial_weights.py")
+writeLines(python_map_source, python_map_script, useBytes = TRUE)
+python_map_output <- system2(
+  Sys.getenv("PYTHON", "python"), shQuote(python_map_script, type = "cmd"),
+  stdout = TRUE, stderr = TRUE, wait = TRUE
+)
+python_map_status <- attr(python_map_output, "status")
+if (!is.null(python_map_status) && python_map_status != 0) {
+  stop("Could not reconstruct the spatial-weight maps: ", paste(tail(python_map_output, 12), collapse = "\n"))
+}
+if (!file.exists(file.path(weight_map_dir, "units.geojson")) || !file.exists(file.path(weight_map_dir, "edges.csv"))) {
+  stop("The spatial-weight map data were not created")
+}
+
+library(sf)
+weight_map_units <- sf::st_read(file.path(weight_map_dir, "units.geojson"), quiet = TRUE)
+weight_edges <- read.csv(file.path(weight_map_dir, "edges.csv"), stringsAsFactors = FALSE)
+if (nrow(weight_map_units) != length(weight_map_ids)) stop("Weight-map geometry does not match the saved sample")
+
+matrix_labels <- c(queen_contiguity = "Queen contiguity", symmetric_knn5 = "Symmetrised kNN-5")
+weight_summary <- do.call(rbind, lapply(names(matrix_labels), function(matrix_name) {
+  x <- weight_edges[weight_edges$matrix == matrix_name, , drop = FALSE]
+  degree <- table(factor(x$from, levels = weight_map_units$iso3))
+  pairs <- paste(pmin(x$from, x$to), pmax(x$from, x$to), sep = "|")
+  data.frame(
+    matrix = unname(matrix_labels[matrix_name]),
+    units = nrow(weight_map_units),
+    isolates = sum(degree == 0),
+    mean_neighbours = mean(as.numeric(degree)),
+    undirected_links = length(unique(pairs)),
+    minimum_nonzero_weight = min(x$weight),
+    maximum_nonzero_weight = max(x$weight)
+  )
+}))
+show_table(weight_summary, digits = 3,
+           caption = "Graph structure and non-zero row-standardised weights for the mapped sample")
+
+points_6933 <- sf::st_point_on_surface(sf::st_transform(weight_map_units, 6933))
+points_geo <- sf::st_transform(points_6933, 4326)
+xy <- sf::st_coordinates(points_geo)
+weight_points <- data.frame(iso3 = weight_map_units$iso3, lon = xy[, 1], lat = xy[, 2])
+
+weight_edges$node_a <- pmin(weight_edges$from, weight_edges$to)
+weight_edges$node_b <- pmax(weight_edges$from, weight_edges$to)
+map_edges <- aggregate(weight ~ matrix + node_a + node_b, data = weight_edges, FUN = mean)
+map_edges <- merge(map_edges, weight_points, by.x = "node_a", by.y = "iso3")
+names(map_edges)[names(map_edges) == "lon"] <- "lon_a"
+names(map_edges)[names(map_edges) == "lat"] <- "lat_a"
+map_edges <- merge(map_edges, weight_points, by.x = "node_b", by.y = "iso3")
+names(map_edges)[names(map_edges) == "lon"] <- "lon_b"
+names(map_edges)[names(map_edges) == "lat"] <- "lat_b"
+map_edges$crosses_seam <- abs(map_edges$lon_a - map_edges$lon_b) > 180
+seam_link_count <- sum(map_edges$crosses_seam)
+map_edges <- map_edges[!map_edges$crosses_seam, , drop = FALSE]
+map_edges$matrix_label <- factor(unname(matrix_labels[map_edges$matrix]), levels = unname(matrix_labels))
+
+make_weight_map_panel <- function(matrix_name) {
+  x <- weight_map_units
+  degree <- table(factor(weight_edges$from[weight_edges$matrix == matrix_name], levels = x$iso3))
+  x$neighbour_count <- as.integer(degree)
+  x$matrix_label <- unname(matrix_labels[matrix_name])
+  x
+}
+weight_map_sf <- rbind(make_weight_map_panel("queen_contiguity"), make_weight_map_panel("symmetric_knn5"))
+
+ggplot2::ggplot() +
+  ggplot2::geom_sf(data = weight_map_sf, ggplot2::aes(fill = neighbour_count), colour = "grey55", linewidth = 0.12) +
+  ggplot2::geom_segment(
+    data = map_edges,
+    ggplot2::aes(x = lon_a, y = lat_a, xend = lon_b, yend = lat_b, linewidth = weight),
+    colour = "#263238", alpha = 0.28, inherit.aes = FALSE
+  ) +
+  ggplot2::geom_point(
+    data = weight_points, ggplot2::aes(x = lon, y = lat),
+    shape = 21, fill = "white", colour = "#263238", size = 0.55, stroke = 0.12
+  ) +
+  ggplot2::facet_wrap(~matrix_label, ncol = 2) +
+  ggplot2::scale_fill_viridis_c(option = "C", name = "Neighbours") +
+  ggplot2::scale_linewidth(range = c(0.08, 0.35), guide = "none") +
+  ggplot2::coord_sf(
+    crs = sf::st_crs("ESRI:54030"), default_crs = sf::st_crs(4326), datum = NA, expand = FALSE
+  ) +
+  ggplot2::labs(
+    title = "Two spatial-weight structures for the same 120-unit sample",
+    subtitle = "Fill = neighbour count; line = non-zero relation in W; width = mean of reciprocal row weights",
+    caption = paste0("The map uses the baseline capacity-loss sample. ", seam_link_count,
+                     " links crossing the map seam are hidden in the drawing only; all links remain in W."),
+    x = NULL, y = NULL
+  ) +
+  ggplot2::theme_minimal(base_size = 10) +
+  ggplot2::theme(panel.grid = ggplot2::element_blank(), strip.text = ggplot2::element_text(face = "bold"))
+```
+
+# 3. Inspect the data before fitting
 
 ## What one observation looks like
 
@@ -175,7 +328,7 @@ ggplot(plot_data, aes(x = value)) + geom_histogram(bins = 25, fill = "#58758A", 
   theme_minimal(base_size = 11)
 ```
 
-# 3. Research question 1: forest-account indicators and baseline controls
+# 4. Research question 1: forest-account indicators and baseline controls
 
 **Question:** How are annual capacity loss, relative GCW erosion, and GCW/GDP associated with GDP per capita, forest area, and warm-biome share?
 
@@ -216,7 +369,7 @@ show_table(q1_terms[order(q1_terms$outcome, q1_terms$weight, q1_terms$term), ],
 
 The coefficient table reports fitted parameters; it does not interpret their scientific meaning. For spatial models, raw parameters may not equal direct, indirect, or total marginal effects. Consult the model parameterisation before interpreting them.
 
-# 4. Research question 2: add 2024 emissions as a predictor
+# 5. Research question 2: add 2024 emissions as a predictor
 
 **Question:** When 2024 emissions are added to the baseline controls, how do the three forest-account relationships and their model diagnostics compare with the matched baseline?
 
@@ -255,7 +408,7 @@ show_table(q2_terms[order(q2_terms$outcome, q2_terms$weight, q2_terms$term), ],
            caption = "Question 2: coefficients of each matrix's provisional minimum-BIC candidate")
 ```
 
-# 5. Research question 3: 2024 emissions as the outcome
+# 6. Research question 3: 2024 emissions as the outcome
 
 **Question:** How are 2024 emissions associated with each forest-account indicator, conditional on the same baseline national controls?
 
@@ -318,7 +471,7 @@ ggplot(q3_plot_data, aes(x = focal, y = log1p(emissions))) +
   theme_minimal(base_size = 11)
 ```
 
-# 6. Compare the two matrices and read the coefficients
+# 7. Compare the two matrices and read the coefficients
 
 The tables show all candidate fits and coefficient tables for the smallest-BIC candidate within each matrix as a **diagnostic shortlist**. It is not the final model selection. In some cases, both matrices can display the same OLS candidate because OLS does not use a spatial weights matrix. Neither AIC/BIC nor a diagnostic p-value alone decides which estimator or matrix is substantively appropriate.
 
@@ -348,7 +501,7 @@ decision_cols <- c("relationship_order", "relationship", "specification", "outco
 show_table(decisions, decision_cols, caption = "Model and interpretation decisions remain researcher-led")
 ```
 
-# 7. Reproduction and limits
+# 8. Reproduction and limits
 
 - Current national inputs: `results/validation/country_level_results_master.csv`.
 - Prepared model results: `results/validation/spatial_emissions_2024_*`.
