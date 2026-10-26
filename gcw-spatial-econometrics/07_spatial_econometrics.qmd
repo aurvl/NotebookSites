@@ -33,40 +33,27 @@ For example, the third question includes the relationship between GCW/GDP and em
 
 # 1. How to use this notebook
 
-The notebook has two modes. With `rerun_spatial_models: false` (the default), Quarto reads the prepared model outputs and rebuilds the tables, descriptive plots, and weight maps. It does not refit the spatial models. With `true`, the first setup cell runs the upstream Python estimation script, then the rest of the notebook reads the refreshed files.
+The published HTML version is intended for readers who want to browse the analysis and inspect its tables, figures, and explanations without installing the repository. It is available from the notebook index and is the simplest way to explore the results.
 
-To rerun the estimates and rebuild the website files, follow these steps in order. Do not run the code cells one by one.
+If you only want to read the analysis, open the published HTML version. No local rerun is required.
 
-1. Open this QMD file and, in the YAML block at the very top, change `rerun_spatial_models: false` to `rerun_spatial_models: true`. Save the file.
+The QMD file is also reproducible locally. By default, `rerun_spatial_models: false` means that Quarto reads the prepared model outputs and rebuilds the tables, descriptive plots, and weight maps without refitting the spatial models. Do not run the code cells one by one: Quarto should execute the complete document from top to bottom.
+
+To rerun the spatial estimates on your own computer:
+
+1. In the YAML block at the top of this file, change `rerun_spatial_models: false` to `rerun_spatial_models: true`, then save the file.
 2. Open a terminal in the BNC2 repository root, the folder containing `pyproject.toml`.
-3. Run the full Quarto command below. Quarto executes the whole document from top to bottom. The first setup cell runs the Python spatial-analysis script; after it finishes, the remaining cells read the refreshed CSV outputs and rebuild the tables, plots, and HTML.
+3. Run the complete QMD:
 
 ```powershell
-quarto render code/notebooks/07_spatial_econometrics.qmd --output-dir "../../../../NotebookSites/gcw-spatial-econometrics"
+quarto render code/notebooks/07_spatial_econometrics.qmd
 ```
 
-Wait until Quarto finishes and reports that the HTML was created. Changing `true` alone does not run anything, and opening the public HTML page cannot run the analysis: the estimates run on your computer when you render this QMD. The command above assumes the `NotebookSites` repository is next to `BNC2 paper` in the same parent folder. Quarto resolves the output path relative to this QMD's folder and writes the HTML and supporting files into `NotebookSites/gcw-spatial-econometrics`.
+The first setup cell runs the upstream Python spatial-analysis script. Once it finishes, the remaining cells read the refreshed result files and rebuild the local tables, plots, and HTML. Wait until Quarto reports that the document was rendered successfully. Changing the parameter alone does not run the estimates.
 
-4. When the first render succeeds, change the parameter back to `false` and save. This prevents future renders from rerunning the estimation.
-5. Run the same Quarto command a second time. This second render does **not** refit the models: it rebuilds the final HTML from the freshly updated result files while leaving the notebook in its normal review mode.
-6. Quarto creates the HTML and its supporting files, but does not copy the source QMD. If you want the public site to include the matching source, copy it from the BNC2 repository root:
+After a successful rerun, change the parameter back to `false` and save the file. This keeps the notebook in its normal review mode: future renders will use the prepared outputs and will not refit the models. If you want to inspect the notebook again after resetting the parameter, render it once more with the same command.
 
-```powershell
-Copy-Item code/notebooks/07_spatial_econometrics.qmd "..\..\NotebookSites\gcw-spatial-econometrics\07_spatial_econometrics.qmd" -Force
-```
-
-7. Rendering changes local files only. To publish the update, run these commands in PowerShell from the BNC2 repository root:
-
-```powershell
-Set-Location ..\..\NotebookSites
-git add gcw-spatial-econometrics
-git commit -m "Update spatial econometrics notebook"
-git push origin main
-```
-
-This publishes the QMD, HTML, and supporting files from the separate `NotebookSites` repository. GitHub Pages deploys the pushed version automatically.
-
-The rerun uses the Python executable named by the `PYTHON` environment variable, if set, or `python` on `PATH`; the repository's Python spatial-analysis dependencies must be available in that environment. This switch reruns the spatial-analysis sequence only, not the full carbon-wealth accounting pipeline.
+This procedure reruns the spatial-analysis sequence only. It does not rerun the full carbon-wealth accounting pipeline. The Python executable named by the `PYTHON` environment variable is used when it is set; otherwise Quarto uses `python` available on `PATH`. The required Python spatial-analysis dependencies must be installed locally.
 
 ```{r}
 root <- normalizePath(getwd(), winslash = "/", mustWork = TRUE)
