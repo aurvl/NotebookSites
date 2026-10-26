@@ -1,41 +1,34 @@
 ---
 title: "Spatial econometric analysis"
-subtitle: "Research questions, data, model sequence, and results"
+subtitle: "Diagnostics, candidate models, and author-led selection"
 format:
   html:
     toc: true
     toc-depth: 3
     code-fold: true
-    theme: cosmo
 engine: knitr
-params:
-  rerun_spatial_models: false
 execute:
   echo: true
   warning: false
 ---
 
-# From the paper to the analysis
+# Purpose and scope
 
-The paper builds national forest and marine carbon-wealth accounts and relates them to forest-capacity losses and national economic and emissions indicators. This notebook makes the spatial-econometric part of that workflow inspectable: it shows which country and territory observations enter each relationship, how the variables are transformed, what OLS diagnostics are run, how spatial candidates are compared, and what the fitted models report.
+This Quarto notebook uses **R throughout** to audit, compare, and visualise the spatial-analysis sequence for the nine primary relationships. It reads the prepared 2024 model fits and diagnostics in `results/validation/`; rendering the notebook does not refit the 168 upstream candidate models. To regenerate those estimates, run `python code/scripts/run_spatial_emissions_extension.py` from the repository root. The distinction between upstream estimation and this R-based review is explicit so that the numerical provenance remains traceable.
 
-The analysis is organised around three questions already encoded in the project outputs. The first asks how the three forest-account indicators vary with national characteristics. The second asks whether adding 2024 emissions changes those relationships. The third asks how 2024 emissions vary with each forest-account indicator. Each question contains three related specifications, giving nine primary relationships in total.
+The nine relationships are grouped into three sets:
 
-The word **relationship** is deliberate. These are cross-sectional associations. The analysis does not identify a causal effect of GCW/GDP, forest-capacity loss, or erosion on emissions.
+1. Capacity loss, relative erosion of GCW, and GCW/GDP as outcomes under the baseline covariates.
+2. The same three outcomes with 2024 emissions added as a predictor.
+3. 2024 emissions as the outcome, with capacity loss, relative erosion, or GCW/GDP added as the focal predictor.
 
-## Research questions
+Each relationship is examined under two spatial-weights definitions: Queen contiguity and symmetrised five-nearest neighbours. The outputs also contain auxiliary specifications and matched-sample references. Those are retained for diagnostics but are not counted among the nine primary relationships above.
 
-1. **How are forest-capacity loss, relative GCW erosion, and GCW as a share of GDP associated with the baseline national controls?**
-2. **How do those three relationships change when 2024 emissions are added as a predictor?**
-3. **How are 2024 CO₂ emissions associated with forest-capacity loss, relative GCW erosion, and GCW/GDP, conditional on the baseline controls?**
+This notebook exposes evidence for the researcher to review. It does not automatically select a model, choose a weight matrix, interpret coefficients, or treat associations as causal.
 
-For example, the third question includes the relationship between GCW/GDP and emissions. It is not phrased as “the impact” because the design is observational and does not establish causal identification.
+# 1. Setup and input audit
 
-# 1. How to use this notebook
-
-By default, the notebook reads the current prepared analysis outputs. The analysis has already been run: it contains nine primary relationships, two spatial-weights matrices, and six candidate model families for each relationship and matrix. To rerun the upstream analysis before rendering, set `rerun_spatial_models: true` in the YAML parameters at the top. That runs `code/scripts/run_spatial_emissions_extension.py` from the repository root and refreshes the spatial result files. A full render with the default `false` setting only reads and presents the stored outputs.
-
-The rendered notebook is therefore useful in two modes: **review mode** reproduces tables and plots from stored outputs without refitting; **rerun mode** runs the estimation sequence first, then reads and displays its refreshed outputs.
+The cells below locate the repository and load the outputs created by the spatial sequence. The filename suffix `spatial_emissions_2024` identifies the expanded analysis that includes emissions as both a predictor and an outcome. `specification`, `outcome`, and `weight` jointly identify each model case; `model` identifies OLS, SAR, SEM, SDM, SDEM, or GNS.
 
 ```{r}
 root <- normalizePath(getwd(), winslash = "/", mustWork = TRUE)
@@ -44,89 +37,42 @@ while (!file.exists(file.path(root, "pyproject.toml"))) {
   if (identical(parent, root)) stop("Render from the repository or one of its subfolders")
   root <- parent
 }
-
-if (isTRUE(params$rerun_spatial_models)) {
-  run_output <- system2(
-    Sys.getenv("PYTHON", "python"),
-    "code/scripts/run_spatial_emissions_extension.py",
-    stdout = TRUE, stderr = TRUE, wait = TRUE,
-    env = paste0("PYTHONPATH=", root)
-  )
-  run_status <- attr(run_output, "status")
-  cat(paste(run_output, collapse = "\n"), "\n")
-  if (!is.null(run_status) && run_status != 0) stop("Upstream spatial estimation failed")
-}
-
-validation_dir <- file.path(root, "results", "validation")
-master_path <- file.path(validation_dir, "country_level_results_master.csv")
-output_files <- c(
+v <- file.path(root, "results", "validation")
+files <- c(
   moran = "spatial_emissions_2024_step1_moran.csv",
   lm = "spatial_emissions_2024_step2_lm_tests.csv",
   nested = "spatial_emissions_2024_step3_nested_tests.csv",
   fit = "spatial_emissions_2024_model_fit.csv",
   coefficients = "spatial_emissions_2024_model_coefficients.csv",
-  sample_audit = "spatial_emissions_2024_sample_audit.csv",
   decisions = "spatial_model_decision_template.csv"
 )
-output_paths <- file.path(validation_dir, output_files)
-names(output_paths) <- names(output_files)
-missing_paths <- c(if (!file.exists(master_path)) master_path, output_paths[!file.exists(output_paths)])
-if (length(missing_paths)) stop("Required input(s) missing: ", paste(missing_paths, collapse = ", "))
-
-master <- read.csv(master_path, check.names = FALSE, stringsAsFactors = FALSE)
-tables <- lapply(output_paths, read.csv, check.names = FALSE, stringsAsFactors = FALSE)
-names(tables) <- names(output_paths)
+paths <- file.path(v, files)
+names(paths) <- names(files)
+missing <- paths[!file.exists(paths)]
+if (length(missing)) stop("Missing spatial outputs: ", paste(missing, collapse = ", "))
+tables <- lapply(paths, read.csv, check.names = FALSE, stringsAsFactors = FALSE)
 moran <- tables$moran
 lm <- tables$lm
 nested <- tables$nested
 fit <- tables$fit
 coefficients <- tables$coefficients
-sample_audit <- tables$sample_audit
 decisions <- tables$decisions
-if (!"UNIT_CODE" %in% names(master)) stop("The current master table has no UNIT_CODE column")
-if (anyDuplicated(master$UNIT_CODE)) stop("UNIT_CODE must uniquely identify each accounting unit")
-show_table <- function(x, cols = names(x), digits = 3, caption = NULL) {
-  knitr::kable(x[, intersect(cols, names(x)), drop = FALSE], digits = digits,
-               caption = caption, row.names = FALSE)
+show_table <- function(x, cols, digits = 3) {
+  knitr::kable(x[, intersect(cols, names(x)), drop = FALSE], digits = digits)
 }
-data.frame(input = c("National analysis table", names(tables)),
-           rows = c(nrow(master), vapply(tables, nrow, integer(1))),
-           file = c(basename(master_path), basename(output_paths)), row.names = NULL) |>
-  show_table()
+stopifnot(nrow(decisions) == 9L, !anyNA(decisions$specification))
+data.frame(
+  source = names(tables),
+  rows = vapply(tables, nrow, integer(1)),
+  path = basename(paths), row.names = NULL
+) |> knitr::kable()
+cat("Weights:", paste(sort(unique(fit$weight)), collapse = ", "), "\n")
+cat("Models:", paste(sort(unique(fit$model)), collapse = ", "), "\n")
 ```
 
-## What each model uses
+# 2. Define the primary relationships
 
-The outcomes are (1) annual forest-capacity loss in MtCO₂/year, (2) reported annual loss as a percentage of GCW, and (3) GCW as a percentage of 2024 GDP. In the emissions-as-outcome models, the dependent variable is 2024 CO₂ emissions in MtCO₂/year. The 2024 emissions series comes from the current GCB 2025-derived country table.
-
-The common baseline controls are log GDP per capita, log forest area in million hectares, and the share of forest area in warm biomes. For forest-capacity loss and erosion, only units reporting deforestation enter the sample; unreported loss is missing, not zero. Every model uses `log1p` for its dependent variable. GDP per capita and forest area use natural-log transforms; the added emissions predictor uses `log1p` of MtCO₂/year. When a forest-account indicator is added to an emissions-as-outcome model, that predictor is also `log1p` transformed.
-
-The two neighbourhood definitions are row-standardised Queen contiguity and row-standardised symmetrised k-nearest neighbours with k = 5, constructed from representative points in an equal-area projection. Queen isolates are retained with no neighbours; kNN can connect territories across water. The two matrices answer spatial-model questions under different definitions of “neighbour”.
-
-# 2. Inspect the data before fitting
-
-## What one observation looks like
-
-`UNIT_CODE` is the study's accounting-unit identifier. The table below shows real rows from the current master table, narrowed to the fields used in this spatial analysis, so the unit identifiers and measurement scales are visible before estimates are discussed.
-
-```{r}
-preview_cols <- c("UNIT_CODE", "name", "spatial_outcome_lost_capacity_mtco2_yr",
-                  "spatial_outcome_erosion_pct_of_gcw", "spatial_outcome_gcw_gdp_pct_2024",
-                  "co2_emissions_tco2_2024", "gdp_per_capita_2024",
-                  "forest_area_allocated_total_ha", "forest_warm_biome_share")
-missing_preview <- setdiff(preview_cols, names(master))
-if (length(missing_preview)) stop("Missing master fields: ", paste(missing_preview, collapse = ", "))
-head_preview <- utils::head(master[, preview_cols], 8)
-names(head_preview) <- c("UNIT_CODE", "Unit", "Capacity loss (MtCO2/yr)", "Loss / GCW (%)",
-                         "GCW / GDP 2024 (%)", "CO2 emissions 2024 (tCO2/yr)",
-                         "GDP per capita 2024 (US$2015)", "Forest area (ha)", "Warm-biome share")
-show_table(head_preview, digits = 3,
-           caption = "First eight study units and the variables used in the spatial analysis")
-```
-
-## Sample coverage and descriptive statistics
-
-Sample sizes differ by outcome because source variables are not available for every unit. The loss-based outcomes use reported-loss cases; GCW/GDP and emissions outcomes use complete cases. Missing outcomes are not converted to zero for model fitting.
+The decision template is the authoritative map from each of the nine relationships to its specification name, outcome, and complete-case sample size. It also contains blank author-decision fields. The mapping below uses those nine rows to filter the primary evidence while leaving auxiliary diagnostics available in the source tables.
 
 ```{r}
 primary <- decisions[decisions$role %in% c("Primary", "Extended"), , drop = FALSE]
@@ -139,222 +85,138 @@ lm_primary <- filter_primary(lm)
 nested_primary <- filter_primary(nested)
 fit_primary <- filter_primary(fit)
 coef_primary <- filter_primary(coefficients)
-show_table(primary, c("relationship_order", "relationship", "specification", "outcome", "sample_n"),
-           caption = "Nine prespecified relationships and their complete-case sample sizes")
-
-library(ggplot2)
-ggplot(primary, aes(x = reorder(relationship, sample_n), y = sample_n)) +
-  geom_col(fill = "#58758A") + coord_flip() +
-  labs(x = NULL, y = "Complete-case units", title = "Sample size by relationship") +
-  theme_minimal(base_size = 11)
-
-measure_cols <- c("spatial_outcome_lost_capacity_mtco2_yr", "spatial_outcome_erosion_pct_of_gcw",
-                  "spatial_outcome_gcw_gdp_pct_2024", "co2_emissions_tco2_2024",
-                  "spatial_predictor_log_gdp_per_capita_2024", "spatial_predictor_log_forest_area_mha",
-                  "spatial_predictor_log_emissions_mtco2_2024",
-                  "spatial_predictor_log1p_lost_capacity_mtco2_yr",
-                  "spatial_predictor_log1p_erosion_pct_of_gcw",
-                  "spatial_predictor_log1p_gcw_gdp_pct_2024")
-desc <- do.call(rbind, lapply(measure_cols, function(nm) {
-  x <- master[[nm]]; x <- x[is.finite(x)]
-  data.frame(variable = nm, n = length(x), mean = mean(x), sd = sd(x), median = median(x),
-             p25 = unname(quantile(x, .25)), p75 = unname(quantile(x, .75)))
-}))
-show_table(desc, digits = 3, caption = "Descriptive statistics for observed outcomes and transformed predictors")
-
-plot_data <- rbind(
-  data.frame(measure = "Annual forest-capacity loss", value = log1p(master$spatial_outcome_lost_capacity_mtco2_yr)),
-  data.frame(measure = "Relative GCW erosion", value = log1p(master$spatial_outcome_erosion_pct_of_gcw)),
-  data.frame(measure = "GCW / GDP", value = log1p(master$spatial_outcome_gcw_gdp_pct_2024)),
-  data.frame(measure = "2024 CO2 emissions", value = log1p(master$co2_emissions_tco2_2024 / 1e6))
-)
-plot_data <- plot_data[is.finite(plot_data$value), ]
-ggplot(plot_data, aes(x = value)) + geom_histogram(bins = 25, fill = "#58758A", colour = "white") +
-  facet_wrap(~ measure, scales = "free", ncol = 2) +
-  labs(x = "log1p-transformed value", y = "Study units", title = "Outcome distributions on the model scale") +
-  theme_minimal(base_size = 11)
+show_table(primary, c("relationship_order", "relationship", "role", "specification", "outcome", "sample_n"))
+stopifnot(length(unique(paste(fit_primary$specification, fit_primary$outcome,
+                              fit_primary$weight, sep = "::"))) == 18L)
 ```
 
-# 3. Research question 1: forest-account indicators and baseline controls
+# 3. Step 1 - Moran's I for the outcome and OLS residuals
 
-**Question:** How are annual capacity loss, relative GCW erosion, and GCW/GDP associated with GDP per capita, forest area, and warm-biome share?
+Moran's I is calculated here for the transformed outcome (`y_log1p`) and the OLS residuals (`ols_residual`). The first diagnostic describes spatial autocorrelation in the outcome; the second checks whether spatial pattern remains in the residuals of the non-spatial baseline. The table reports the statistic, permutation result, sample size, island/component counts, and the stored Holm-adjusted value where available.
 
-The sequence begins with OLS using heteroskedasticity-robust standard errors as a non-spatial reference. Moran's I then describes spatial autocorrelation in the outcome and OLS residuals. Lagrange-multiplier tests evaluate specified forms of spatial dependence relative to OLS. These diagnostics do not automatically choose a spatial estimator.
+Queen contiguity connects units sharing a boundary. Symmetric kNN-5 connects each unit to its five nearest neighbours and symmetrises the links. These define alternative neighbourhood matrices, so compare them as separate specifications rather than treating their statistics as interchangeable.
 
 ```{r}
-q1 <- primary[primary$specification == "baseline_2024_same_sample", ]
-q1_moran <- moran_primary[moran_primary$specification == "baseline_2024_same_sample", ]
-q1_lm <- lm_primary[lm_primary$specification == "baseline_2024_same_sample", ]
-q1_fits <- fit_primary[fit_primary$specification == "baseline_2024_same_sample", ]
-q1_nested <- nested_primary[nested_primary$specification == "baseline_2024_same_sample", ]
-show_table(q1, c("relationship_order", "relationship", "outcome", "sample_n"),
-           caption = "Question 1: three baseline outcome models")
-show_table(q1_moran, c("outcome", "weight", "measure", "n", "moran_i", "p_permutation_two_sided",
-                       "p_holm_within_specification_measure"), digits = 4,
-           caption = "Question 1: Moran diagnostics")
-show_table(q1_lm, c("outcome", "weight", "test", "statistic", "df", "p_value",
-                    "p_holm_within_specification_test"), digits = 4,
-           caption = "Question 1: OLS Lagrange-multiplier diagnostics")
-show_table(q1_fits[order(q1_fits$outcome, q1_fits$weight, q1_fits$bic_rank), ],
-           c("outcome", "weight", "model", "n", "aic", "bic", "aic_rank", "bic_rank", "rho", "lambda",
-             "optimizer_success", "covariance_status"), digits = 3,
-           caption = "Question 1: all six model candidates under both weights matrices")
-show_table(q1_nested, c("outcome", "weight", "comparison", "restricted_model", "unrestricted_model",
-                        "lr_statistic", "df", "p_value", "test_status"), digits = 4,
-           caption = "Question 1: nested likelihood-ratio comparisons")
-q1_shortlist <- q1_fits[order(q1_fits$outcome, q1_fits$weight, q1_fits$bic), ]
-q1_shortlist <- q1_shortlist[!duplicated(q1_shortlist[c("outcome", "weight")]), ]
-q1_shortlist <- merge(q1_shortlist, primary[c("specification", "outcome", "relationship_order", "relationship")],
-                      by = c("specification", "outcome"), all.x = TRUE)
-q1_terms <- merge(q1_shortlist[c("outcome", "weight", "model", "n", "bic")], coef_primary,
-                  by = c("outcome", "weight", "model", "n"), all.x = TRUE)
-show_table(q1_terms[order(q1_terms$outcome, q1_terms$weight, q1_terms$term), ],
-           c("outcome", "weight", "model", "term", "coefficient", "std_error_ml", "z_wald_ml",
-             "p_wald_ml", "bic", "covariance_status"), digits = 4,
-           caption = "Question 1: coefficients of each matrix's provisional minimum-BIC candidate")
+moran_view <- moran_primary[order(moran_primary$specification, moran_primary$outcome,
+                                  moran_primary$weight, moran_primary$measure), , drop = FALSE]
+show_table(moran_view, c("specification", "outcome", "weight", "measure", "n",
+                         "islands", "components", "moran_i", "p_permutation_two_sided",
+                         "p_holm_within_specification_measure"), digits = 4)
 ```
 
-The coefficient table reports fitted parameters; it does not interpret their scientific meaning. For spatial models, raw parameters may not equal direct, indirect, or total marginal effects. Consult the model parameterisation before interpreting them.
+Reading note: a small p-value is evidence against the null used by that diagnostic, not evidence that a particular spatial regression is automatically correct. The multiple-testing-adjusted column should be kept alongside the unadjusted permutation result.
 
-# 4. Research question 2: add 2024 emissions as a predictor
+# 4. Step 2 - Lagrange-multiplier diagnostics after OLS
 
-**Question:** When 2024 emissions are added to the baseline controls, how do the three forest-account relationships and their model diagnostics compare with the matched baseline?
-
-Baseline and emissions-augmented models use the same complete-case units for each outcome. The compared models therefore differ by the added predictor rather than by the sample. Likelihood-ratio tests and fit summaries are shown as evidence for author review, not as automatic selection rules.
+The LM diagnostics test specific spatial-dependence alternatives relative to the OLS baseline. `LM_lag` and `LM_error` are the conventional lag and error tests; their robust counterparts adjust each test for the competing form of dependence. The joint tests are also retained. The reported p-values and Holm-adjusted values are shown without using a significance threshold to choose a final estimator automatically.
 
 ```{r}
-q2 <- primary[primary$specification == "add_emissions_2024_as_x", ]
-q2_moran <- moran_primary[moran_primary$specification == "add_emissions_2024_as_x", ]
-q2_lm <- lm_primary[lm_primary$specification == "add_emissions_2024_as_x", ]
-q2_fits <- fit_primary[fit_primary$specification == "add_emissions_2024_as_x", ]
-q2_nested <- nested_primary[nested_primary$specification == "add_emissions_2024_as_x", ]
-show_table(q2, c("relationship_order", "relationship", "outcome", "sample_n"),
-           caption = "Question 2: three models adding emissions as a predictor")
-show_table(q2_moran, c("outcome", "weight", "measure", "n", "moran_i", "p_permutation_two_sided",
-                       "p_holm_within_specification_measure"), digits = 4,
-           caption = "Question 2: Moran diagnostics")
-show_table(q2_lm, c("outcome", "weight", "test", "statistic", "df", "p_value",
-                    "p_holm_within_specification_test"), digits = 4,
-           caption = "Question 2: OLS Lagrange-multiplier diagnostics")
-show_table(q2_fits[order(q2_fits$outcome, q2_fits$weight, q2_fits$bic_rank), ],
-           c("outcome", "weight", "model", "n", "aic", "bic", "aic_rank", "bic_rank", "rho", "lambda",
-             "optimizer_success", "covariance_status"), digits = 3,
-           caption = "Question 2: all six model candidates under both weights matrices")
-show_table(q2_nested, c("outcome", "weight", "comparison", "restricted_model", "unrestricted_model",
-                        "lr_statistic", "df", "p_value", "test_status"), digits = 4,
-           caption = "Question 2: nested spatial-model comparisons")
-q2_shortlist <- q2_fits[order(q2_fits$outcome, q2_fits$weight, q2_fits$bic), ]
-q2_shortlist <- q2_shortlist[!duplicated(q2_shortlist[c("outcome", "weight")]), ]
-q2_shortlist <- merge(q2_shortlist, primary[c("specification", "outcome", "relationship_order", "relationship")],
-                      by = c("specification", "outcome"), all.x = TRUE)
-q2_terms <- merge(q2_shortlist[c("outcome", "weight", "model", "n", "bic")], coef_primary,
-                  by = c("outcome", "weight", "model", "n"), all.x = TRUE)
-show_table(q2_terms[order(q2_terms$outcome, q2_terms$weight, q2_terms$term), ],
-           c("outcome", "weight", "model", "term", "coefficient", "std_error_ml", "z_wald_ml",
-             "p_wald_ml", "bic", "covariance_status"), digits = 4,
-           caption = "Question 2: coefficients of each matrix's provisional minimum-BIC candidate")
+lm_view <- lm_primary[order(lm_primary$specification, lm_primary$outcome,
+                            lm_primary$weight, lm_primary$test), , drop = FALSE]
+show_table(lm_view, c("specification", "outcome", "weight", "n", "test",
+                      "statistic", "df", "p_value", "p_holm_within_specification_test"), digits = 4)
 ```
 
-# 5. Research question 3: 2024 emissions as the outcome
+# 5. Step 3 - Nested spatial-model comparisons
 
-**Question:** How are 2024 emissions associated with each forest-account indicator, conditional on the same baseline national controls?
-
-This question contains three separate emissions-outcome models, each adding one focal predictor. For each, the prepared analysis also estimates a reduced emissions model on exactly the same units for the predictor-block comparison.
+The likelihood-ratio comparisons evaluate three nested restrictions encoded in the prepared analysis: SDM versus SAR, SDEM versus SEM, and GNS versus SDM. The restricted and unrestricted model labels are included in the output so each comparison is traceable. These tests address whether the additional parameters in the unrestricted specification improve fit under the tested restriction; they do not settle all assumptions or determine which spatial weights matrix should be used.
 
 ```{r}
-q3 <- primary[grepl("emissions_2024_as_y_plus_", primary$specification), ]
-q3_moran <- moran_primary[moran_primary$specification %in% q3$specification, ]
-q3_lm <- lm_primary[lm_primary$specification %in% q3$specification, ]
-q3_fits <- fit_primary[fit_primary$specification %in% q3$specification, ]
-q3_nested <- nested_primary[nested_primary$specification %in% q3$specification, ]
-show_table(q3, c("relationship_order", "relationship", "outcome", "sample_n"),
-           caption = "Question 3: emissions models with one forest-account predictor at a time")
-show_table(q3_moran, c("specification", "weight", "measure", "n", "moran_i", "p_permutation_two_sided",
-                       "p_holm_within_specification_measure"), digits = 4,
-           caption = "Question 3: Moran diagnostics")
-show_table(q3_lm, c("specification", "weight", "test", "statistic", "df", "p_value",
-                    "p_holm_within_specification_test"), digits = 4,
-           caption = "Question 3: OLS Lagrange-multiplier diagnostics")
-show_table(q3_fits[order(q3_fits$specification, q3_fits$weight, q3_fits$bic_rank), ],
-           c("specification", "weight", "model", "n", "aic", "bic", "aic_rank", "bic_rank", "rho", "lambda",
-             "optimizer_success", "covariance_status"), digits = 3,
-           caption = "Question 3: all six model candidates under both weights matrices")
-show_table(q3_nested, c("specification", "weight", "comparison", "restricted_model", "unrestricted_model",
-                        "lr_statistic", "df", "p_value", "test_status"), digits = 4,
-           caption = "Question 3: same-sample nested comparisons for the added focal predictors")
-q3_shortlist <- q3_fits[order(q3_fits$specification, q3_fits$weight, q3_fits$bic), ]
-q3_shortlist <- q3_shortlist[!duplicated(q3_shortlist[c("specification", "weight")]), ]
-q3_shortlist <- merge(q3_shortlist, primary[c("specification", "outcome", "relationship_order", "relationship")],
-                      by = c("specification", "outcome"), all.x = TRUE)
-q3_terms <- merge(q3_shortlist[c("specification", "outcome", "weight", "model", "n", "bic")],
-                  coef_primary, by = c("specification", "outcome", "weight", "model", "n"), all.x = TRUE)
-show_table(q3_terms[order(q3_terms$specification, q3_terms$weight, q3_terms$term), ],
-           c("specification", "weight", "model", "term", "coefficient", "std_error_ml", "z_wald_ml",
-             "p_wald_ml", "bic", "covariance_status"), digits = 4,
-           caption = "Question 3: coefficients of each matrix's provisional minimum-BIC candidate")
+nested_view <- nested_primary[order(nested_primary$specification, nested_primary$outcome,
+                                    nested_primary$weight, nested_primary$comparison), , drop = FALSE]
+show_table(nested_view, c("specification", "outcome", "weight", "comparison",
+                          "restricted_model", "unrestricted_model", "n", "lr_statistic",
+                          "df", "p_value", "p_holm_within_specification_comparison",
+                          "test_status"), digits = 4)
 ```
 
-## Descriptive views: emissions and the three focal indicators
+# 6. Step 4 - Compare candidate fit statistics and diagnostics
 
-These panels are raw descriptive checks for the three relationships in the third question. Their fitted lines are not spatial-model estimates and do not identify causal effects.
+Candidate models are compared only within the same relationship, sample, and weight definition. AIC and BIC ranks are provided as fit summaries; the smallest value is not an automatic scientific decision. The table also exposes convergence and covariance status so a nominal rank cannot hide an estimation problem.
 
 ```{r}
-q3_plot_data <- rbind(
-  data.frame(relationship = "Capacity loss", focal = log1p(master$spatial_outcome_lost_capacity_mtco2_yr),
-             emissions = master$co2_emissions_tco2_2024 / 1e6),
-  data.frame(relationship = "Relative GCW erosion", focal = log1p(master$spatial_outcome_erosion_pct_of_gcw),
-             emissions = master$co2_emissions_tco2_2024 / 1e6),
-  data.frame(relationship = "GCW / GDP", focal = log1p(master$spatial_outcome_gcw_gdp_pct_2024),
-             emissions = master$co2_emissions_tco2_2024 / 1e6)
-)
-q3_plot_data <- q3_plot_data[is.finite(q3_plot_data$focal) & is.finite(q3_plot_data$emissions) &
-                               q3_plot_data$emissions >= 0, ]
-ggplot(q3_plot_data, aes(x = focal, y = log1p(emissions))) +
-  geom_point(alpha = .65, colour = "#315A70") +
-  geom_smooth(method = "lm", se = TRUE, colour = "#B65D3A", linewidth = .7) +
-  facet_wrap(~ relationship, scales = "free_x") +
-  labs(x = "log1p-transformed focal indicator", y = "log1p(2024 CO2 emissions, MtCO2/yr)",
-       title = "Emissions and forest-account indicators: descriptive relationships") +
-  theme_minimal(base_size = 11)
+fit_view <- fit_primary[order(fit_primary$specification, fit_primary$outcome,
+                              fit_primary$weight, fit_primary$bic_rank), , drop = FALSE]
+show_table(fit_view, c("specification", "outcome", "weight", "model", "n",
+                       "aic", "bic", "aic_rank", "bic_rank", "rho", "lambda",
+                       "optimizer_success", "covariance_status"), digits = 3)
+
+cases <- split(fit_primary, paste(fit_primary$specification, fit_primary$outcome,
+                                  fit_primary$weight, sep = "::"))
+fit_health <- do.call(rbind, lapply(cases, function(d) data.frame(
+  specification = d$specification[1], outcome = d$outcome[1], weight = d$weight[1],
+  candidate_models = length(unique(d$model)),
+  all_optimizers_successful = all(d$optimizer_success %in% c(TRUE, "True", "TRUE")),
+  covariance_statuses = paste(sort(unique(d$covariance_status)), collapse = ", ")
+)))
+row.names(fit_health) <- NULL
+stopifnot(nrow(fit_health) == 18L, all(fit_health$candidate_models == 6L))
+show_table(fit_health, names(fit_health))
 ```
 
-# 6. Compare the two matrices and read the coefficients
+## Diagnostic shortlist, without a final manuscript choice
 
-The tables show all candidate fits and coefficient tables for the smallest-BIC candidate within each matrix as a **diagnostic shortlist**. It is not the final model selection. In some cases, both matrices can display the same OLS candidate because OLS does not use a spatial weights matrix. Neither AIC/BIC nor a diagnostic p-value alone decides which estimator or matrix is substantively appropriate.
+The code below identifies the smallest-BIC fit for each relationship and weights matrix, then the smallest-BIC fit across the two matrices. For OLS, the likelihood and BIC are identical under both matrices because OLS does not use the spatial weights; Queen is shown first when the values tie. The table places the OLS-residual Moran and robust LM results alongside that shortlist. This is a reproducible **candidate screen**, not a rule that overrides the model restrictions, disconnected Queen components, coefficient interpretation, or the researcher's final decision.
 
 ```{r}
-shortlist_all <- rbind(transform(q1_shortlist, question = "Q1: baseline controls"),
-                      transform(q2_shortlist, question = "Q2: add emissions predictor"),
-                      transform(q3_shortlist, question = "Q3: emissions outcome"))
-show_table(shortlist_all[order(shortlist_all$relationship_order, shortlist_all$weight), ],
-           c("question", "relationship", "outcome", "weight", "model", "n", "bic"), digits = 3,
-           caption = "Provisional minimum-BIC candidate for every relationship and weights matrix")
+case_key <- function(d) paste(d$specification, d$outcome, d$weight, sep = "::")
+ordered <- fit_primary[order(case_key(fit_primary), fit_primary$bic,
+                             fit_primary$model), , drop = FALSE]
+best_by_weight <- ordered[!duplicated(case_key(ordered)), , drop = FALSE]
+best_by_weight$weight_priority <- ifelse(best_by_weight$weight == "queen_contiguity", 0L, 1L)
+best_overall <- best_by_weight[order(key(best_by_weight), best_by_weight$bic,
+                                       best_by_weight$weight_priority), , drop = FALSE]
+best_overall <- best_overall[!duplicated(key(best_overall)), , drop = FALSE]
+best_overall <- merge(primary[, c("relationship_order", "relationship", "specification", "outcome")],
+                      best_overall, by = c("specification", "outcome"), sort = FALSE)
 
 residual_moran <- moran_primary[moran_primary$measure == "ols_residual",
-                                c("specification", "outcome", "weight", "moran_i", "p_permutation_two_sided")]
-robust_lm <- lm_primary[lm_primary$test %in% c("robust_LM_lag", "robust_LM_error"), ]
-show_table(residual_moran, digits = 4, caption = "OLS residual Moran statistics")
-show_table(robust_lm, c("specification", "outcome", "weight", "test", "statistic", "p_value",
-                        "p_holm_within_specification_test"), digits = 4,
-           caption = "Robust LM test results")
+                               c("specification", "outcome", "weight", "moran_i",
+                                 "p_permutation_two_sided"), drop = FALSE]
+names(residual_moran)[names(residual_moran) == "p_permutation_two_sided"] <- "ols_residual_moran_p"
+robust_lm <- lm_primary[lm_primary$test %in% c("robust_LM_lag", "robust_LM_error"),
+                        c("specification", "outcome", "weight", "test", "p_value"), drop = FALSE]
+robust_lm <- reshape(robust_lm, idvar = c("specification", "outcome", "weight"),
+                     timevar = "test", direction = "wide")
+best_overall <- merge(best_overall, residual_moran,
+                      by = c("specification", "outcome", "weight"), all.x = TRUE, sort = FALSE)
+best_overall <- merge(best_overall, robust_lm,
+                      by = c("specification", "outcome", "weight"), all.x = TRUE, sort = FALSE)
+best_overall <- best_overall[order(best_overall$relationship_order), , drop = FALSE]
+stopifnot(nrow(best_overall) == 9L)
+show_table(best_overall, c("relationship_order", "relationship", "n", "model", "weight",
+                           "bic", "moran_i", "ols_residual_moran_p",
+                           "p_value.robust_LM_lag", "p_value.robust_LM_error"), digits = 4)
 ```
 
-For each relationship, the researcher can record the sign and scale of the focal coefficient, its uncertainty, whether it changes across the two matrices, and how that evidence sits alongside the OLS and spatial diagnostics. For spatial lag models, interpretation may require direct, indirect, and total impacts rather than the raw parameter alone. No substantive conclusion is generated here; the final model, weights matrix, and rationale remain researcher decisions.
+The candidate screen does not convert a statistical association into a causal effect. It also does not imply that the minimum-BIC weights matrix is substantively preferred. Section 8 retains the explicit researcher-decision fields.
+
+# 7. Inspect coefficients without assigning causal meaning
+
+The coefficient table holds the estimates and model-based standard errors for each fitted specification. Spatial models can contain direct, indirect, and feedback effects; a raw coefficient is not necessarily the full marginal effect. Use the model's parameterisation and the analysis script before describing a coefficient. The table is exposed for traceability and author review, not as an automatic interpretation.
 
 ```{r}
-decision_cols <- c("relationship_order", "relationship", "specification", "outcome", "sample_n",
-                   "minimum_bic_candidate_by_weight", "final_model_decision", "final_weight_decision",
-                   "researcher_rationale", "status")
-show_table(decisions, decision_cols, caption = "Model and interpretation decisions remain researcher-led")
+coef_cols <- c("specification", "outcome", "weight", "model", "term", "coefficient",
+               "std_error_ml", "z_wald_ml", "p_wald_ml", "optimizer_success", "covariance_status")
+show_table(utils::head(coef_primary, 80), coef_cols, digits = 3)
 ```
 
-# 7. Reproduction and limits
+# 8. Author-led model and weight decisions
 
-- Current national inputs: `results/validation/country_level_results_master.csv`.
-- Prepared model results: `results/validation/spatial_emissions_2024_*`.
-- Upstream estimation entry point: `code/scripts/run_spatial_emissions_extension.py`.
-- Relationship and sample mapping: `spatial_model_decision_template.csv` and `spatial_emissions_2024_sample_audit.csv`.
-- `rerun_spatial_models: false` reads existing results; `true` reruns the upstream analysis before loading them.
-- Non-reporting deforestation is missing, not zero. Model samples are complete cases, not imputed.
-- Coefficients are model output, not automatic interpretation. These observational relationships do not establish causality.
-- Final estimator, weights-matrix, and manuscript interpretation decisions remain with the researcher.
+The following table is intentionally not auto-filled. `minimum_bic_candidate_by_weight` is a diagnostic summary; the author should enter the final model and weight choice only after reviewing the diagnostics, sample, model assumptions, and substantive purpose. Record the rationale in the supplied decision template so the manuscript's selected three relationships can be traced back to this review.
+
+```{r}
+review_cols <- c("relationship_order", "relationship", "role", "specification", "outcome",
+                 "sample_n", "minimum_bic_candidate_by_weight", "final_model_decision",
+                 "final_weight_decision", "researcher_rationale", "status")
+show_table(decisions, review_cols)
+```
+
+# 9. Reproduction and boundaries
+
+- Prepared outputs: `results/validation/spatial_emissions_2024_*`.
+- Main sequence script: `code/scripts/run_spatial_emissions_extension.py`.
+- Selection template: `results/validation/spatial_model_decision_template.csv`.
+- All executable chunks in this Quarto notebook use R. Rendering reviews existing model results; it does not rerun the upstream model fits.
+- Model-selection decisions and coefficient interpretation remain with the researcher.
+- The reported relationships are observational associations; the notebook does not establish causality.
