@@ -49,7 +49,13 @@ Wait until Quarto finishes and reports that the HTML was created. Changing `true
 
 4. When the first render succeeds, change the parameter back to `false` and save. This prevents future renders from rerunning the estimation.
 5. Run the same Quarto command a second time. This second render does **not** refit the models: it rebuilds the final HTML from the freshly updated result files while leaving the notebook in its normal review mode.
-6. Rendering only changes local files. To update the public GitHub Pages website, commit and push the updated QMD, HTML, and supporting files from the separate `NotebookSites` repository.
+6. Quarto creates the HTML and its supporting files, but does not copy the source QMD. If you want the public site to include the matching source, copy it from the BNC2 repository root:
+
+```powershell
+Copy-Item code/notebooks/07_spatial_econometrics.qmd "..\..\NotebookSites\gcw-spatial-econometrics\07_spatial_econometrics.qmd" -Force
+```
+
+7. Rendering changes local files only. To update the public GitHub Pages website, commit and push the QMD, HTML, and supporting files from the separate `NotebookSites` repository. GitHub Pages deploys the pushed version automatically.
 
 The rerun uses the Python executable named by the `PYTHON` environment variable, if set, or `python` on `PATH`; the repository's Python spatial-analysis dependencies must be available in that environment. This switch reruns the spatial-analysis sequence only, not the full carbon-wealth accounting pipeline.
 
