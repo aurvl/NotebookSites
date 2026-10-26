@@ -144,12 +144,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="how-to-use-this-notebook" class="level1">
 <h1>1. How to use this notebook</h1>
 <p>The published HTML version is intended for readers who want to browse the analysis and inspect its tables, figures, and explanations without installing the repository. It is available from the notebook index and is the simplest way to explore the results.</p>
-<p>If you only want to read the analysis, open the published HTML version. No local rerun is required.</p>
+<p>If you only want to read the analysis, open the <a href="https://aurvl.github.io/NotebookSites/gcw-spatial-econometrics/07_spatial_econometrics.html">published HTML version</a>. No local rerun is required.</p>
 <p>The QMD file is also reproducible locally. By default, <code>rerun_spatial_models: false</code> means that Quarto reads the prepared model outputs and rebuilds the tables, descriptive plots, and weight maps without refitting the spatial models. Do not run the code cells one by one: Quarto should execute the complete document from top to bottom.</p>
 <p>To rerun the spatial estimates on your own computer:</p>
 <ol type="1">
 <li>In the YAML block at the top of this file, change <code>rerun_spatial_models: false</code> to <code>rerun_spatial_models: true</code>, then save the file.</li>
-<li>Open a terminal in the repository root, the folder containing <code>pyproject.toml</code>.</li>
+<li>Open a terminal in the repository root.</li>
 <li>Run the complete QMD:</li>
 </ol>
 <div class="sourceCode" id="cb1"><pre class="sourceCode powershell code-with-copy"><code class="sourceCode powershell"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>quarto render code<span class="op">/</span>notebooks<span class="op">/</span>07_spatial_econometrics<span class="op">.</span><span class="fu">qmd</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>

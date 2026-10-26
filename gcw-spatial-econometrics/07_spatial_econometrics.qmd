@@ -35,14 +35,14 @@ For example, the third question includes the relationship between GCW/GDP and em
 
 The published HTML version is intended for readers who want to browse the analysis and inspect its tables, figures, and explanations without installing the repository. It is available from the notebook index and is the simplest way to explore the results.
 
-If you only want to read the analysis, open the published HTML version. No local rerun is required.
+If you only want to read the analysis, open the [published HTML version](https://aurvl.github.io/NotebookSites/gcw-spatial-econometrics/07_spatial_econometrics.html). No local rerun is required.
 
 The QMD file is also reproducible locally. By default, `rerun_spatial_models: false` means that Quarto reads the prepared model outputs and rebuilds the tables, descriptive plots, and weight maps without refitting the spatial models. Do not run the code cells one by one: Quarto should execute the complete document from top to bottom.
 
 To rerun the spatial estimates on your own computer:
 
 1. In the YAML block at the top of this file, change `rerun_spatial_models: false` to `rerun_spatial_models: true`, then save the file.
-2. Open a terminal in the repository root, the folder containing `pyproject.toml`.
+2. Open a terminal in the repository root.
 3. Run the complete QMD:
 
 ```powershell
