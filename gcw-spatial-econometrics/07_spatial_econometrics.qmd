@@ -82,6 +82,7 @@ output_files <- c(
   nested = "spatial_emissions_2024_step3_nested_tests.csv",
   fit = "spatial_emissions_2024_model_fit.csv",
   coefficients = "spatial_emissions_2024_model_coefficients.csv",
+  block_tests = "spatial_emissions_2024_predictor_block_tests.csv",
   sample_audit = "spatial_emissions_2024_sample_audit.csv",
   decisions = "spatial_model_decision_template.csv"
 )
@@ -98,6 +99,7 @@ lm <- tables$lm
 nested <- tables$nested
 fit <- tables$fit
 coefficients <- tables$coefficients
+block_tests <- tables$block_tests
 sample_audit <- tables$sample_audit
 decisions <- tables$decisions
 if (!"UNIT_CODE" %in% names(master)) stop("The current master table has no UNIT_CODE column")
@@ -124,10 +126,11 @@ show_table <- function(x, cols = names(x), digits = 3, caption = NULL) {
     relationship = "Outcome / relationship", specification = "Model specification",
     outcome = "Outcome", weight = "Weights", model = "Estimator", n = "Countries and territories",
     sample_n = "Countries and territories", measure = "Quantity tested", moran_i = "Moran's I",
-    p_permutation_two_sided = "Permutation p-value", p_holm_within_specification_measure = "Adjusted p-value",
-    p_holm_within_specification_test = "Adjusted p-value", p_value = "p-value", statistic = "Test statistic",
+    p_permutation_two_sided = "Permutation p-value", p_holm_within_specification_measure = "Holm-adjusted p-value",
+    p_holm_within_specification_test = "Holm-adjusted p-value", p_holm_within_specification_comparison = "Holm-adjusted p-value",
+    p_holm_within_block_model = "Holm-adjusted p-value", p_value = "p-value", statistic = "Test statistic",
     restricted_model = "Simpler model", unrestricted_model = "Expanded model",
-    lr_statistic = "Likelihood-ratio statistic", df = "Degrees of freedom",
+    lr_statistic = "Likelihood-ratio statistic", delta_bic = "Change in BIC", df = "Degrees of freedom",
     coefficient = "Estimate", std_error_ml = "Standard error", p_wald_ml = "Wald p-value",
     term = "Variable", bic = "BIC", aic = "AIC", log_likelihood = "Log likelihood",
     r_squared = "R-squared", adjusted_r_squared = "Adjusted R-squared",
@@ -162,6 +165,17 @@ show_table <- function(x, cols = names(x), digits = 3, caption = NULL) {
     test_label <- unname(test_labels[as.character(d$test)])
     d$test <- ifelse(is.na(test_label), gsub("_", " ", d$test, fixed = TRUE), test_label)
   }
+  p_columns <- intersect(c("p_permutation_two_sided", "p_holm_within_specification_measure",
+                           "p_holm_within_specification_test", "p_holm_within_specification_comparison",
+                           "p_holm_within_block_model", "p_value"), names(x))
+  for (column in p_columns) {
+    values <- suppressWarnings(as.numeric(x[[column]]))
+    d[[unname(label_names[column])]] <- ifelse(
+      is.na(values), "",
+      ifelse(values < 0.001, "<0.001", formatC(values, format = "f", digits = 3))
+    )
+  }
+  d <- d[, !duplicated(names(d)), drop = FALSE]
   if ("comparison" %in% names(d)) {
     d$comparison <- gsub("SDM", "Durbin", d$comparison, fixed = TRUE)
     d$comparison <- gsub("SDEM", "Error-Durbin", d$comparison, fixed = TRUE)
@@ -170,7 +184,9 @@ show_table <- function(x, cols = names(x), digits = 3, caption = NULL) {
     d$comparison <- gsub("GNS", "General nesting", d$comparison, fixed = TRUE)
     d$comparison <- gsub("_vs_", " versus ", d$comparison, fixed = TRUE)
   }
-  knitr::kable(d, digits = digits, caption = caption, row.names = FALSE)
+  knitr::kable(d, digits = digits, caption = caption, row.names = FALSE,
+               format = "html", escape = FALSE) |>
+    kableExtra::kable_styling(bootstrap_options = "condensed", full_width = FALSE, position = "center")
 }
 nice_outcome <- function(x) {
   labels <- c(lost_capacity_mtco2_yr = "Annual forest-capacity loss (MtCO2/year)",
@@ -209,6 +225,13 @@ nice_term <- function(x) {
   x <- gsub("^log1p_lost_capacity_mtco2_yr$", "Annual capacity loss", x)
   x <- gsub("^log1p_erosion_pct_of_gcw$", "Annual GCW erosion", x)
   x <- gsub("^log1p_gcw_gdp_pct_2024$", "GCW / 2024 GDP", x)
+  x <- gsub("^W_ln_gdp_per_capita_2024$", "Neighbour-weighted log GDP per capita", x)
+  x <- gsub("^W_ln_forest_area_mha$", "Neighbour-weighted log forest area", x)
+  x <- gsub("^W_ln_emissions_mtco2_2024$", "Neighbour-weighted log 2024 CO2 emissions", x)
+  x <- gsub("^W_warm_biome_share$", "Neighbour-weighted warm-biome share", x)
+  x <- gsub("^W_log1p_lost_capacity_mtco2_yr$", "Neighbour-weighted annual capacity loss", x)
+  x <- gsub("^W_log1p_erosion_pct_of_gcw$", "Neighbour-weighted annual GCW erosion", x)
+  x <- gsub("^W_log1p_gcw_gdp_pct_2024$", "Neighbour-weighted GCW / GDP", x)
   x <- gsub("^W_", "Neighbour-weighted ", x)
   x <- gsub("_", " ", x, fixed = TRUE)
   x <- gsub("^constant$", "Intercept", x)
@@ -225,9 +248,9 @@ data.frame(input = c("National analysis table", names(tables)),
 
 ## What each model uses
 
-Each row in the analysis represents one country or territory. The three forest-account measures are annual forest-capacity loss (MtCO2/year), that annual loss divided by GCW (%), and GCW divided by 2024 GDP (%). In the third research question, 2024 CO2 emissions (MtCO2/year) become the outcome. The emissions series comes from the current GCB 2025-derived country table.
+Each row represents one country or territory. The outcomes are annual forest-capacity loss, annual loss relative to GCW, GCW relative to 2024 GDP, and, in Question 3, 2024 CO2 emissions from the current GCB-derived country table.
 
-The common baseline controls are log GDP per person, log forest area (million hectares), and the share of forest in warm biomes. A logarithm compresses large values so that a few very large countries do not dominate the numerical scale. For forest-capacity loss and relative erosion, only countries reporting deforestation are included; an unreported value is missing, not zero. The model also uses `log(1 + value)` for non-negative outcomes and predictors. This keeps zero values in the analysis while reducing right-skew. The horizontal axis in the distribution plot is therefore not in the original units: a value of 0 means the original value was 0, and a value of 1 means the original value was about 1.72 units because `exp(1) - 1` is about 1.72. Each panel has its own original measurement unit.
+The common controls are log GDP per person, log forest area, and warm-biome share; non-negative outcomes and focal indicators use log1p transformations, while unreported loss values remain missing.
 
 The two neighbourhood definitions are row-standardised Queen contiguity and row-standardised symmetrised k-nearest neighbours with k = 5, constructed from representative points in an equal-area projection. Queen isolates are retained with no neighbours; kNN can connect territories across water. The next section maps what those non-zero relationships look like.
 
@@ -312,7 +335,6 @@ weight_summary <- do.call(rbind, lapply(names(matrix_labels), function(matrix_na
 }))
 show_table(weight_summary, digits = 3,
            caption = "Graph structure and non-zero row-standardised weights for the mapped sample")
-knitr::asis_output("`Units` counts the mapped observations. `Isolates` counts units with no neighbour in the Queen graph. `Mean neighbours` and `undirected links` describe graph connectivity. The minimum and maximum are the smallest and largest non-zero row-standardised weights in the saved sample.")
 
 points_6933 <- sf::st_point_on_surface(sf::st_transform(weight_map_units, 6933))
 points_geo <- sf::st_transform(points_6933, 4326)
@@ -367,6 +389,8 @@ weight_map_figure <- ggplot2::ggplot() +
 print(weight_map_figure)
 cat("Figure: Queen contiguity and symmetrised five-nearest-neighbour links for the same 120-unit sample. Fill shows the number of neighbours; lines show links present in the weights matrix. ", seam_link_count, " links crossing the map seam are omitted from the drawing only.\n", sep = "")
 ```
+
+For this 120-unit example, the Queen graph has `r weight_summary$isolates[weight_summary$matrix == "Queen contiguity"]` isolates and `r weight_summary$undirected_links[weight_summary$matrix == "Queen contiguity"]` undirected links; the symmetrised kNN-5 graph has `r weight_summary$isolates[weight_summary$matrix == "Symmetrised kNN-5"]` isolates and `r weight_summary$undirected_links[weight_summary$matrix == "Symmetrised kNN-5"]` links. The maps show why the two definitions are compared separately in the results below.
 
 # 3. Inspect the data before fitting
 
@@ -462,25 +486,6 @@ ols_summary_table <- function(specification, outcomes) {
                r_squared = stats[["r_squared"]], adjusted_r_squared = stats[["adjusted_r_squared"]])
   }))
 }
-print_coefficient_tables <- function(d) {
-  group_fields <- intersect(c("specification", "outcome", "weight"), names(d))
-  groups <- split(d, interaction(d[group_fields], drop = TRUE))
-  pieces <- character()
-  for (part in groups) {
-    specification_label <- if ("specification" %in% names(part)) paste0(nice_spec(part$specification[1]), " - ") else ""
-    heading <- paste0("#### ", specification_label, nice_outcome(part$outcome[1]), " - ",
-                      nice_weight(part$weight[1]), " - ", toupper(part$model[1]))
-    table_data <- part[, c("term", "coefficient", "std_error_ml", "ci_lower_95",
-                           "ci_upper_95", "p_wald_ml")]
-    table_data$term <- nice_term(table_data$term)
-    table <- knitr::kable(table_data,
-                          digits = 4, col.names = c("Variable", "Estimate", "Standard error",
-                                                   "95% CI lower", "95% CI upper", "Wald p-value"),
-                          row.names = FALSE, format = "pipe")
-    pieces <- c(pieces, heading, as.character(table))
-  }
-  knitr::asis_output(paste(pieces, collapse = "\n\n"))
-}
 collapse_repeated_ols_coefficients <- function(d) {
   identity <- intersect(c("specification", "outcome", "model", "term"), names(d))
   repeated_ols <- d$model == "OLS" & duplicated(d[d$model == "OLS", identity, drop = FALSE])
@@ -489,6 +494,103 @@ collapse_repeated_ols_coefficients <- function(d) {
   d <- d[keep, , drop = FALSE]
   d$weight[d$model == "OLS"] <- "not_applicable_ols"
   d
+}
+regression_table <- function(specification, outcome) {
+  fits <- fit_primary[fit_primary$specification == specification & fit_primary$outcome == outcome, , drop = FALSE]
+  get_fit <- function(weight, model = NULL) {
+    rows <- fits[fits$weight == weight, , drop = FALSE]
+    if (!is.null(model)) rows <- rows[rows$model == model, , drop = FALSE]
+    if (!nrow(rows)) return(NULL)
+    if (is.null(model)) rows <- rows[which.min(rows$bic), , drop = FALSE]
+    rows[1, , drop = FALSE]
+  }
+  queen_best <- get_fit("queen_contiguity")
+  knn_best <- get_fit("symmetric_knn5")
+  if (is.null(queen_best) || is.null(knn_best)) stop("Both weights definitions are required for the regression table")
+
+  ols_fit <- get_fit("queen_contiguity", "OLS")
+  if (is.null(ols_fit)) ols_fit <- get_fit("symmetric_knn5", "OLS")
+  if (is.null(ols_fit)) stop("The OLS reference fit is missing")
+
+  both_ols <- queen_best$model == "OLS" && knn_best$model == "OLS"
+  if (both_ols) {
+    queen_model <- get_fit("queen_contiguity", "SEM")
+    knn_model <- get_fit("symmetric_knn5", "SEM")
+    if (is.null(queen_model)) queen_model <- get_fit("queen_contiguity")
+    if (is.null(knn_model)) knn_model <- get_fit("symmetric_knn5")
+    queen_label <- paste("Queen comparator:", queen_model$model)
+    knn_label <- paste("kNN-5 comparator:", knn_model$model)
+  } else {
+    queen_model <- queen_best
+    knn_model <- knn_best
+    queen_label <- paste("Queen minimum BIC:", queen_model$model)
+    knn_label <- paste("kNN-5 minimum BIC:", knn_model$model)
+  }
+  selected <- list(OLS = ols_fit, Queen = queen_model, kNN5 = knn_model)
+  column_labels <- c("OLS", queen_label, knn_label)
+
+  coefficient_rows <- lapply(selected, function(model_fit) {
+    coef_primary[coef_primary$specification == model_fit$specification &
+                   coef_primary$outcome == model_fit$outcome &
+                   coef_primary$weight == model_fit$weight &
+                   coef_primary$model == model_fit$model, , drop = FALSE]
+  })
+  term_values <- unique(unlist(lapply(coefficient_rows, `[[`, "term")))
+  predictor_order <- c("ln_gdp_per_capita_2024", "ln_forest_area_mha", "warm_biome_share",
+                       "ln_emissions_mtco2_2024", "log1p_lost_capacity_mtco2_yr",
+                       "log1p_erosion_pct_of_gcw", "log1p_gcw_gdp_pct_2024", "ln_population_2024")
+  main_terms <- intersect(predictor_order, term_values)
+  if (length(setdiff(term_values, c(predictor_order, "constant", "rho", "lambda")))) {
+    main_terms <- c(main_terms, setdiff(term_values, c(predictor_order, "constant", "rho", "lambda", grep("^W_", term_values, value = TRUE))))
+  }
+  constant_term <- if ("constant" %in% term_values) "constant" else character()
+  spatial_x_terms <- sort(grep("^W_", term_values, value = TRUE))
+
+  format_coefficient <- function(model_fit, term) {
+    rows <- coef_primary[coef_primary$specification == model_fit$specification &
+                           coef_primary$outcome == model_fit$outcome &
+                           coef_primary$weight == model_fit$weight &
+                           coef_primary$model == model_fit$model &
+                           coef_primary$term == term, , drop = FALSE]
+    if (!nrow(rows)) return("")
+    stars <- if (rows$p_wald_ml[1] < 0.01) "***" else if (rows$p_wald_ml[1] < 0.05) "**" else if (rows$p_wald_ml[1] < 0.10) "*" else ""
+    paste0(formatC(rows$coefficient[1], format = "f", digits = 3), stars,
+           "<br>(", formatC(rows$std_error_ml[1], format = "f", digits = 3), ")")
+  }
+  fmt_stat <- function(value) ifelse(is.na(value), "", formatC(value, format = "f", digits = 3))
+  make_row <- function(label, values) {
+    result <- as.list(c(label, values))
+    names(result) <- c("Variable", column_labels)
+    as.data.frame(result, check.names = FALSE, stringsAsFactors = FALSE)
+  }
+  rows <- list()
+  for (term in c(main_terms, constant_term, spatial_x_terms)) {
+    label <- if (term == "constant") "Intercept" else nice_term(term)
+    rows[[length(rows) + 1L]] <- make_row(label, vapply(selected, format_coefficient, character(1), term = term))
+  }
+  rows[[length(rows) + 1L]] <- make_row("Observations", vapply(selected, function(x) as.character(x$n), character(1)))
+  rows[[length(rows) + 1L]] <- make_row("Log likelihood", vapply(selected, function(x) fmt_stat(x$log_likelihood), character(1)))
+  rows[[length(rows) + 1L]] <- make_row("AIC", vapply(selected, function(x) fmt_stat(x$aic), character(1)))
+  rows[[length(rows) + 1L]] <- make_row("BIC", vapply(selected, function(x) fmt_stat(x$bic), character(1)))
+  rows[[length(rows) + 1L]] <- make_row("R-squared", vapply(selected, function(x) {
+    if (x$model != "OLS") return("")
+    fmt_stat(ols_reference_stats(specification, outcome)[["r_squared"]])
+  }, character(1)))
+  rows[[length(rows) + 1L]] <- make_row("Adjusted R-squared", vapply(selected, function(x) {
+    if (x$model != "OLS") return("")
+    fmt_stat(ols_reference_stats(specification, outcome)[["adjusted_r_squared"]])
+  }, character(1)))
+  rows[[length(rows) + 1L]] <- make_row("Spatial-lag parameter (rho)", vapply(selected, function(x) format_coefficient(x, "rho"), character(1)))
+  rows[[length(rows) + 1L]] <- make_row("Spatial-error parameter (lambda)", vapply(selected, function(x) format_coefficient(x, "lambda"), character(1)))
+  table_data <- do.call(rbind, rows)
+  kable <- knitr::kable(table_data, format = "html", escape = FALSE, row.names = FALSE,
+                        col.names = c("Variable", column_labels),
+                        caption = "Regression results")
+  kable <- kableExtra::add_header_above(kable, setNames(c(1, length(selected)), c(" ", paste("Dependent variable:", nice_outcome(outcome)))))
+  kable <- kableExtra::kable_styling(kable, bootstrap_options = "condensed", full_width = FALSE, position = "center")
+  kableExtra::footnote(kable,
+                       general = "* p < 0.10; ** p < 0.05; *** p < 0.01. Maximum-likelihood standard errors are in parentheses. Modeled outcomes and non-negative focal indicators use log1p transformations.",
+                       general_title = "Note:", threeparttable = TRUE, escape = FALSE)
 }
 show_table(primary, c("relationship", "specification", "outcome", "sample_n"),
            caption = "Nine prespecified relationships and their complete-case sample sizes")
@@ -535,72 +637,110 @@ print(distribution_figure)
 cat("Figure: Distributions of annual capacity loss, relative GCW erosion, GCW/GDP, and 2024 CO2 emissions, plotted as natural log of one plus the original value. This transformation retains zero values and compresses large values.\n")
 ```
 
-The sample-size chart counts the country and territory records that have every value needed for a given model. In the descriptive table, the mean is the arithmetic average, the standard deviation describes spread around that average, the median is the middle observation, and the 25th and 75th percentiles mark the middle half of the sample.
-
-The histograms use `log(1 + x)`, where `x` is the original non-negative value. This means: add 1, then take the natural logarithm. The added 1 lets a true zero stay in the graph, because `log(0)` is undefined. The transformation also squeezes very large values closer together, so the shape of a highly uneven distribution is easier to see. An axis value of 0 means the original value was 0; an axis value of 1 means the original value was about 1.72 in that panel's units. Each panel has its own units, so compare the shapes within panels, not the numerical axis positions between different panels.
+The sample-size chart reports complete-case counts. The distribution panels use log1p values, so zeros remain in view while large observations are compressed; each panel retains its own measurement scale.
 
 # 4. Research question 1: forest-account indicators and baseline controls
 
-**Question:** How are annual capacity loss, relative GCW erosion, and GCW/GDP associated with GDP per capita, forest area, and warm-biome share?
+**Question:** How are annual forest-capacity loss, relative GCW erosion, and GCW/GDP associated with GDP per capita, forest area, and warm-biome share?
 
-First, the table identifies the three outcomes and their sample sizes. Moran's I checks whether similar values or OLS residuals cluster among neighbours. The Lagrange-multiplier (LM) tests then check particular spatial patterns against an ordinary least-squares (OLS) reference. These checks are clues to inspect, not a rule that chooses a model. The OLS coefficient standard errors in the saved candidate output are likelihood-based; they are not the separate HC3 robust errors used by some diagnostic routines.
+The three baseline relationships use different outcomes and complete-case samples. Across the regression tables, cells show coefficient estimates with maximum-likelihood standard errors in parentheses; stars denote p < 0.10, p < 0.05, and p < 0.01. Outcomes and non-negative focal indicators are on the log1p scale, while the warm-biome share is untransformed.
 
 ```{r}
+attach_relationship <- function(d) {
+  mapping <- unique(primary[c("specification", "outcome", "relationship")])
+  merge(d, mapping, by = c("specification", "outcome"), all.x = TRUE, sort = FALSE)
+}
 q1 <- primary[primary$specification == "baseline_2024_same_sample", ]
 q1_moran <- moran_primary[moran_primary$specification == "baseline_2024_same_sample", ]
 q1_lm <- lm_primary[lm_primary$specification == "baseline_2024_same_sample", ]
 q1_fits <- fit_primary[fit_primary$specification == "baseline_2024_same_sample", ]
 q1_nested <- nested_primary[nested_primary$specification == "baseline_2024_same_sample", ]
-show_table(q1, c("relationship", "outcome", "sample_n"),
-           caption = "Question 1: three baseline outcome models")
-knitr::asis_output("This first table names each outcome and reports how many country and territory records enter that model. The count can differ because some outcomes are unavailable for some units. It is a model sample size, not the total number of countries in the source table.")
-show_table(q1_moran, c("outcome", "weight", "measure", "n", "moran_i", "p_permutation_two_sided",
-                       "p_holm_within_specification_measure"), digits = 4,
-           caption = "Question 1: Moran diagnostics")
-
-knitr::asis_output("How to read Moran's I: values above zero describe clustering of similar values under the chosen neighbour definition; values below zero describe neighbouring values that tend to differ. The permutation p-value compares the observed statistic with randomly rearranged values. The adjusted p-value accounts for repeated tests within this question. Read the two rows separately: clustering in the outcome describes the raw pattern, while clustering in OLS residuals asks whether a pattern remains after the listed controls. Neither statistic identifies a cause.")
-
-show_table(q1_lm, c("outcome", "weight", "test", "statistic", "df", "p_value",
-                    "p_holm_within_specification_test"), digits = 4,
-           caption = "Question 1: OLS Lagrange-multiplier diagnostics")
-
-knitr::asis_output("How to read the LM table: `LM lag` tests a pattern linked to neighbouring outcomes; `LM error` tests spatial structure in unobserved model errors. The robust versions adjust each test for the competing form of spatial dependence. The statistic is the test value, `df` is its degrees of freedom, and the adjusted p-value accounts for the repeated versions of that test. A small adjusted p-value flags a pattern for model comparison; it does not pick the estimator.")
-
-q1_candidate_fits <- candidate_summary(q1_fits, "baseline_2024_same_sample")
-show_table(q1_candidate_fits,
-           c("outcome", "weight", "model", "n", "log_likelihood", "aic", "bic", "rho", "lambda",
-             "optimizer_success", "covariance_status"), digits = 3,
-           caption = "Question 1: lowest-BIC candidate within each outcome and weights definition")
-
-knitr::asis_output("Each row is the candidate with the lowest BIC among the six fitted estimators for that outcome and neighbour definition. `n` is the number of units; log likelihood is the model's fit contribution; AIC and BIC balance fit against the number of estimated parameters, with lower values preferred only within the same outcome and sample. `rho` is the outcome-neighbour term and `lambda` is the error-neighbour term; zero means that term is not part of that estimator. `Converged` reports whether the numerical search completed, and the last column reports whether standard errors could be calculated. These columns shortlist candidates; they do not select the final model. A conventional OLS R-squared is shown separately below and is not filled in for spatial likelihood models, where it would not be directly comparable.")
-
-q1_ols_stats <- ols_summary_table("baseline_2024_same_sample", unique(q1$outcome))
-show_table(q1_ols_stats, c("relationship", "outcome", "n", "r_squared", "adjusted_r_squared"), digits = 4,
-           caption = "Question 1: OLS reference fit on the transformed outcome scale")
-knitr::asis_output("R-squared is the share of variation in the transformed outcome accounted for by the listed OLS predictors in this sample. Adjusted R-squared applies a small penalty for the number of predictors. These are descriptive OLS fit statistics, not evidence of causation and not directly comparable with the spatial models' likelihood criteria.")
-
-show_table(q1_nested, c("outcome", "weight", "comparison", "restricted_model", "unrestricted_model",
-                        "lr_statistic", "df", "p_value", "test_status"), digits = 4,
-           caption = "Question 1: nested likelihood-ratio comparisons")
-
-knitr::asis_output("Each row compares the named simpler and expanded models on the same observations. The likelihood-ratio statistic measures the fit change; degrees of freedom count the added parameters. The p-value evaluates that change under the test, and `test status` flags comparisons that failed the required nesting check. These tests compare only the model pair named in that row. They do not establish which model is substantively correct.")
+q1_moran_view <- attach_relationship(q1_moran)
+q1_lm_view <- attach_relationship(q1_lm)
+q1_nested_view <- attach_relationship(q1_nested)
 q1_shortlist <- q1_fits[order(q1_fits$outcome, q1_fits$weight, q1_fits$bic), ]
 q1_shortlist <- q1_shortlist[!duplicated(q1_shortlist[c("outcome", "weight")]), ]
-q1_terms <- merge(q1_shortlist[c("outcome", "weight", "model", "n", "bic")], coef_primary,
-                  by = c("outcome", "weight", "model", "n"), all.x = TRUE)
-q1_terms <- collapse_repeated_ols_coefficients(q1_terms)
-q1_terms$ci_lower_95 <- q1_terms$coefficient - 1.96 * q1_terms$std_error_ml
-q1_terms$ci_upper_95 <- q1_terms$coefficient + 1.96 * q1_terms$std_error_ml
-print_coefficient_tables(q1_terms[order(q1_terms$outcome, q1_terms$weight, q1_terms$term), ])
 ```
 
-Each small coefficient table belongs to one outcome and one neighbour definition, so its rows are not mixed with other regressions. `Estimate` is the fitted coefficient on the transformed scale, `Standard error` describes its estimated uncertainty, the two confidence-limit columns give the approximate 95% interval, and `Wald p-value` tests whether the coefficient differs from zero under the model's reported standard error. The table reports model parameters, not a scientific interpretation. For spatial models, raw coefficients may not equal direct, spillover, or total effects.
+```{r}
+show_table(q1[order(q1$relationship), ], c("relationship", "sample_n"),
+           caption = "Question 1: outcomes and complete-case sample sizes")
+```
+
+The capacity-loss and relative-erosion models each use 120 countries and territories; the GCW/GDP model uses 191. The difference reflects outcome availability, so cross-outcome fit comparisons are not treated as matched-sample comparisons.
+
+```{r}
+show_table(q1_moran_view[order(q1_moran_view$relationship, q1_moran_view$weight, q1_moran_view$measure), ],
+           c("relationship", "weight", "measure", "n", "moran_i", "p_permutation_two_sided",
+             "p_holm_within_specification_measure"), digits = 4,
+           caption = "Question 1: outcome and OLS-residual Moran results")
+```
+
+For annual capacity loss, Moran's I is 0.151 under Queen and 0.042 under kNN-5, with no Holm-adjusted p-value below 0.05; the residual tests are also non-significant. Relative erosion has positive spatial autocorrelation under both matrices (I = 0.277 and 0.332; adjusted p = 0.0069 and 0.0006), while its OLS residuals are not significant. GCW/GDP has the strongest outcome pattern (I = 0.570 and 0.484), and positive residual autocorrelation remains under both matrices (I = 0.268 and 0.252; adjusted p = 0.0006), motivating closer comparison of spatial candidates for this relationship.
+
+```{r}
+show_table(q1_lm_view[order(q1_lm_view$relationship, q1_lm_view$weight, q1_lm_view$test), ],
+           c("relationship", "weight", "test", "statistic", "df", "p_value",
+             "p_holm_within_specification_test"), digits = 4,
+           caption = "Question 1: OLS LM diagnostics")
+```
+
+After Holm adjustment, the robust LM tests do not flag either lag or error dependence for capacity loss or relative erosion under either matrix. For GCW/GDP, the robust error statistic is significant under Queen (adjusted p = 0.0179) and just below 0.05 under kNN-5 (0.0494), whereas the robust lag tests are not; this is an error-pattern diagnostic and is followed by model-fit comparisons, not treated as an estimator choice.
+
+```{r}
+q1_candidate_fits <- candidate_summary(q1_fits, "baseline_2024_same_sample")
+q1_candidate_fits <- attach_relationship(q1_candidate_fits)
+show_table(q1_candidate_fits[order(q1_candidate_fits$relationship, q1_candidate_fits$weight), ],
+           c("relationship", "weight", "model", "n", "log_likelihood", "aic", "bic", "rho", "lambda",
+             "optimizer_success", "covariance_status"), digits = 3,
+           caption = "Question 1: minimum-BIC candidate within each weights definition")
+```
+
+The minimum-BIC candidate is OLS for capacity loss and relative erosion under both matrices. For GCW/GDP, the shortlist is SDEM under Queen (BIC = 578.535; λ = 0.443) and SEM under kNN-5 (BIC = 583.263; λ = 0.482). The remaining parameter tables therefore emphasize the two matrix-specific GCW/GDP candidates while retaining OLS comparisons for the outcomes where it has the lowest BIC.
+
+```{r}
+q1_ols_stats <- ols_summary_table("baseline_2024_same_sample", unique(q1$outcome))
+show_table(q1_ols_stats[order(q1_ols_stats$relationship), ],
+           c("relationship", "n", "r_squared", "adjusted_r_squared"), digits = 4,
+           caption = "Question 1: OLS reference fit")
+```
+
+The OLS R-squared values are 0.468 for capacity loss, 0.276 for relative erosion, and 0.580 for GCW/GDP (adjusted values: 0.455, 0.257, and 0.573). These are reference fits on each outcome's transformed scale; the spatial models are compared using their likelihood-based criteria instead.
+
+```{r}
+show_table(q1_nested_view[order(q1_nested_view$relationship, q1_nested_view$weight, q1_nested_view$comparison), ],
+           c("relationship", "weight", "comparison", "restricted_model", "unrestricted_model",
+             "lr_statistic", "df", "p_value", "p_holm_within_specification_comparison", "test_status"), digits = 4,
+           caption = "Question 1: nested spatial-model comparisons")
+```
+
+These rows compare only SDM with SAR, SDEM with SEM, and GNS with SDM within each outcome and weights definition. None of the comparisons is Holm-significant for capacity loss or relative erosion; for GCW/GDP, all three comparisons are significant under Queen, while under kNN-5 the SDEM-versus-SEM and GNS-versus-SDM comparisons are significant but SDM versus SAR is not. The coefficient tables below show the corresponding OLS and spatial parameter patterns.
+
+```{r}
+regression_table("baseline_2024_same_sample", "lost_capacity_mtco2_yr")
+```
+
+In the capacity-loss table, forest area and warm-biome share have positive, precisely estimated OLS coefficients (about 0.142 and 0.159); the GDP-per-capita coefficient is not distinguishable from zero. This pattern is consistent across the displayed OLS reference and the two SEM comparison fits, and the next outcome tests whether the same control pattern appears for relative erosion.
+
+```{r}
+regression_table("baseline_2024_same_sample", "erosion_pct_of_gcw")
+```
+
+For relative erosion, the OLS coefficient on log GDP per capita is negative (about -0.146), and the coefficient on log forest area is smaller and negative (about -0.039). The OLS candidate remains the minimum-BIC fit for both matrices; the table's SEM columns are comparison fits rather than the selected BIC candidates.
+
+```{r}
+regression_table("baseline_2024_same_sample", "gcw_gdp_pct_2024")
+```
+
+For GCW/GDP, the GDP-per-capita coefficient is negative and the forest-area coefficient positive in both minimum-BIC spatial candidates; their estimates are similar across Queen and kNN-5. The Queen SDEM also includes positive neighbour-weighted forest area and negative neighbour-weighted GDP per capita terms, while the residual Moran and robust LM results above show that this relationship retains spatial structure after the baseline controls.
+
+**Question 1 synthesis.** The evidence differs across outcomes: capacity loss has no significant Moran or robust LM signal, relative erosion has spatial autocorrelation in its raw values but not in OLS residuals, and GCW/GDP retains significant residual autocorrelation with robust error-pattern diagnostics. The analysis therefore carries the matrix-specific spatial candidates forward for GCW/GDP, while keeping OLS as the BIC reference for the other two outcomes.
 
 # 5. Research question 2: add 2024 emissions as a predictor
 
-**Question:** When 2024 emissions are added to the baseline controls, how do the three forest-account relationships and their model diagnostics compare with the matched baseline?
+**Question:** How do the three forest-account relationships change when 2024 emissions are added to the baseline controls?
 
-Baseline and emissions-augmented models use the same complete-case units for each outcome. The compared models therefore differ by the added predictor rather than by the sample. Likelihood-ratio tests and fit summaries are shown as evidence for author review, not as automatic selection rules.
+Each model uses the same complete-case units as its matched baseline in Question 1. This makes the coefficient, fit, and predictor-block comparisons within an outcome independent of a change in sample size.
 
 ```{r}
 q2 <- primary[primary$specification == "add_emissions_2024_as_x", ]
@@ -608,49 +748,105 @@ q2_moran <- moran_primary[moran_primary$specification == "add_emissions_2024_as_
 q2_lm <- lm_primary[lm_primary$specification == "add_emissions_2024_as_x", ]
 q2_fits <- fit_primary[fit_primary$specification == "add_emissions_2024_as_x", ]
 q2_nested <- nested_primary[nested_primary$specification == "add_emissions_2024_as_x", ]
-show_table(q2, c("relationship", "outcome", "sample_n"),
-           caption = "Question 2: three models adding emissions as a predictor")
-knitr::asis_output("This table uses the same units as the matched baseline in Question 1. The only intended change is adding 2024 emissions to the predictor list, so a difference in sample size should not explain any fit change.")
-show_table(q2_moran, c("outcome", "weight", "measure", "n", "moran_i", "p_permutation_two_sided",
-                       "p_holm_within_specification_measure"), digits = 4,
-           caption = "Question 2: Moran diagnostics")
-knitr::asis_output("Moran's I, the permutation p-value, and its adjusted version have the same meaning as in Question 1. Compare the outcome rows and residual rows separately, and compare only matching outcomes and neighbour definitions with the baseline.")
-show_table(q2_lm, c("outcome", "weight", "test", "statistic", "df", "p_value",
-                    "p_holm_within_specification_test"), digits = 4,
-           caption = "Question 2: OLS Lagrange-multiplier diagnostics")
-knitr::asis_output("The LM table repeats the lag and error checks after emissions have been added to OLS. Read the adjusted p-value for each named diagnostic; it indicates whether the observed statistic is unusual under that test, not which spatial model to use.")
-q2_candidate_fits <- candidate_summary(q2_fits, "add_emissions_2024_as_x")
-show_table(q2_candidate_fits,
-           c("outcome", "weight", "model", "n", "log_likelihood", "aic", "bic", "rho", "lambda",
-             "optimizer_success", "covariance_status"), digits = 3,
-           caption = "Question 2: lowest-BIC candidate within each outcome and weights definition")
-
-knitr::asis_output("The columns have the same definitions as in Question 1. Compare the matching outcome and neighbour definition with its baseline row. The samples are matched, so both fits use the same countries and territories. Lower AIC or BIC indicates a better score under that criterion for the same outcome and sample, but neither score alone decides the scientific model.")
-q2_ols_stats <- ols_summary_table("add_emissions_2024_as_x", unique(q2$outcome))
-show_table(q2_ols_stats, c("relationship", "outcome", "n", "r_squared", "adjusted_r_squared"), digits = 4,
-           caption = "Question 2: OLS reference fit after adding 2024 emissions")
-knitr::asis_output("R-squared and adjusted R-squared refer to OLS on the transformed outcome scale. They summarize in-sample fit with and without a small penalty for the number of predictors. Compare with Question 1 only for the same outcome and exactly matched observations; these statistics do not show a causal effect.")
-show_table(q2_nested, c("outcome", "weight", "comparison", "restricted_model", "unrestricted_model",
-                        "lr_statistic", "df", "p_value", "test_status"), digits = 4,
-           caption = "Question 2: nested spatial-model comparisons")
-knitr::asis_output("Each row tests the baseline against the version that adds emissions for the same outcome, neighbour definition, and estimator. The likelihood-ratio statistic measures the change in fit, `df` counts the added terms, and the p-value evaluates that change. `Test status` confirms whether the nested-model calculation passed its check.")
+q2_moran_view <- attach_relationship(q2_moran)
+q2_lm_view <- attach_relationship(q2_lm)
+q2_nested_view <- attach_relationship(q2_nested)
 q2_shortlist <- q2_fits[order(q2_fits$outcome, q2_fits$weight, q2_fits$bic), ]
 q2_shortlist <- q2_shortlist[!duplicated(q2_shortlist[c("outcome", "weight")]), ]
-q2_terms <- merge(q2_shortlist[c("outcome", "weight", "model", "n", "bic")], coef_primary,
-                  by = c("outcome", "weight", "model", "n"), all.x = TRUE)
-q2_terms <- collapse_repeated_ols_coefficients(q2_terms)
-q2_terms$ci_lower_95 <- q2_terms$coefficient - 1.96 * q2_terms$std_error_ml
-q2_terms$ci_upper_95 <- q2_terms$coefficient + 1.96 * q2_terms$std_error_ml
-print_coefficient_tables(q2_terms[order(q2_terms$outcome, q2_terms$weight, q2_terms$term), ])
+q2_block <- block_tests[block_tests$block_test == "emissions_as_x", , drop = FALSE]
+q2_block <- merge(q2_block, unique(primary[c("specification", "outcome", "relationship")]),
+                   by.x = c("unrestricted_specification", "outcome"),
+                   by.y = c("specification", "outcome"), all.x = TRUE, sort = FALSE)
 ```
 
-These are separate coefficient tables for the selected candidate in each outcome and neighbour definition. Estimates and intervals are on the transformed scale. A coefficient's sign and size are statistical descriptions; deciding what pattern is scientifically meaningful is left to the researcher.
+```{r}
+show_table(q2[order(q2$relationship), ], c("relationship", "sample_n"),
+           caption = "Question 2: outcomes and matched sample sizes")
+```
+
+The samples remain 120 for capacity loss, 120 for relative erosion, and 191 for GCW/GDP, matching Question 1. The additional emissions variable therefore changes the predictor set, not the observation count.
+
+```{r}
+show_table(q2_moran_view[order(q2_moran_view$relationship, q2_moran_view$weight, q2_moran_view$measure), ],
+           c("relationship", "weight", "measure", "n", "moran_i", "p_permutation_two_sided",
+             "p_holm_within_specification_measure"), digits = 4,
+           caption = "Question 2: outcome and OLS-residual Moran results")
+```
+
+The outcome Moran results are effectively unchanged from Question 1. Capacity-loss residual Moran values remain non-significant, and relative-erosion residuals remain non-significant under both matrices; for GCW/GDP, residual Moran I falls from 0.268/0.252 to 0.217/0.193 but remains Holm-significant under Queen and kNN-5. Thus, adding emissions is accompanied by a smaller residual spatial statistic for GCW/GDP, but not by its disappearance.
+
+```{r}
+show_table(q2_lm_view[order(q2_lm_view$relationship, q2_lm_view$weight, q2_lm_view$test), ],
+           c("relationship", "weight", "test", "statistic", "df", "p_value",
+             "p_holm_within_specification_test"), digits = 4,
+           caption = "Question 2: OLS LM diagnostics")
+```
+
+The robust LM results remain non-significant for capacity loss and relative erosion under both matrices. For GCW/GDP, the robust error test remains significant under kNN-5 (adjusted p = 0.0012), while its Queen result is not below 0.05 after adjustment; the robust lag tests are not significant. This leaves the error-pattern diagnostic strongest for the kNN-5 specification.
+
+```{r}
+q2_candidate_fits <- candidate_summary(q2_fits, "add_emissions_2024_as_x")
+q2_candidate_fits <- attach_relationship(q2_candidate_fits)
+show_table(q2_candidate_fits[order(q2_candidate_fits$relationship, q2_candidate_fits$weight), ],
+           c("relationship", "weight", "model", "n", "log_likelihood", "aic", "bic", "rho", "lambda",
+             "optimizer_success", "covariance_status"), digits = 3,
+           caption = "Question 2: minimum-BIC candidate within each weights definition")
+```
+
+OLS remains the minimum-BIC candidate for capacity loss and relative erosion under both matrices. SEM is the minimum-BIC candidate for GCW/GDP under Queen (BIC = 471.611; λ = 0.402) and kNN-5 (BIC = 469.894; λ = 0.380), replacing the Question 1 SDEM/SEM pair in the shortlist. The following predictor-block table directly compares the baseline and emissions-augmented versions on matched samples.
+
+```{r}
+show_table(q2_block[order(q2_block$relationship, q2_block$weight, q2_block$model), ],
+           c("relationship", "weight", "model", "n", "df", "lr_statistic", "p_value",
+             "p_holm_within_block_model", "delta_bic"), digits = 4,
+           caption = "Question 2: same-sample test of the added emissions predictor block")
+```
+
+The emissions block does not improve the capacity-loss models after adjustment for repeated tests. For relative erosion, the block is significant for SDM, SDEM, and GNS under Queen only (adjusted p = 0.0481, 0.0307, and 0.0186); all kNN-5 versions are non-significant. For GCW/GDP, the block is significant for all six estimators under both matrices (LR statistics about 110-130; Holm-adjusted p-values below 0.001), with lower BIC in every comparison.
+
+```{r}
+q2_ols_stats <- ols_summary_table("add_emissions_2024_as_x", unique(q2$outcome))
+show_table(q2_ols_stats[order(q2_ols_stats$relationship), ],
+           c("relationship", "n", "r_squared", "adjusted_r_squared"), digits = 4,
+           caption = "Question 2: OLS reference fit after adding emissions")
+```
+
+The OLS R-squared changes from 0.468 to 0.472 for capacity loss and from 0.276 to 0.280 for relative erosion. For GCW/GDP it rises from 0.580 to 0.787 (adjusted R-squared = 0.783), the largest fit change among the three matched outcomes and consistent with the emissions-block comparisons above.
+
+```{r}
+show_table(q2_nested_view[order(q2_nested_view$relationship, q2_nested_view$weight, q2_nested_view$comparison), ],
+           c("relationship", "weight", "comparison", "restricted_model", "unrestricted_model",
+             "lr_statistic", "df", "p_value", "p_holm_within_specification_comparison", "test_status"), digits = 4,
+           caption = "Question 2: nested spatial-model comparisons")
+```
+
+These rows compare SDM with SAR, SDEM with SEM, and GNS with SDM within the emissions-augmented specification; they do not test baseline versus emissions-augmented models. For GCW/GDP, SDEM versus SEM and GNS versus SDM are significant under Queen, and GNS versus SDM is significant under kNN-5; no Holm-significant nested comparison appears for capacity loss or relative erosion. The separate predictor-block table above is the test of adding emissions.
+
+```{r}
+regression_table("add_emissions_2024_as_x", "lost_capacity_mtco2_yr")
+```
+
+The selected OLS, Queen, and kNN-5 columns show no statistically distinguishable emissions coefficient for annual capacity loss. This agrees with the non-significant emissions-block tests for this outcome and leaves the capacity-loss coefficient pattern close to its baseline specification.
+
+```{r}
+regression_table("add_emissions_2024_as_x", "erosion_pct_of_gcw")
+```
+
+The emissions coefficient is not individually significant in the displayed erosion candidates, even though the joint predictor-block test identifies a Queen-specific contribution in SDM, SDEM, and GNS. The distinction between an individual coefficient and a multi-parameter block is retained in the two tables rather than collapsed into a single conclusion.
+
+```{r}
+regression_table("add_emissions_2024_as_x", "gcw_gdp_pct_2024")
+```
+
+For GCW/GDP, the emissions coefficient is negative and statistically distinguishable from zero in the selected columns, while the forest-area coefficient is larger than in Question 1. The warm-biome-share coefficient is also negative in the spatial candidates; this relationship is the only one with a large increase in OLS R-squared and consistent emissions-block evidence across both weights definitions.
+
+**Question 2 synthesis.** Adding 2024 emissions makes little difference to the capacity-loss and relative-erosion OLS fit, although the emissions block contributes in some Queen erosion specifications. For GCW/GDP, fit statistics, coefficients, and block tests all show a marked difference from Question 1, while residual spatial autocorrelation and error-type diagnostics remain present.
 
 # 6. Research question 3: 2024 emissions as the outcome
 
-**Question:** How are 2024 emissions associated with each forest-account indicator, conditional on the same baseline national controls?
+**Question:** How are 2024 CO2 emissions associated with each forest-account indicator, conditional on GDP per capita, forest area, and warm-biome share?
 
-This question contains three separate emissions-outcome models, each adding one focal predictor. For each, the prepared analysis also estimates a reduced emissions model on exactly the same units for the predictor-block comparison.
+The three models use the same emissions outcome but add a different focal forest-account indicator. Their complete-case samples differ because the capacity-loss and erosion indicators are not available for all units with emissions.
 
 ```{r}
 q3 <- primary[grepl("emissions_2024_as_y_plus_", primary$specification), ]
@@ -658,46 +854,104 @@ q3_moran <- moran_primary[moran_primary$specification %in% q3$specification, ]
 q3_lm <- lm_primary[lm_primary$specification %in% q3$specification, ]
 q3_fits <- fit_primary[fit_primary$specification %in% q3$specification, ]
 q3_nested <- nested_primary[nested_primary$specification %in% q3$specification, ]
-show_table(q3, c("relationship", "outcome", "sample_n"),
-           caption = "Question 3: emissions models with one forest-account predictor at a time")
-knitr::asis_output("Each row is a different model of 2024 emissions. The focal forest-account measure changes from row to row, while the baseline controls stay the same. The sample size shows how many units have emissions and all predictors required for that specific comparison.")
-show_table(q3_moran, c("specification", "weight", "measure", "n", "moran_i", "p_permutation_two_sided",
-                       "p_holm_within_specification_measure"), digits = 4,
-           caption = "Question 3: Moran diagnostics")
-knitr::asis_output("For each emissions model and neighbour definition, these rows check clustering in emissions and in the OLS residuals. The statistic describes direction and strength of spatial pattern; the permutation p-value and adjusted p-value describe its statistical evidence. Residual rows check for pattern left after the controls.")
-show_table(q3_lm, c("specification", "weight", "test", "statistic", "df", "p_value",
-                    "p_holm_within_specification_test"), digits = 4,
-           caption = "Question 3: OLS Lagrange-multiplier diagnostics")
-knitr::asis_output("The LM rows test for outcome-lag and error patterns relative to OLS. The robust variants account for the competing pattern. The adjusted p-value helps read each test across the repeated cases; it is a diagnostic, not an automatic model-selection command.")
-q3_candidate_fits <- do.call(rbind, lapply(split(q3_fits, q3_fits$specification),
-                                           function(d) candidate_summary(d, unique(d$specification)[1])))
-show_table(q3_candidate_fits,
-           c("specification", "weight", "model", "n", "log_likelihood", "aic", "bic", "rho", "lambda",
-             "optimizer_success", "covariance_status"), digits = 3,
-           caption = "Question 3: lowest-BIC candidate within each relationship and weights definition")
-
-knitr::asis_output("Each specification adds one forest-account measure to the emissions model. The table shows the lowest-BIC candidate separately for each specification and neighbour definition. Compare BIC only within that same specification and sample, not across the three different focal measures. OLS uses no neighbour matrix, so its candidate is listed once where it has the lowest BIC.")
-q3_ols_stats <- ols_summary_table(unique(q3$specification), rep("emissions_mtco2_yr_2024", nrow(q3)))
-show_table(q3_ols_stats, c("relationship", "outcome", "n", "r_squared", "adjusted_r_squared"), digits = 4,
-           caption = "Question 3: OLS reference fit for each emissions relationship")
-knitr::asis_output("These R-squared statistics describe OLS fit for each distinct emissions sample. Because the three models use different added predictors and can have different samples, compare them cautiously and read the sample count alongside each value.")
-show_table(q3_nested, c("specification", "weight", "comparison", "restricted_model", "unrestricted_model",
-                        "lr_statistic", "df", "p_value", "test_status"), digits = 4,
-           caption = "Question 3: same-sample nested comparisons for the added focal predictors")
-knitr::asis_output("Each likelihood-ratio row compares the emissions model with baseline controls against the same model plus the focal forest-account measure. Both use the same units. The statistic, degrees of freedom, p-value, and test status have the same meaning as in the earlier nested-comparison table.")
+q3_moran_view <- attach_relationship(q3_moran)
+q3_lm_view <- attach_relationship(q3_lm)
+q3_nested_view <- attach_relationship(q3_nested)
 q3_shortlist <- q3_fits[order(q3_fits$specification, q3_fits$weight, q3_fits$bic), ]
 q3_shortlist <- q3_shortlist[!duplicated(q3_shortlist[c("specification", "weight")]), ]
-q3_terms <- merge(q3_shortlist[c("specification", "outcome", "weight", "model", "n", "bic")],
-                  coef_primary, by = c("specification", "outcome", "weight", "model", "n"), all.x = TRUE)
-q3_terms <- collapse_repeated_ols_coefficients(q3_terms)
-q3_terms$ci_lower_95 <- q3_terms$coefficient - 1.96 * q3_terms$std_error_ml
-q3_terms$ci_upper_95 <- q3_terms$coefficient + 1.96 * q3_terms$std_error_ml
-print_coefficient_tables(q3_terms[order(q3_terms$specification, q3_terms$weight, q3_terms$term), ])
+q3_block <- block_tests[block_tests$block_test %in% c("lost_capacity_as_x", "erosion_as_x", "gcw_gdp_as_x"), , drop = FALSE]
+q3_block <- merge(q3_block, unique(primary[c("specification", "outcome", "relationship")]),
+                   by.x = c("unrestricted_specification", "outcome"),
+                   by.y = c("specification", "outcome"), all.x = TRUE, sort = FALSE)
 ```
+
+```{r}
+show_table(q3[order(q3$relationship), ], c("relationship", "sample_n"),
+           caption = "Question 3: emissions outcome and complete-case sample sizes")
+```
+
+The emissions models use 120 units when capacity loss or relative erosion is the focal predictor and 191 when GCW/GDP is focal. The different sample sizes are carried through the corresponding diagnostics, model fits, and same-sample predictor-block tests.
+
+```{r}
+show_table(q3_moran_view[order(q3_moran_view$relationship, q3_moran_view$weight, q3_moran_view$measure), ],
+           c("relationship", "weight", "measure", "n", "moran_i", "p_permutation_two_sided",
+             "p_holm_within_specification_measure"), digits = 4,
+           caption = "Question 3: emissions and OLS-residual Moran results")
+```
+
+Across all three samples, 2024 emissions have positive, Holm-significant Moran statistics under both matrices (I ranges from 0.256 to 0.322). OLS residual Moran I is larger still, ranging from 0.388 to 0.563, and remains significant in all six matrix-by-relationship cases. Thus the baseline controls and one focal indicator leave a strong spatial residual pattern in this emissions outcome.
+
+```{r}
+show_table(q3_lm_view[order(q3_lm_view$relationship, q3_lm_view$weight, q3_lm_view$test), ],
+           c("relationship", "weight", "test", "statistic", "df", "p_value",
+             "p_holm_within_specification_test"), digits = 4,
+           caption = "Question 3: OLS LM diagnostics")
+```
+
+The robust LM error tests are Holm-significant for all three relationships under Queen and kNN-5. Robust lag tests are not significant for capacity loss or erosion; for GCW/GDP they are significant under both matrices (adjusted p = 0.0011 and 0.0041). The diagnostics therefore show a consistent error-pattern signal, with an additional lag-pattern signal only in the GCW/GDP sample.
+
+```{r}
+q3_candidate_fits <- do.call(rbind, lapply(split(q3_fits, q3_fits$specification),
+                                           function(d) candidate_summary(d, unique(d$specification)[1])))
+q3_candidate_fits <- attach_relationship(q3_candidate_fits)
+show_table(q3_candidate_fits[order(q3_candidate_fits$relationship, q3_candidate_fits$weight), ],
+           c("relationship", "weight", "model", "n", "log_likelihood", "aic", "bic", "rho", "lambda",
+             "optimizer_success", "covariance_status"), digits = 3,
+           caption = "Question 3: minimum-BIC candidate within each weights definition")
+```
+
+SEM has the lowest BIC under both Queen and kNN-5 for each of the three emissions relationships. The minimum-BIC models have λ estimates between about 0.59 and 0.70; the fit table retains AIC and all other candidates for comparison rather than presenting this shortlist as a final model decision.
+
+```{r}
+q3_ols_stats <- ols_summary_table(unique(q3$specification), rep("emissions_mtco2_yr_2024", nrow(q3)))
+show_table(q3_ols_stats[order(q3_ols_stats$relationship), ],
+           c("relationship", "n", "r_squared", "adjusted_r_squared"), digits = 4,
+           caption = "Question 3: OLS reference fit for each emissions relationship")
+```
+
+The OLS R-squared is 0.408 in both 120-unit samples and 0.733 in the 191-unit GCW/GDP sample. The largest value belongs to the GCW/GDP specification, but the sample and focal predictor differ, so it is reported as a separate reference fit rather than a ranking of comparable models.
+
+```{r}
+show_table(q3_nested_view[order(q3_nested_view$relationship, q3_nested_view$weight, q3_nested_view$comparison), ],
+           c("relationship", "weight", "comparison", "restricted_model", "unrestricted_model",
+             "lr_statistic", "df", "p_value", "p_holm_within_specification_comparison", "test_status"), digits = 4,
+           caption = "Question 3: nested spatial-model comparisons")
+```
+
+The nested rows again compare only SDM with SAR, SDEM with SEM, and GNS with SDM within the same emissions specification and weights definition; they do not test whether the focal forest-account variable should be added. SDM versus SAR is Holm-significant for all three relationships under both matrices, while GNS versus SDM is significant only under Queen for capacity loss and erosion. SDEM versus SEM is significant in all cases except GCW/GDP under kNN-5; the next table separately tests the focal predictor block against its matched reduced emissions model.
+
+```{r}
+show_table(q3_block[order(q3_block$relationship, q3_block$weight, q3_block$model), ],
+           c("relationship", "weight", "model", "n", "df", "lr_statistic", "p_value",
+             "p_holm_within_block_model", "delta_bic"), digits = 4,
+           caption = "Question 3: same-sample tests of each focal predictor block")
+```
+
+The capacity-loss block is not Holm-significant for any estimator or matrix (the smallest adjusted p-value is 0.074). The erosion block is significant for SEM, SDEM, and GNS under Queen only (adjusted p = 0.0139, 0.0234, and 0.0270); every kNN-5 comparison is non-significant. The GCW/GDP block is significant under both matrices for all six estimators (LR statistics about 110-141; adjusted p-values below 0.001), with negative BIC changes in each comparison.
+
+```{r}
+regression_table("emissions_2024_as_y_plus_lost_capacity_x", "emissions_mtco2_yr_2024")
+```
+
+The capacity-loss coefficient is positive but not statistically distinguishable from zero in OLS or the kNN-5 SEM; it is smaller in magnitude and only weakly significant in the Queen SEM. The predictor-block test does not show a Holm-significant contribution for this indicator, so the focal coefficient and block-level comparison point to limited evidence in this specification.
+
+```{r}
+regression_table("emissions_2024_as_y_plus_erosion_x", "emissions_mtco2_yr_2024")
+```
+
+The relative-erosion coefficient is positive in all three displayed columns but is statistically distinguishable from zero only in the Queen SEM. That matrix sensitivity is consistent with the block tests: the erosion block is significant under Queen and not under kNN-5.
+
+```{r}
+regression_table("emissions_2024_as_y_plus_gcw_gdp_x", "emissions_mtco2_yr_2024")
+```
+
+The GCW/GDP coefficient is negative and statistically significant in OLS and in both SEM candidates; its estimate is similar across the two matrices. This is the most stable focal-coefficient pattern among the three emissions relationships and is accompanied by the strong predictor-block tests under both weights definitions.
+
+**Question 3 synthesis.** Emissions and their OLS residuals remain spatially patterned in all three samples, and the SEM candidates have the lowest BIC under both matrices. The GCW/GDP association is negative and stable across the displayed candidates, whereas the capacity-loss and erosion coefficients are weaker or matrix-sensitive; the block tests reinforce that contrast. These remain cross-sectional associations, not causal effects.
 
 ## Descriptive views: emissions and the three focal indicators
 
-These panels show unadjusted two-variable patterns for the three relationships in the third question. Both axes use `log(1 + x)` so zeros remain visible and large values are compressed. The line is a simple bivariate OLS trend with its confidence band; it is not one of the multivariable models above and it does not isolate the forest-account measure from other country characteristics.
+The panels show the unadjusted bivariate patterns for emissions and each forest-account indicator; they do not adjust for the other national characteristics in the models above.
 
 ```{r}
 q3_plot_data <- rbind(
@@ -714,48 +968,37 @@ emissions_scatter_figure <- ggplot(q3_plot_data, aes(x = focal, y = log1p(emissi
   geom_point(alpha = .72, colour = "#075985") +
   geom_smooth(method = "lm", formula = y ~ x, se = TRUE, colour = "#E76F51", linewidth = .8) +
   facet_wrap(~ relationship, scales = "free_x") +
-  labs(x = "Natural log of (1 + forest-account measure)", y = "Natural log of (1 + 2024 CO2 emissions, MtCO2/year)") +
+  labs(x = "log1p forest-account indicator", y = "log1p 2024 CO2 emissions (MtCO2/year)") +
   theme_minimal(base_size = 11)
 print(emissions_scatter_figure)
-cat("Figure: Unadjusted associations between each forest-account measure and 2024 CO2 emissions. Points are countries and territories; lines are bivariate OLS trends with 95% confidence bands. Both axes use natural log of one plus the original measure.\n")
+cat("Figure: Unadjusted relationships between each forest-account indicator and 2024 CO2 emissions. Points show countries and territories; lines are bivariate OLS trends with 95% confidence bands.\n")
 ```
 
-# 7. Compare the two matrices and read the coefficients
+# 7. Compare the two matrices
 
-The tables show all candidate fits and coefficient tables for the smallest-BIC candidate within each matrix as a **diagnostic shortlist**. It is not the final model selection. In some cases, both matrices can display the same OLS candidate because OLS does not use a spatial weights matrix. Neither AIC/BIC nor a diagnostic p-value alone decides which estimator or matrix is substantively appropriate.
+The index below collects the provisional minimum-BIC candidate for each relationship and weights definition. It repeats only the estimator and score; the question-specific sections contain the diagnostics, coefficients, and predictor-block tests.
 
 ```{r}
 shortlist_all <- rbind(transform(q1_shortlist, question = "Q1: baseline controls"),
-                      transform(q2_shortlist, question = "Q2: add emissions predictor"),
-                      transform(q3_shortlist, question = "Q3: emissions outcome"))
+                      transform(q2_shortlist, question = "Q2: emissions added as predictor"),
+                      transform(q3_shortlist, question = "Q3: emissions as outcome"))
 shortlist_all <- merge(shortlist_all, primary[c("specification", "outcome", "relationship")],
                        by = c("specification", "outcome"), all.x = TRUE)
 show_table(shortlist_all[order(shortlist_all$relationship, shortlist_all$weight), ],
-           c("question", "relationship", "outcome", "weight", "model", "n", "bic"), digits = 3,
-           caption = "Provisional minimum-BIC candidate for every relationship and weights matrix")
-knitr::asis_output("Use this index to find the provisional lowest-BIC estimator for each outcome under each neighbour definition. The estimator and BIC are repeated here for navigation; the detailed diagnostics and coefficients appear in the question-specific sections above.")
-
-residual_moran <- moran_primary[moran_primary$measure == "ols_residual",
-                                c("specification", "outcome", "weight", "moran_i", "p_permutation_two_sided")]
-robust_lm <- lm_primary[lm_primary$test %in% c("robust_LM_lag", "robust_LM_error"), ]
-show_table(residual_moran, digits = 4, caption = "OLS residual Moran statistics")
-knitr::asis_output("This table keeps only the residual rows from the Moran checks. Moran's I gives the direction and size of residual clustering, while the permutation p-value measures how unusual it is under random rearrangements. Compare the matching outcome under Queen and kNN neighbours.")
-show_table(robust_lm, c("specification", "outcome", "weight", "test", "statistic", "p_value",
-                        "p_holm_within_specification_test"), digits = 4,
-           caption = "Robust LM test results")
-knitr::asis_output("The robust lag test checks for dependence on neighbouring outcomes while allowing for spatial error dependence; the robust error test checks the reverse. Their adjusted p-values are screening diagnostics. Read them alongside Moran's I and the nested model comparisons, rather than as a stand-alone instruction to choose a model.")
+           c("question", "relationship", "weight", "model", "n", "bic"), digits = 3,
+           caption = "Provisional minimum-BIC candidate by relationship and weights definition")
 ```
 
-For each relationship, the researcher can record the sign and scale of the focal coefficient, its uncertainty, whether it changes across the two matrices, and how that evidence sits alongside the OLS and spatial diagnostics. For spatial lag models, interpretation may require direct, indirect, and total impacts rather than the raw parameter alone. No substantive conclusion is generated here; the final model, weights matrix, and rationale remain researcher decisions.
+The shortlist remains provisional: it organizes the saved fit evidence but does not select the final estimator or matrix. The decision table is retained for the researcher to record those choices and their rationale.
 
 ```{r}
 decision_cols <- c("relationship", "specification", "outcome", "sample_n",
                    "minimum_bic_candidate_by_weight", "final_model_decision", "final_weight_decision",
                    "researcher_rationale", "status")
-show_table(decisions, decision_cols, caption = "Model and interpretation decisions remain researcher-led")
+show_table(decisions, decision_cols, caption = "Researcher-led model and interpretation decisions")
 ```
 
-The BIC shortlist is generated from the saved model scores, but the decision fields remain for the researcher. Record the final estimator and weights only after reviewing the sample, assumptions, diagnostics, and coefficient output. The rationale field is where to document that reasoning; a low BIC by itself is not the rationale.
+Final estimator, weights-matrix, and manuscript-interpretation decisions remain with the researcher; no model is selected automatically from a diagnostic p-value or information criterion.
 
 # 8. Reproduction and limits
 
