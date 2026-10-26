@@ -55,7 +55,16 @@ Wait until Quarto finishes and reports that the HTML was created. Changing `true
 Copy-Item code/notebooks/07_spatial_econometrics.qmd "..\..\NotebookSites\gcw-spatial-econometrics\07_spatial_econometrics.qmd" -Force
 ```
 
-7. Rendering changes local files only. To update the public GitHub Pages website, commit and push the QMD, HTML, and supporting files from the separate `NotebookSites` repository. GitHub Pages deploys the pushed version automatically.
+7. Rendering changes local files only. To publish the update, run these commands in PowerShell from the BNC2 repository root:
+
+```powershell
+Set-Location ..\..\NotebookSites
+git add gcw-spatial-econometrics
+git commit -m "Update spatial econometrics notebook"
+git push origin main
+```
+
+This publishes the QMD, HTML, and supporting files from the separate `NotebookSites` repository. GitHub Pages deploys the pushed version automatically.
 
 The rerun uses the Python executable named by the `PYTHON` environment variable, if set, or `python` on `PATH`; the repository's Python spatial-analysis dependencies must be available in that environment. This switch reruns the spatial-analysis sequence only, not the full carbon-wealth accounting pipeline.
 
