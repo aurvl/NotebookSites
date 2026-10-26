@@ -42,7 +42,7 @@ The QMD file is also reproducible locally. By default, `rerun_spatial_models: fa
 To rerun the spatial estimates on your own computer:
 
 1. In the YAML block at the top of this file, change `rerun_spatial_models: false` to `rerun_spatial_models: true`, then save the file.
-2. Open a terminal in the BNC2 repository root, the folder containing `pyproject.toml`.
+2. Open a terminal in the repository root, the folder containing `pyproject.toml`.
 3. Run the complete QMD:
 
 ```powershell
