@@ -8,8 +8,6 @@ format:
     code-fold: true
     theme: cosmo
 engine: knitr
-params:
-  rerun_spatial_models: false
 execute:
   echo: true
   warning: false
@@ -25,9 +23,9 @@ The word **relationship** is deliberate. These are cross-sectional associations.
 
 ## Research questions
 
-1. **How are forest-capacity loss, relative GCW erosion, and GCW as a share of GDP associated with the baseline national controls?**
-2. **How do those three relationships change when 2024 emissions are added as a predictor?**
-3. **How are 2024 CO₂ emissions associated with forest-capacity loss, relative GCW erosion, and GCW/GDP, conditional on the baseline controls?**
+1.  **How are forest-capacity loss, relative GCW erosion, and GCW as a share of GDP associated with the baseline national controls?**
+2.  **How do those three relationships change when 2024 emissions are added as a predictor?**
+3.  **How are 2024 CO₂ emissions associated with forest-capacity loss, relative GCW erosion, and GCW/GDP, conditional on the baseline controls?**
 
 For example, the third question includes the relationship between GCW/GDP and emissions. It is not phrased as “the impact” because the design is observational and does not establish causal identification.
 
@@ -37,23 +35,13 @@ The published HTML version is intended for readers who want to browse the analys
 
 If you only want to read the analysis, open the [published HTML version](https://aurvl.github.io/NotebookSites/gcw-spatial-econometrics/07_spatial_econometrics.html). No local rerun is required.
 
-The QMD file is also reproducible locally. By default, `rerun_spatial_models: false` means that Quarto reads the prepared model outputs and rebuilds the tables, descriptive plots, and weight maps without refitting the spatial models. Do not run the code cells one by one: Quarto should execute the complete document from top to bottom.
+The QMD reads the model and diagnostic tables prepared by `main.py`, then builds its comparison tables, descriptive plots, and weight maps in the rendered document. It does not refit models or write analysis tables back to the repository. Do not run code chunks one by one; render the complete document from the repository root:
 
-To rerun the spatial estimates on your own computer:
-
-1. In the YAML block at the top of this file, change `rerun_spatial_models: false` to `rerun_spatial_models: true`, then save the file.
-2. Open a terminal in the repository root.
-3. Run the complete QMD:
-
-```powershell
-quarto render code/notebooks/07_spatial_econometrics.qmd
+``` powershell
+quarto render code/notebooks/07_spatial_econometrics.qmd --to html --output-dir tmp/quarto-render
 ```
 
-The first setup cell runs the upstream Python spatial-analysis script. Once it finishes, the remaining cells read the refreshed result files and rebuild the local tables, plots, and HTML. Wait until Quarto reports that the document was rendered successfully. Changing the parameter alone does not run the estimates.
-
-After a successful rerun, change the parameter back to `false` and save the file. This keeps the notebook in its normal review mode: future renders will use the prepared outputs and will not refit the models. If you want to inspect the notebook again after resetting the parameter, render it once more with the same command.
-
-This procedure reruns the spatial-analysis sequence only. It does not rerun the full carbon-wealth accounting pipeline. The Python executable named by the `PYTHON` environment variable is used when it is set; otherwise Quarto uses `python` available on `PATH`. The required Python spatial-analysis dependencies must be installed locally.
+This render is independent of `main.py`; run the main pipeline first whenever its prepared spatial outputs need to be refreshed. Quarto uses the installed R, `knitr`, and `sf` packages for the document and the Python environment available on `PATH` to build the temporary weight-map inputs.
 
 ```{r}
 root <- normalizePath(getwd(), winslash = "/", mustWork = TRUE)
@@ -63,18 +51,7 @@ while (!file.exists(file.path(root, "pyproject.toml"))) {
   root <- parent
 }
 
-if (isTRUE(params$rerun_spatial_models)) {
-  run_output <- system2(
-    Sys.getenv("PYTHON", "python"),
-    shQuote(file.path(root, "code", "scripts", "run_spatial_emissions_extension.py"), type = "cmd"),
-    stdout = TRUE, stderr = TRUE, wait = TRUE
-  )
-  run_status <- attr(run_output, "status")
-  cat(paste(run_output, collapse = "\n"), "\n")
-  if (!is.null(run_status) && run_status != 0) stop("Upstream spatial estimation failed")
-}
-
-validation_dir <- file.path(root, "results", "validation")
+validation_dir <- file.path(root, "data", "derived", "validation")
 master_path <- file.path(validation_dir, "country_level_results_master.csv")
 output_files <- c(
   moran = "spatial_emissions_2024_step1_moran.csv",
@@ -281,41 +258,48 @@ python_ids <- paste0("ids = [", paste0("'", weight_map_ids, "'", collapse = ", "
 python_map_source <- c(
   "from pathlib import Path",
   "import sys",
+  "import io",
+  "from contextlib import redirect_stdout, redirect_stderr",
   "import pandas as pd",
   paste0("root = Path(r'", python_root, "')"),
   paste0("out_dir = Path(r'", python_out, "')"),
-  "sys.path.insert(0, str(root / 'code' / 'scripts'))",
-  "import run_spatial_full_sequence as spatial",
+  "log = io.StringIO()",
   python_ids,
-  "units, missing_geometry = spatial._unit_geometries()",
-  "full_weights = spatial._build_weights(units)",
-  "sample_units = units.set_index('iso3').loc[ids].reset_index()",
-  "sample_units.to_file(out_dir / 'units.geojson', driver='GeoJSON')",
-  "rows = []",
-  "for matrix_name, full_weight in full_weights.items():",
-  "    subset = spatial._weight_subsample(full_weight, ids)",
-  "    for focal in subset.id_order:",
-  "        for neighbour, value in zip(subset.neighbors[focal], subset.weights[focal]):",
-  "            rows.append({'matrix': matrix_name, 'from': focal, 'to': neighbour, 'weight': float(value)})",
-  "pd.DataFrame(rows).to_csv(out_dir / 'edges.csv', index=False)"
+  "with redirect_stdout(log), redirect_stderr(log):",
+  "    sys.path.insert(0, str(root / 'code' / 'scripts'))",
+  "    import run_spatial_full_sequence as spatial",
+  "    units, missing_geometry = spatial._unit_geometries()",
+  "    full_weights = spatial._build_weights(units)",
+  "    sample_units = units.set_index('iso3').loc[ids].reset_index()",
+  "    sample_units.to_file(out_dir / 'units.geojson', driver='GeoJSON')",
+  "    rows = []",
+  "    for matrix_name, full_weight in full_weights.items():",
+  "        subset = spatial._weight_subsample(full_weight, ids)",
+  "        for focal in subset.id_order:",
+  "            for neighbour, value in zip(subset.neighbors[focal], subset.weights[focal]):",
+  "                rows.append({'matrix': matrix_name, 'from': focal, 'to': neighbour, 'weight': float(value)})",
+  "print(pd.DataFrame(rows).to_json(orient='records'))"
 )
 python_map_script <- file.path(weight_map_dir, "export_spatial_weights.py")
+python_stderr <- file.path(weight_map_dir, "python_stderr.log")
 writeLines(python_map_source, python_map_script, useBytes = TRUE)
 python_map_output <- system2(
   Sys.getenv("PYTHON", "python"), shQuote(python_map_script, type = "cmd"),
-  stdout = TRUE, stderr = TRUE, wait = TRUE
+  stdout = TRUE, stderr = python_stderr, wait = TRUE
 )
 python_map_status <- attr(python_map_output, "status")
 if (!is.null(python_map_status) && python_map_status != 0) {
-  stop("Could not reconstruct the spatial-weight maps: ", paste(tail(python_map_output, 12), collapse = "\n"))
+  python_error <- if (file.exists(python_stderr)) readLines(python_stderr, warn = FALSE) else character()
+  stop("Could not reconstruct the spatial-weight maps: ", paste(tail(c(python_map_output, python_error), 12), collapse = "\n"))
 }
-if (!file.exists(file.path(weight_map_dir, "units.geojson")) || !file.exists(file.path(weight_map_dir, "edges.csv"))) {
-  stop("The spatial-weight map data were not created")
+if (!file.exists(file.path(weight_map_dir, "units.geojson"))) {
+  stop("The spatial-weight map geometry was not created")
 }
 
 library(sf)
+library(jsonlite)
 weight_map_units <- sf::st_read(file.path(weight_map_dir, "units.geojson"), quiet = TRUE)
-weight_edges <- read.csv(file.path(weight_map_dir, "edges.csv"), stringsAsFactors = FALSE)
+weight_edges <- jsonlite::fromJSON(paste(python_map_output, collapse = ""))
 if (nrow(weight_map_units) != length(weight_map_ids)) stop("Weight-map geometry does not match the saved sample")
 
 matrix_labels <- c(queen_contiguity = "Queen contiguity", symmetric_knn5 = "Symmetrised kNN-5")
@@ -643,7 +627,7 @@ The sample-size chart reports complete-case counts. The distribution panels use 
 
 **Question:** How are annual forest-capacity loss, relative GCW erosion, and GCW/GDP associated with GDP per capita, forest area, and warm-biome share?
 
-The three baseline relationships use different outcomes and complete-case samples. Across the regression tables, cells show coefficient estimates with maximum-likelihood standard errors in parentheses; stars denote p < 0.10, p < 0.05, and p < 0.01. Outcomes and non-negative focal indicators are on the log1p scale, while the warm-biome share is untransformed.
+The three baseline relationships use different outcomes and complete-case samples. Across the regression tables, cells show coefficient estimates with maximum-likelihood standard errors in parentheses; stars denote p \< 0.10, p \< 0.05, and p \< 0.01. Outcomes and non-negative focal indicators are on the log1p scale, while the warm-biome share is untransformed.
 
 ```{r}
 attach_relationship <- function(d) {
@@ -1002,11 +986,11 @@ Final estimator, weights-matrix, and manuscript-interpretation decisions remain 
 
 # 8. Reproduction and limits
 
-- Current national inputs: `results/validation/country_level_results_master.csv`.
-- Prepared model results: `results/validation/spatial_emissions_2024_*`.
-- Upstream estimation entry point: `code/scripts/run_spatial_emissions_extension.py`.
-- Relationship and sample mapping: `spatial_model_decision_template.csv` and `spatial_emissions_2024_sample_audit.csv`.
-- `rerun_spatial_models: false` reads existing results; `true` reruns the upstream analysis before loading them.
-- Non-reporting deforestation is missing, not zero. Model samples are complete cases, not imputed.
-- Coefficients are model output, not automatic interpretation. These observational relationships do not establish causality.
-- Final estimator, weights-matrix, and manuscript interpretation decisions remain with the researcher.
+-   Current national inputs: `data/derived/validation/country_level_results_master.csv`.
+-   Prepared model results: `data/derived/validation/spatial_emissions_2024_*`.
+-   Upstream estimation entry point: `code/scripts/run_spatial_emissions_extension.py`.
+-   Relationship and sample mapping: `spatial_model_decision_template.csv` and `spatial_emissions_2024_sample_audit.csv`.
+-   The notebook reads prepared model outputs; `main.py` is responsible for rebuilding them.
+-   Non-reporting deforestation is missing, not zero. Model samples are complete cases, not imputed.
+-   Coefficients are model output, not automatic interpretation. These observational relationships do not establish causality.
+-   Final estimator, weights-matrix, and manuscript interpretation decisions remain with the researcher.
